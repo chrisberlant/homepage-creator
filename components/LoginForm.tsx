@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
 	Form,
@@ -13,35 +12,34 @@ import {
 	FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-
-const formSchema = z.object({
-	username: z.string().min(2, {
-		message: 'Username must be at least 2 characters.',
-	}),
-	password: z.string().min(8, {
-		message: 'Password must be at least 8 characters.',
-	}),
-});
+import { loginFormSchema, loginFormType } from '@/schemas/form';
+import { login } from '../server-actions/auth';
+import { toast } from 'sonner';
 
 export default function LoginForm() {
-	const form = useForm<z.infer<typeof formSchema>>({
-		resolver: zodResolver(formSchema),
+	const form = useForm<loginFormType>({
+		resolver: zodResolver(loginFormSchema),
 		defaultValues: {
 			username: '',
 			password: '',
 		},
 	});
 
-	// 2. Define a submit handler.
-	function onSubmit(values: z.infer<typeof formSchema>) {
-		console.log(values);
-	}
-
 	return (
 		<Form {...form}>
 			<form
-				onSubmit={form.handleSubmit(onSubmit)}
-				className='max-w-md mt-8'
+				onSubmit={form.handleSubmit(async (e) => {
+					const loginSuccess = await login(form.getValues());
+					// if (loginSuccess?.error) {
+					// 	form.setError('username', {
+					// 		message: 'Wrong id or password',
+					// 	});
+					// 	form.setError('password', {
+					// 		message: 'Wrong id or password',
+					// 	});
+					// }
+				})}
+				className='mt-8 flex-1 max-w-md'
 			>
 				<FormField
 					control={form.control}

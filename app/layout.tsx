@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { ThemeProvider, ThemeToggler } from '../components/ThemeToggler';
+import { ThemeProvider, ThemeToggler } from '@/components/ThemeToggler';
+import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
 	title: 'My Homepage',
@@ -22,7 +23,11 @@ export default function RootLayout({
 						</h1>
 						<ThemeToggler />
 					</header>
-					<main>{children}</main>
+
+					<main>
+						<Toaster />
+						{children}
+					</main>
 				</body>
 			</html>
 		</ThemeProvider>
