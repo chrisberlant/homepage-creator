@@ -14,7 +14,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { loginFormSchema, loginFormType } from '@/schemas/form';
 import { login } from '../server-actions/auth';
-import { toast } from 'sonner';
 
 export default function LoginForm() {
 	const form = useForm<loginFormType>({
@@ -29,15 +28,15 @@ export default function LoginForm() {
 		<Form {...form}>
 			<form
 				onSubmit={form.handleSubmit(async (e) => {
-					const loginSuccess = await login(form.getValues());
-					// if (loginSuccess?.error) {
-					// 	form.setError('username', {
-					// 		message: 'Wrong id or password',
-					// 	});
-					// 	form.setError('password', {
-					// 		message: 'Wrong id or password',
-					// 	});
-					// }
+					const loginSuccess = await login(e);
+					if (loginSuccess?.error) {
+						form.setError('username', {
+							message: loginSuccess.error,
+						});
+						form.setError('password', {
+							message: loginSuccess.error,
+						});
+					}
 				})}
 				className='mt-8 flex-1 max-w-md'
 			>

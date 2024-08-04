@@ -9,7 +9,7 @@ export function ThemeToggler() {
 	return (
 		<button
 			onClick={toggleTheme}
-			className='absolute hover:scale-110 right-8'
+			className='hover:scale-110 right-8'
 			aria-label='Toggle color theme'
 		>
 			{theme === 'light' ? <Sun /> : <Moon />}

@@ -1,16 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { updateSession } from './lib/auth';
+import { NextRequest } from 'next/server';
+import { updateSession } from './server-actions/auth';
 
-export async function middleware(req: NextRequest) {
-	console.log('Route Middleware', req.nextUrl.pathname);
-	// return await updateSession(req);
-	// const accessToken = req.cookies.get('access-token')?.value;
-	// const response = NextResponse.next();
-
-	// response.cookies.set('access-token', 'Your secret token');
-
-	// return response;
-	// You can add additional middleware logic here
+export async function middleware(request: NextRequest) {
+	console.log('Route Middleware', request.nextUrl.pathname);
+	// return await updateSession(request);
 }
 
 // Optionally, don't invoke Middleware on some paths

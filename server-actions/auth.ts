@@ -1,10 +1,13 @@
 'use server';
 
+import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
-import { encrypt } from '../lib/auth';
-import prisma from '../lib/prisma';
-import { loginFormType } from '../schemas/form';
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 import { redirect } from 'next/navigation';
+import { loginFormType } from '../schemas/form';
+
+const secretKey = new TextEncoder().encode(process.env.SECRET_KEY);
 
 export async function login(values: loginFormType) {
 	try {
@@ -13,20 +16,62 @@ export async function login(values: loginFormType) {
 				name: values.username,
 			},
 		});
-		if (!user) return { error: 'Utilisateur introuvable' };
-		if (values.password !== user.password)
-			return { error: 'Mdp incorrect' };
+		if (!user || values.password !== user.password)
+			return { error: 'Username or password incorrect' };
 
 		if (values.password === user.password) {
 			// Create the session
-			const expires = new Date(Date.now() + 10000 * 1000);
-			const session = await encrypt({ user, expires });
-
+			const expires = new Date(Date.now() + 60 * 60 * 1000);
+			const { id, name } = user;
+			const session = await encrypt({ user: { id, name }, expires });
 			// Save the session in a cookie
 			cookies().set('session', session, { expires, httpOnly: true });
-			redirect('/home');
 		}
 	} catch (error) {
-		return { error: 'Erreur lors de la requête' };
+		throw error;
 	}
+	redirect('/home');
+}
+
+export async function encrypt(payload: any) {
+	return await new SignJWT(payload)
+		.setProtectedHeader({ alg: 'HS256' })
+		.setIssuedAt()
+		.setExpirationTime('12h')
+		.sign(secretKey);
+}
+
+export async function decrypt(input: string): Promise<any> {
+	const { payload } = await jwtVerify(input, secretKey, {
+		algorithms: ['HS256'],
+	});
+	return payload;
+}
+
+export async function logout() {
+	// Destroy the session
+	cookies().delete('session');
+}
+
+export async function getSession() {
+	const session = cookies().get('session')?.value;
+	if (!session) return null;
+	return await decrypt(session);
+}
+
+export async function updateSession(request: NextRequest) {
+	const session = request.cookies.get('session')?.value;
+	if (!session) return;
+
+	// Refresh the session so it doesn't expire
+	const parsed = await decrypt(session);
+	parsed.expires = new Date(Date.now() + 60 * 60 * 1000);
+	const res = NextResponse.next();
+	res.cookies.set({
+		name: 'session',
+		value: await encrypt(parsed),
+		httpOnly: true,
+		expires: parsed.expires,
+	});
+	return res;
 }
