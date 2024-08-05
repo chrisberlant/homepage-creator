@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { redirect } from 'next/navigation';
-import { loginFormType } from '../schemas/form';
+import { loginFormType } from '../components/LoginForm';
 
 const secretKey = new TextEncoder().encode(process.env.SECRET_KEY);
 
