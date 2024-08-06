@@ -18,7 +18,7 @@ export default function Draggable({ children }: { children: ReactNode }) {
 			style={style}
 			{...listeners}
 			{...attributes}
-			className='border rounded-xl p-2 bg-card'
+			className='border rounded-xl p-2 bg-card shadow-sm dark:shadow-none'
 		>
 			{children}
 		</button>

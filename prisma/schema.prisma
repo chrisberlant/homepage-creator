@@ -22,6 +22,7 @@ model User {
   email         String       @unique
   password      String
   categories    Category[]
+  links         Link[]
 }
 
 model Category {
@@ -40,4 +41,6 @@ model Link {
   index         Int
   category      Category     @relation(fields: [categoryId], references: [id])
   categoryId    Int
+  owner         User         @relation(fields: [ownerId], references:  [id])
+  ownerId       Int
 }

@@ -9,6 +9,12 @@ import { loginFormType } from '../components/LoginForm';
 
 const secretKey = new TextEncoder().encode(process.env.SECRET_KEY);
 
+type SessionType = {
+	user: { id: number; name: string };
+	expires: string;
+	iat: number;
+	exp: number;
+};
 export async function login(values: loginFormType) {
 	try {
 		const user = await prisma.user.findFirst({
@@ -56,7 +62,7 @@ export async function logout() {
 export async function getSession() {
 	const session = cookies().get('session')?.value;
 	if (!session) return null;
-	return await decrypt(session);
+	return (await decrypt(session)) as SessionType;
 }
 
 export async function updateSession(request: NextRequest) {
