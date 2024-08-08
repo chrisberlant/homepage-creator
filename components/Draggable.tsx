@@ -1,6 +1,7 @@
 'use client';
 import React, { ReactNode } from 'react';
 import { useDraggable } from '@dnd-kit/core';
+import { PlusIcon } from 'lucide-react';
 
 interface DraggableProps {
 	children: ReactNode;
@@ -23,7 +24,7 @@ export default function Draggable({ children, id }: DraggableProps) {
 			style={style}
 			{...listeners}
 			{...attributes}
-			className='border rounded-xl p-2 bg-card shadow-sm dark:shadow-none'
+			className='border rounded-xl p-2 bg-muted shadow-sm dark:shadow-none z-10'
 		>
 			{children}
 		</button>

@@ -4,19 +4,19 @@ import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { getSession } from './auth';
 
-interface CreateCategoryProps {
+interface CreateLinkProps {
 	title: string;
 	url: string;
 	categoryId: number;
 	index: number;
 }
 
-export async function createCategory({
+export async function createLink({
 	title,
 	url,
 	categoryId,
 	index,
-}: CreateCategoryProps) {
+}: CreateLinkProps) {
 	const session = await getSession();
 	if (!session) return;
 	try {
@@ -47,6 +47,32 @@ export async function deleteLink(id: number) {
 			},
 		});
 		if (!deletedLink) return { error: 'Cannot delete link' };
+		revalidatePath('/home');
+	} catch (error) {
+		throw error;
+	}
+}
+
+export async function changeLinkCategory({
+	id,
+	newCategoryId,
+}: {
+	id: number;
+	newCategoryId: number;
+}) {
+	const session = await getSession();
+	if (!session) return;
+	try {
+		const movedLink = await prisma.link.update({
+			where: {
+				id,
+				ownerId: session.user.id,
+			},
+			data: {
+				categoryId: newCategoryId,
+			},
+		});
+		if (!movedLink) return { error: 'Cannot change link category' };
 		revalidatePath('/home');
 	} catch (error) {
 		throw error;
