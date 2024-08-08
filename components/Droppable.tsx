@@ -5,17 +5,15 @@ import { useDroppable } from '@dnd-kit/core';
 import { Trash2Icon } from 'lucide-react';
 import { deleteCategory } from '../server-actions/categories';
 
-export default function Droppable({
-	children,
-	id,
-	title,
-}: {
+interface DroppableProps {
 	children: ReactNode;
 	id: number;
 	title: string;
-}) {
+}
+
+export default function Droppable({ children, id, title }: DroppableProps) {
 	const { isOver, setNodeRef } = useDroppable({
-		id: 'droppable',
+		id,
 	});
 	const style = {
 		color: isOver ? 'green' : undefined,

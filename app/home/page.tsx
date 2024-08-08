@@ -30,7 +30,7 @@ export default async function Page() {
 					>
 						<div className='flex flex-col gap-2'>
 							{category.links.map((link) => (
-								<Draggable key={link.id}>
+								<Draggable key={link.id} id={link.id}>
 									{link.title}
 								</Draggable>
 							))}
