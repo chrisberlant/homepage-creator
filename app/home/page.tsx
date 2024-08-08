@@ -1,9 +1,10 @@
 import { getSession } from '@/server-actions/auth';
 import { redirect } from 'next/navigation';
-import Draggable from '@/components/Draggable';
+import LinkCard from '@/components/LinkCard';
 import CreateCategoryButton from '@/components/CreateCategoryButton';
 import fetchApi from '@/lib/fetchApi';
-import Droppable from '@/components/Droppable';
+import CategoryCard from '@/components/CategoryCard';
+import EditingModeButton from '../../components/EditingModeButton';
 
 type CategoryType = {
 	id: number;
@@ -19,26 +20,25 @@ export default async function Page() {
 
 	return (
 		<section>
-			{/* {/* <Draggable>Element</Draggable> */}
 			<CreateCategoryButton />
+			<EditingModeButton />
 			<div className='flex flex-wrap justify-around'>
 				{categories.map((category) => (
-					<Droppable
+					<CategoryCard
 						key={category.id}
 						id={category.id}
 						title={category.title}
 					>
 						<div className='flex flex-col gap-2'>
 							{category.links.map((link) => (
-								<Draggable key={link.id} id={link.id}>
+								<LinkCard key={link.id} id={link.id}>
 									{link.title}
-								</Draggable>
+								</LinkCard>
 							))}
 						</div>
-					</Droppable>
+					</CategoryCard>
 				))}
 			</div>
-			{/* <Droppable>Zone</Droppable> */}
 		</section>
 	);
 }

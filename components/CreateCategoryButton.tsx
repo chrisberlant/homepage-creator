@@ -2,7 +2,7 @@
 
 import { PlusIcon } from 'lucide-react';
 import { createCategory } from '../server-actions/categories';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Input } from './ui/input';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,6 +15,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from './ui/form';
+import { EditingContext } from '../app/home/layout';
 
 const createCategoryFormSchema = z.object({
 	title: z.string().min(1, {
@@ -25,6 +26,7 @@ const createCategoryFormSchema = z.object({
 type createCategoryFormType = z.infer<typeof createCategoryFormSchema>;
 
 export default function CreateCategoryButton() {
+	const { editingMode } = useContext(EditingContext);
 	const form = useForm<createCategoryFormType>({
 		resolver: zodResolver(createCategoryFormSchema),
 		defaultValues: {
@@ -34,41 +36,45 @@ export default function CreateCategoryButton() {
 	const [openedMenu, setOpenedMenu] = useState(false);
 
 	return (
-		<>
-			<PlusIcon
-				onClick={() => setOpenedMenu((prev) => !prev)}
-				className='mb-4'
-			/>
-			{openedMenu && (
-				<Form {...form}>
-					<form
-						onSubmit={form.handleSubmit(async (e) => {
-							const creation = await createCategory(e.title);
-							if (creation?.error) {
-								return form.setError('title', {
-									message: creation.error,
-								});
-							}
-							form.reset();
-						})}
-						className='flex'
-					>
-						<FormField
-							control={form.control}
-							name='title'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Create new category</FormLabel>
-									<FormControl>
-										<Input {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-					</form>
-				</Form>
-			)}
-		</>
+		editingMode && (
+			<>
+				<PlusIcon
+					onClick={() => setOpenedMenu((prev) => !prev)}
+					className='mb-4'
+				/>
+				{openedMenu && (
+					<Form {...form}>
+						<form
+							onSubmit={form.handleSubmit(async (e) => {
+								const creation = await createCategory(e.title);
+								if (creation?.error) {
+									return form.setError('title', {
+										message: creation.error,
+									});
+								}
+								form.reset();
+							})}
+							className='flex'
+						>
+							<FormField
+								control={form.control}
+								name='title'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>
+											Create new category
+										</FormLabel>
+										<FormControl>
+											<Input {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</form>
+					</Form>
+				)}
+			</>
+		)
 	);
 }
