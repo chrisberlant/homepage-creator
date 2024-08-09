@@ -11,12 +11,7 @@ interface CreateLinkProps {
 	index: number;
 }
 
-export async function createLink({
-	title,
-	url,
-	categoryId,
-	index,
-}: CreateLinkProps) {
+export async function createLink({ title, url, categoryId }: CreateLinkProps) {
 	const session = await getSession();
 	if (!session) return;
 	try {

@@ -22,7 +22,7 @@ export default async function Page() {
 		<section>
 			<EditingModeButton />
 			<CreateCategoryButton />
-			<div className='flex flex-wrap justify-around'>
+			<div className='flex flex-wrap justify-around items-start'>
 				{categories.map((category) => (
 					<CategoryCard
 						key={category.id}

@@ -22,7 +22,13 @@ export async function GET() {
 					url: true,
 					index: true,
 				},
+				orderBy: {
+					index: 'asc',
+				},
 			},
+		},
+		orderBy: {
+			index: 'asc',
 		},
 	});
 

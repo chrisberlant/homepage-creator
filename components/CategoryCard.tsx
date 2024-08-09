@@ -1,8 +1,16 @@
 'use client';
 
-import React, { ReactNode, useContext } from 'react';
+import React, { ReactNode, useContext, useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
-import { Trash2Icon } from 'lucide-react';
+import {
+	ArrowBigDown,
+	ArrowBigUp,
+	ArrowDown,
+	CrossIcon,
+	FolderClosedIcon,
+	ShieldCloseIcon,
+	Trash2Icon,
+} from 'lucide-react';
 import { deleteCategory } from '../server-actions/categories';
 import CreateLinkButton from './CreateLinkButton';
 import { EditingModeContext } from './EditingModeContextProvider';
@@ -25,6 +33,7 @@ export default function CategoryCard({
 	const style = {
 		color: isOver ? 'green' : undefined,
 	};
+	const [opened, setOpened] = useState(true);
 
 	return (
 		<div
@@ -32,7 +41,20 @@ export default function CategoryCard({
 			style={style}
 			className='border-2 shadow-md dark:shadow-none bg-card p-2 px-5 m-4 w-1/3 rounded-2xl relative'
 		>
-			<h2 className='mb-4 font-bold'>{title}</h2>
+			<div className='flex mb-4'>
+				{opened ? (
+					<ArrowBigUp
+						onClick={() => setOpened(false)}
+						className='absolute cursor-pointer'
+					/>
+				) : (
+					<ArrowBigDown
+						onClick={() => setOpened(true)}
+						className='absolute cursor-pointer'
+					/>
+				)}
+				<h2 className='font-bold text-center flex-1'>{title}</h2>
+			</div>
 			{editingMode && (
 				<>
 					<CreateLinkButton categoryId={id} />
@@ -43,7 +65,7 @@ export default function CategoryCard({
 					/>
 				</>
 			)}
-			<div className='flex flex-col gap-1.5'>{children}</div>
+			{opened && <div className='flex flex-col gap-1.5'>{children}</div>}
 		</div>
 	);
 }

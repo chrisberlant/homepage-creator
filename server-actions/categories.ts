@@ -8,10 +8,21 @@ export async function createCategory(title: string) {
 	const session = await getSession();
 	if (!session) return;
 	try {
+		const lastCategory = await prisma.category.findFirst({
+			where: {
+				ownerId: session.user.id,
+			},
+			orderBy: {
+				index: 'desc',
+			},
+		});
+
+		const newIndex = lastCategory?.index ? lastCategory.index + 1 : 0;
+
 		const category = await prisma.category.create({
 			data: {
 				title,
-				index: 0,
+				index: newIndex,
 				ownerId: session.user.id,
 			},
 		});
