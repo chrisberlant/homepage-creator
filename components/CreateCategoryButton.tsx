@@ -15,7 +15,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from './ui/form';
-import { EditingContext } from '../app/home/layout';
+import { EditingModeContext } from './EditingModeContextProvider';
 
 const createCategoryFormSchema = z.object({
 	title: z.string().min(1, {
@@ -26,7 +26,7 @@ const createCategoryFormSchema = z.object({
 type createCategoryFormType = z.infer<typeof createCategoryFormSchema>;
 
 export default function CreateCategoryButton() {
-	const { editingMode } = useContext(EditingContext);
+	const { editingMode } = useContext(EditingModeContext);
 	const form = useForm<createCategoryFormType>({
 		resolver: zodResolver(createCategoryFormSchema),
 		defaultValues: {

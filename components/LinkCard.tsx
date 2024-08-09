@@ -3,7 +3,7 @@ import React, { ReactNode, useContext } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { Trash2Icon } from 'lucide-react';
 import { deleteLink } from '../server-actions/links';
-import { EditingContext } from '../app/home/layout';
+import { EditingModeContext } from './EditingModeContextProvider';
 
 interface LinkCardProps {
 	children: ReactNode;
@@ -11,7 +11,7 @@ interface LinkCardProps {
 }
 
 export default function LinkCard({ children, id }: LinkCardProps) {
-	const { editingMode } = useContext(EditingContext);
+	const { editingMode } = useContext(EditingModeContext);
 	const { attributes, listeners, setNodeRef, transform } = useDraggable({
 		id,
 	});

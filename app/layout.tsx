@@ -21,7 +21,7 @@ export default async function RootLayout({
 		<ThemeProvider>
 			<html lang='en'>
 				<body>
-					<header className='flex  items-center'>
+					<header className='flex items-center'>
 						<h1 className='text-4xl font-bold text-center ml-auto'>
 							My Homepage
 						</h1>

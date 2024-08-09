@@ -5,7 +5,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { Trash2Icon } from 'lucide-react';
 import { deleteCategory } from '../server-actions/categories';
 import CreateLinkButton from './CreateLinkButton';
-import { EditingContext } from '../app/home/layout';
+import { EditingModeContext } from './EditingModeContextProvider';
 
 interface CategoryCardProps {
 	children: ReactNode;
@@ -18,7 +18,7 @@ export default function CategoryCard({
 	id,
 	title,
 }: CategoryCardProps) {
-	const { editingMode } = useContext(EditingContext);
+	const { editingMode } = useContext(EditingModeContext);
 	const { isOver, setNodeRef } = useDroppable({
 		id,
 	});
