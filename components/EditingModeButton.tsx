@@ -7,19 +7,22 @@ import { EditingModeContext } from './EditingModeContextProvider';
 
 export default function EditingModeButton() {
 	const { editingMode, toggleEditingMode } = useContext(EditingModeContext);
+
 	return (
-		<Button onClick={toggleEditingMode} className='mt-4'>
-			{editingMode ? (
-				<>
-					<PenOffIcon className='mr-2' />
-					Quit edit mode
-				</>
-			) : (
-				<>
-					<PenIcon className='mr-2' />
-					Enable edit mode
-				</>
-			)}
-		</Button>
+		<div className='flex'>
+			<Button onClick={toggleEditingMode} className='ml-auto'>
+				{editingMode ? (
+					<>
+						<PenOffIcon className='mr-2' />
+						Quit edit mode
+					</>
+				) : (
+					<>
+						<PenIcon className='mr-2' />
+						Enable edit mode
+					</>
+				)}
+			</Button>
+		</div>
 	);
 }

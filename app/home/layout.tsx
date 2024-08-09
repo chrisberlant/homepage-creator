@@ -1,4 +1,3 @@
-'use client';
 import EditingModeContextProvider from '@/components/EditingModeContextProvider';
 
 export default function Layout({

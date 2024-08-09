@@ -20,11 +20,22 @@ export async function createLink({
 	const session = await getSession();
 	if (!session) return;
 	try {
+		const lastLink = await prisma.link.findFirst({
+			where: {
+				ownerId: session.user.id,
+			},
+			orderBy: {
+				index: 'desc',
+			},
+		});
+
+		const newIndex = lastLink?.index ? lastLink.index + 1 : 0;
+
 		const link = await prisma.link.create({
 			data: {
 				title,
 				url,
-				index,
+				index: newIndex,
 				categoryId,
 				ownerId: session.user.id,
 			},

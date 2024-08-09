@@ -1,6 +1,6 @@
 'use client';
 
-import { PlusIcon } from 'lucide-react';
+import { MinusIcon, PlusIcon } from 'lucide-react';
 import { createCategory } from '../server-actions/categories';
 import { useContext, useState } from 'react';
 import { Input } from './ui/input';
@@ -16,6 +16,7 @@ import {
 	FormMessage,
 } from './ui/form';
 import { EditingModeContext } from './EditingModeContextProvider';
+import { Button } from './ui/button';
 
 const createCategoryFormSchema = z.object({
 	title: z.string().min(1, {
@@ -37,11 +38,18 @@ export default function CreateCategoryButton() {
 
 	return (
 		editingMode && (
-			<>
-				<PlusIcon
-					onClick={() => setOpenedMenu((prev) => !prev)}
-					className='mb-4'
-				/>
+			<div className='flex gap-4'>
+				{openedMenu ? (
+					<MinusIcon
+						onClick={() => setOpenedMenu((prev) => !prev)}
+						className='mb-4'
+					/>
+				) : (
+					<PlusIcon
+						onClick={() => setOpenedMenu((prev) => !prev)}
+						className='mb-4'
+					/>
+				)}
 				{openedMenu && (
 					<Form {...form}>
 						<form
@@ -54,7 +62,7 @@ export default function CreateCategoryButton() {
 								}
 								form.reset();
 							})}
-							className='flex'
+							className='flex mb-4'
 						>
 							<FormField
 								control={form.control}
@@ -71,10 +79,13 @@ export default function CreateCategoryButton() {
 									</FormItem>
 								)}
 							/>
+							<Button type='submit' className='self-end ml-2'>
+								Valider
+							</Button>
 						</form>
 					</Form>
 				)}
-			</>
+			</div>
 		)
 	);
 }
