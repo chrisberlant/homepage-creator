@@ -29,13 +29,13 @@ export default async function Page() {
 						id={category.id}
 						title={category.title}
 					>
-						<div className='flex flex-col gap-2'>
+						<ul className='flex flex-col gap-2'>
 							{category.links.map((link) => (
 								<LinkCard key={link.id} id={link.id}>
 									{link.title}
 								</LinkCard>
 							))}
-						</div>
+						</ul>
 					</CategoryCard>
 				))}
 			</div>

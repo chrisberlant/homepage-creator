@@ -22,12 +22,12 @@ export default function LinkCard({ children, id }: LinkCardProps) {
 		: undefined;
 
 	return (
-		<button
+		<li
 			ref={setNodeRef}
 			style={style}
 			{...listeners}
 			{...attributes}
-			className='relative border rounded-xl p-2 bg-muted shadow-sm dark:shadow-none z-10'
+			className='relative text-center border rounded-xl p-2 bg-muted shadow-sm dark:shadow-none z-10'
 		>
 			{editingMode && (
 				<Trash2Icon
@@ -38,6 +38,6 @@ export default function LinkCard({ children, id }: LinkCardProps) {
 				/>
 			)}
 			{children}
-		</button>
+		</li>
 	);
 }

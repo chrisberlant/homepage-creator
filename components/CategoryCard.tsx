@@ -1,16 +1,14 @@
 'use client';
 
-import React, { ReactNode, useContext, useState } from 'react';
+import React, {
+	ReactNode,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
 import { useDroppable } from '@dnd-kit/core';
-import {
-	ArrowBigDown,
-	ArrowBigUp,
-	ArrowDown,
-	CrossIcon,
-	FolderClosedIcon,
-	ShieldCloseIcon,
-	Trash2Icon,
-} from 'lucide-react';
+import { ArrowBigDown, ArrowBigUp, Trash2Icon } from 'lucide-react';
 import { deleteCategory } from '../server-actions/categories';
 import CreateLinkButton from './CreateLinkButton';
 import { EditingModeContext } from './EditingModeContextProvider';
@@ -34,6 +32,17 @@ export default function CategoryCard({
 		color: isOver ? 'green' : undefined,
 	};
 	const [opened, setOpened] = useState(true);
+	const contentRef = useRef<HTMLDivElement>(null);
+
+	const toggleView = () => setOpened(!opened);
+
+	useEffect(() => {
+		if (contentRef.current) {
+			contentRef.current.style.height = opened
+				? `${contentRef.current.scrollHeight}px`
+				: '0px';
+		}
+	}, [opened]);
 
 	return (
 		<div
@@ -44,12 +53,12 @@ export default function CategoryCard({
 			<div className='flex mb-4'>
 				{opened ? (
 					<ArrowBigUp
-						onClick={() => setOpened(false)}
+						onClick={toggleView}
 						className='absolute cursor-pointer'
 					/>
 				) : (
 					<ArrowBigDown
-						onClick={() => setOpened(true)}
+						onClick={toggleView}
 						className='absolute cursor-pointer'
 					/>
 				)}
@@ -65,7 +74,14 @@ export default function CategoryCard({
 					/>
 				</>
 			)}
-			{opened && <div className='flex flex-col gap-1.5'>{children}</div>}
+			<div
+				ref={contentRef}
+				className={`overflow-hidden transition-all duration-300 ease ${
+					opened ? 'opacity-1' : 'opacity-30'
+				}`}
+			>
+				{children}
+			</div>
 		</div>
 	);
 }
