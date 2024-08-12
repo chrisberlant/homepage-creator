@@ -19,6 +19,7 @@ export async function createLink({ title, url, categoryId }: CreateLinkProps) {
 			const lastLink = await prisma.link.findFirst({
 				where: {
 					ownerId: session.user.id,
+					categoryId,
 				},
 				orderBy: {
 					index: 'desc',
@@ -71,14 +72,32 @@ export async function changeLinkCategory({
 	const session = await getSession();
 	if (!session) return;
 	try {
-		await prisma.link.update({
-			where: {
-				id,
-				ownerId: session.user.id,
-			},
-			data: {
-				categoryId: newCategoryId,
-			},
+		await prisma.$transaction(async (prisma) => {
+			const highestIndex = await prisma.link.findFirst({
+				where: {
+					ownerId: session.user.id,
+					categoryId: newCategoryId,
+				},
+				orderBy: {
+					index: 'desc',
+				},
+			});
+
+			const newIndex =
+				highestIndex && highestIndex?.index !== null
+					? highestIndex.index + 1
+					: 0;
+
+			await prisma.link.update({
+				where: {
+					id,
+					ownerId: session.user.id,
+				},
+				data: {
+					categoryId: newCategoryId,
+					index: newIndex,
+				},
+			});
 		});
 
 		revalidatePath('/home');
