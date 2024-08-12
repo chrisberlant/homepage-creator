@@ -15,30 +15,32 @@ export async function createLink({ title, url, categoryId }: CreateLinkProps) {
 	const session = await getSession();
 	if (!session) return;
 	try {
-		const lastLink = await prisma.link.findFirst({
-			where: {
-				ownerId: session.user.id,
-			},
-			orderBy: {
-				index: 'desc',
-			},
+		await prisma.$transaction(async (prisma) => {
+			const lastLink = await prisma.link.findFirst({
+				where: {
+					ownerId: session.user.id,
+				},
+				orderBy: {
+					index: 'desc',
+				},
+			});
+
+			const newIndex = lastLink?.index ? lastLink.index + 1 : 0;
+
+			await prisma.link.create({
+				data: {
+					title,
+					url,
+					index: newIndex,
+					categoryId,
+					ownerId: session.user.id,
+				},
+			});
 		});
 
-		const newIndex = lastLink?.index ? lastLink.index + 1 : 0;
-
-		const link = await prisma.link.create({
-			data: {
-				title,
-				url,
-				index: newIndex,
-				categoryId,
-				ownerId: session.user.id,
-			},
-		});
-		if (!link) return { error: 'Cannot create link' };
 		revalidatePath('/home');
 	} catch (error) {
-		throw error;
+		return { error: 'Cannot create link' };
 	}
 }
 
@@ -46,16 +48,16 @@ export async function deleteLink(id: number) {
 	const session = await getSession();
 	if (!session) return;
 	try {
-		const deletedLink = await prisma.link.delete({
+		await prisma.link.delete({
 			where: {
 				id,
 				ownerId: session.user.id,
 			},
 		});
-		if (!deletedLink) return { error: 'Cannot delete link' };
+
 		revalidatePath('/home');
 	} catch (error) {
-		throw error;
+		return { error: 'Cannot delete link' };
 	}
 }
 
@@ -69,7 +71,7 @@ export async function changeLinkCategory({
 	const session = await getSession();
 	if (!session) return;
 	try {
-		const movedLink = await prisma.link.update({
+		await prisma.link.update({
 			where: {
 				id,
 				ownerId: session.user.id,
@@ -78,9 +80,9 @@ export async function changeLinkCategory({
 				categoryId: newCategoryId,
 			},
 		});
-		if (!movedLink) return { error: 'Cannot change link category' };
+
 		revalidatePath('/home');
 	} catch (error) {
-		throw error;
+		return { error: 'Cannot change link category' };
 	}
 }

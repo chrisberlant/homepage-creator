@@ -1,6 +1,6 @@
 'use client';
 
-import { PlusIcon } from 'lucide-react';
+import { PlusIcon, MinusIcon } from 'lucide-react';
 import { createLink } from '../server-actions/links';
 import { useState } from 'react';
 import { Input } from './ui/input';
@@ -44,10 +44,18 @@ export default function CreateLinkButton({
 
 	return (
 		<>
-			<PlusIcon
-				onClick={() => setOpenedMenu((prev) => !prev)}
-				className='mb-2'
-			/>
+			{openedMenu ? (
+				<MinusIcon
+					onClick={() => setOpenedMenu(!openedMenu)}
+					className='mb-4'
+				/>
+			) : (
+				<PlusIcon
+					onClick={() => setOpenedMenu(!openedMenu)}
+					className='mb-4'
+				/>
+			)}
+
 			{openedMenu && (
 				<Form {...form}>
 					<form

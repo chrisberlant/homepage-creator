@@ -41,12 +41,12 @@ export default function CreateCategoryButton() {
 			<div className='flex gap-4'>
 				{openedMenu ? (
 					<MinusIcon
-						onClick={() => setOpenedMenu((prev) => !prev)}
+						onClick={() => setOpenedMenu(!openedMenu)}
 						className='mb-4'
 					/>
 				) : (
 					<PlusIcon
-						onClick={() => setOpenedMenu((prev) => !prev)}
+						onClick={() => setOpenedMenu(!openedMenu)}
 						className='mb-4'
 					/>
 				)}
@@ -55,11 +55,11 @@ export default function CreateCategoryButton() {
 						<form
 							onSubmit={form.handleSubmit(async (e) => {
 								const creation = await createCategory(e.title);
-								if (creation?.error) {
+								if (creation?.error)
 									return form.setError('title', {
 										message: creation.error,
 									});
-								}
+
 								form.reset();
 							})}
 							className='flex mb-4'

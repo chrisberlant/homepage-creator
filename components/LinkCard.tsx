@@ -4,6 +4,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { Trash2Icon } from 'lucide-react';
 import { deleteLink } from '../server-actions/links';
 import { EditingModeContext } from './EditingModeContextProvider';
+import { toast } from 'sonner';
 
 interface LinkCardProps {
 	children: ReactNode;
@@ -27,14 +28,17 @@ export default function LinkCard({ children, id }: LinkCardProps) {
 			style={style}
 			{...listeners}
 			{...attributes}
-			className='relative text-center border rounded-xl p-2 bg-muted shadow-sm dark:shadow-none z-10'
+			className='relative text-center border rounded-xl p-2 bg-muted shadow-sm dark:shadow-none z-20'
 		>
 			{editingMode && (
 				<Trash2Icon
 					stroke='red'
 					size={18}
-					className='absolute cursor-pointer z-20 right-2'
-					onClick={async () => await deleteLink(id)}
+					className='absolute cursor-pointer z-30 right-2'
+					onClick={async () => {
+						const result = await deleteLink(id);
+						if (result?.error) toast.error(result.error);
+					}}
 				/>
 			)}
 			{children}

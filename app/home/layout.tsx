@@ -1,4 +1,5 @@
 import EditingModeContextProvider from '@/components/EditingModeContextProvider';
+import DndContextProvider from '../../components/DndContextProvider';
 
 export default function Layout({
 	children,

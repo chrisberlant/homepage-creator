@@ -1,5 +1,4 @@
 'use client';
-
 import React, {
 	ReactNode,
 	useContext,
@@ -38,11 +37,13 @@ export default function CategoryCard({
 
 	useEffect(() => {
 		if (contentRef.current) {
-			contentRef.current.style.height = opened
-				? `${contentRef.current.scrollHeight}px`
-				: '0px';
+			if (opened) {
+				contentRef.current.style.height = 'auto';
+				const height = contentRef.current.scrollHeight;
+				contentRef.current.style.height = `${height}px`;
+			} else contentRef.current.style.height = '0px';
 		}
-	}, [opened]);
+	}, [opened, children]);
 
 	return (
 		<div
@@ -76,8 +77,8 @@ export default function CategoryCard({
 			)}
 			<div
 				ref={contentRef}
-				className={`overflow-hidden transition-all duration-300 ease ${
-					opened ? 'opacity-1' : 'opacity-30'
+				className={` transition-all duration-500 ease ${
+					opened ? 'opacity-100' : 'opacity-0 overflow-hidden'
 				}`}
 			>
 				{children}

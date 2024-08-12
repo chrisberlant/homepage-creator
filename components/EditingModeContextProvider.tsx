@@ -24,6 +24,7 @@ export default function EditingModeContextProvider({
 
 	const value = { editingMode, toggleEditingMode };
 
+	// Drag'n'drop is activated only when in editing mode
 	return (
 		<EditingModeContext.Provider value={value}>
 			{editingMode ? (
