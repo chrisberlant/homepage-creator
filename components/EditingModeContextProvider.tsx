@@ -19,7 +19,7 @@ export default function EditingModeContextProvider({
 }: {
 	children: ReactNode;
 }) {
-	const [editingMode, setEditingMode] = useState(false);
+	const [editingMode, setEditingMode] = useState(true);
 	const toggleEditingMode = () => setEditingMode((prev) => !prev);
 
 	const value = { editingMode, toggleEditingMode };

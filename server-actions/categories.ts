@@ -7,6 +7,7 @@ import { getSession } from './auth';
 export async function createCategory(title: string) {
 	const session = await getSession();
 	if (!session) return;
+
 	try {
 		await prisma.$transaction(async (prisma) => {
 			const lastCategory = await prisma.category.findFirst({
@@ -35,15 +36,38 @@ export async function createCategory(title: string) {
 	}
 }
 
-export async function deleteCategory(id: number) {
+export async function deleteCategory({
+	id,
+	index,
+}: {
+	id: number;
+	index: number;
+}) {
 	const session = await getSession();
 	if (!session) return;
+
 	try {
-		await prisma.category.delete({
-			where: {
-				ownerId: session.user.id,
-				id,
-			},
+		await prisma.$transaction(async (prisma) => {
+			await prisma.category.updateMany({
+				where: {
+					index: {
+						gt: index,
+					},
+					ownerId: session.user.id,
+				},
+				data: {
+					index: {
+						decrement: 1,
+					},
+				},
+			});
+
+			await prisma.category.delete({
+				where: {
+					ownerId: session.user.id,
+					id,
+				},
+			});
 		});
 
 		revalidatePath('/home');

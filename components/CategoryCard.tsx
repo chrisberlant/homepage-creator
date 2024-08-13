@@ -11,16 +11,19 @@ import { ArrowBigDown, ArrowBigUp, Trash2Icon } from 'lucide-react';
 import { deleteCategory } from '../server-actions/categories';
 import CreateLinkButton from './CreateLinkButton';
 import { EditingModeContext } from './EditingModeContextProvider';
+import { toast } from 'sonner';
 
 interface CategoryCardProps {
 	children: ReactNode;
 	id: number;
+	index: number;
 	title: string;
 }
 
 export default function CategoryCard({
 	children,
 	id,
+	index,
 	title,
 }: CategoryCardProps) {
 	const { editingMode } = useContext(EditingModeContext);
@@ -71,7 +74,10 @@ export default function CategoryCard({
 					<Trash2Icon
 						stroke='red'
 						className='absolute right-4 top-3 cursor-pointer'
-						onClick={async () => await deleteCategory(id)}
+						onClick={async () => {
+							const result = await deleteCategory({ id, index });
+							if (result?.error) toast.error(result.error);
+						}}
 					/>
 				</>
 			)}

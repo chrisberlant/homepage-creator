@@ -9,12 +9,23 @@ import { toast } from 'sonner';
 interface LinkCardProps {
 	children: ReactNode;
 	id: number;
+	index: number;
+	categoryId: number;
 }
 
-export default function LinkCard({ children, id }: LinkCardProps) {
+export default function LinkCard({
+	children,
+	id,
+	index,
+	categoryId,
+}: LinkCardProps) {
 	const { editingMode } = useContext(EditingModeContext);
 	const { attributes, listeners, setNodeRef, transform } = useDraggable({
 		id,
+		data: {
+			categoryId,
+			index,
+		},
 	});
 	const style = transform
 		? {
