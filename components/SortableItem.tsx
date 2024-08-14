@@ -1,0 +1,27 @@
+'use client';
+
+import React from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+export function SortableItem({ id }: { id: number }) {
+	const { attributes, listeners, setNodeRef, transform, transition } =
+		useSortable({ id });
+
+	const style = {
+		transform: CSS.Transform.toString(transform),
+		transition,
+	};
+
+	return (
+		<div
+			ref={setNodeRef}
+			style={style}
+			{...attributes}
+			{...listeners}
+			className='border-2 flex flex-1 min-w-24'
+		>
+			{id}
+		</div>
+	);
+}

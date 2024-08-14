@@ -8,7 +8,6 @@ interface CreateLinkProps {
 	title: string;
 	url: string;
 	categoryId: number;
-	index: number;
 }
 
 export async function createLink({ title, url, categoryId }: CreateLinkProps) {

@@ -65,7 +65,6 @@ export default function CreateLinkButton({
 								title,
 								url,
 								categoryId,
-								index: 0,
 							});
 							if (creation?.error) {
 								return form.setError('title', {

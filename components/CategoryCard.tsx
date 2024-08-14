@@ -1,31 +1,38 @@
 'use client';
-import React, {
-	ReactNode,
-	useContext,
-	useEffect,
-	useRef,
-	useState,
-} from 'react';
+
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { ArrowBigDown, ArrowBigUp, Trash2Icon } from 'lucide-react';
 import { deleteCategory } from '../server-actions/categories';
 import CreateLinkButton from './CreateLinkButton';
-import { EditingModeContext } from './EditingModeContextProvider';
+import { EditingModeContext } from './contexts/EditingModeContextProvider';
 import { toast } from 'sonner';
+import LinkCard from './LinkCard';
+import {
+	SortableContext,
+	verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 
 interface CategoryCardProps {
-	children: ReactNode;
 	id: number;
 	index: number;
 	title: string;
+	links: {
+		id: number;
+		title: string;
+		url: string;
+		index: number;
+	}[];
 }
 
 export default function CategoryCard({
-	children,
 	id,
 	index,
 	title,
+	links,
 }: CategoryCardProps) {
+	const [items, setItems] = useState(links);
+
 	const { editingMode } = useContext(EditingModeContext);
 	const { isOver, setNodeRef } = useDroppable({
 		id,
@@ -34,23 +41,23 @@ export default function CategoryCard({
 		color: isOver ? 'green' : undefined,
 	};
 	const [opened, setOpened] = useState(true);
-	const contentRef = useRef<HTMLDivElement>(null);
+	// const contentRef = useRef<HTMLDivElement>(null);
 
 	const toggleView = () => setOpened(!opened);
 
-	useEffect(() => {
-		if (contentRef.current) {
-			if (opened) {
-				contentRef.current.style.height = 'auto';
-				const height = contentRef.current.scrollHeight;
-				contentRef.current.style.height = `${height}px`;
-			} else contentRef.current.style.height = '0px';
-		}
-	}, [opened, children]);
+	// useEffect(() => {
+	// 	if (contentRef.current) {
+	// 		if (opened) {
+	// 			contentRef.current.style.height = 'auto';
+	// 			const height = contentRef.current.scrollHeight;
+	// 			contentRef.current.style.height = `${height}px`;
+	// 		} else contentRef.current.style.height = '0px';
+	// 	}
+	// }, [opened]);
 
 	return (
 		<div
-			ref={setNodeRef}
+			// ref={setNodeRef}
 			style={style}
 			className='border-2 shadow-md dark:shadow-none bg-card p-2 px-5 m-4 w-1/3 rounded-2xl relative'
 		>
@@ -81,14 +88,27 @@ export default function CategoryCard({
 					/>
 				</>
 			)}
-			<div
-				ref={contentRef}
-				className={` transition-all duration-500 ease ${
-					opened ? 'opacity-100' : 'opacity-0 overflow-hidden'
-				}`}
+			<SortableContext
+				items={items}
+				strategy={verticalListSortingStrategy}
 			>
-				{children}
-			</div>
+				<div
+					ref={setNodeRef}
+					className={`flex flex-col gap-2 transition-all duration-500 ease ${
+						opened ? 'opacity-100' : 'opacity-0 overflow-hidden'
+					}`}
+				>
+					{links.map((link) => (
+						<LinkCard
+							key={link.id}
+							id={link.id}
+							index={link.index}
+							categoryId={id}
+							title={link.title}
+						/>
+					))}
+				</div>
+			</SortableContext>
 		</div>
 	);
 }

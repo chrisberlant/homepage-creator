@@ -1,40 +1,41 @@
 'use client';
 import React, { ReactNode, useContext } from 'react';
-import { useDraggable } from '@dnd-kit/core';
 import { Trash2Icon } from 'lucide-react';
 import { deleteLink } from '../server-actions/links';
-import { EditingModeContext } from './EditingModeContextProvider';
+import { EditingModeContext } from './contexts/EditingModeContextProvider';
 import { toast } from 'sonner';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface LinkCardProps {
-	children: ReactNode;
 	id: number;
 	index: number;
+	title: string;
 	categoryId: number;
 }
 
 export default function LinkCard({
-	children,
 	id,
 	index,
+	title,
 	categoryId,
 }: LinkCardProps) {
 	const { editingMode } = useContext(EditingModeContext);
-	const { attributes, listeners, setNodeRef, transform } = useDraggable({
-		id,
-		data: {
-			categoryId,
-			index,
-		},
-	});
-	const style = transform
-		? {
-				transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-		  }
-		: undefined;
+	const { attributes, listeners, setNodeRef, transform, transition } =
+		useSortable({
+			id,
+			data: {
+				categoryId,
+				index,
+			},
+		});
+	const style = {
+		transform: CSS.Transform.toString(transform),
+		transition,
+	};
 
 	return (
-		<li
+		<div
 			ref={setNodeRef}
 			style={style}
 			{...listeners}
@@ -52,7 +53,7 @@ export default function LinkCard({
 					}}
 				/>
 			)}
-			{children}
-		</li>
+			<span>{title}</span>
+		</div>
 	);
 }

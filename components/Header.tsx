@@ -1,5 +1,4 @@
 import { getSession } from '../server-actions/auth';
-import EditingModeButton from './EditingModeButton';
 import LogoutButton from './LogoutButton';
 import { ThemeToggler } from './ThemeToggler';
 
