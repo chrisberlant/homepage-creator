@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ThemeProvider } from '@/components/ThemeToggler';
 import { Toaster } from 'sonner';
 import Header from '@/components/Header';
+import QueryProvider from '@/components/providers/QueryClientProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -21,7 +22,7 @@ export default function RootLayout({
 					<Header />
 					<main>
 						<Toaster />
-						{children}
+						<QueryProvider>{children}</QueryProvider>
 					</main>
 				</body>
 			</html>

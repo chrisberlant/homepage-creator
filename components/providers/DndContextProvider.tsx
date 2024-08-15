@@ -11,7 +11,7 @@ import {
 } from '@dnd-kit/core';
 import { toast } from 'sonner';
 import { changeLinkCategory } from '../../server-actions/links';
-import { ReactNode, useContext } from 'react';
+import { ReactNode } from 'react';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
 export default function DndContextProvider({

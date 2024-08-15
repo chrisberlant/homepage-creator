@@ -4,6 +4,40 @@ import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { getSession } from './auth';
 
+export async function getCategories() {
+	const session = await getSession();
+	if (!session) return;
+
+	try {
+		return await prisma.category.findMany({
+			where: {
+				ownerId: session.user.id,
+			},
+			select: {
+				id: true,
+				title: true,
+				index: true,
+				links: {
+					select: {
+						id: true,
+						title: true,
+						url: true,
+						index: true,
+					},
+					orderBy: {
+						index: 'asc',
+					},
+				},
+			},
+			orderBy: {
+				index: 'asc',
+			},
+		});
+	} catch (error) {
+		return null;
+	}
+}
+
 export async function createCategory(title: string) {
 	const session = await getSession();
 	if (!session) return;

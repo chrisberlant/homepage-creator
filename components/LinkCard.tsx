@@ -2,7 +2,7 @@
 import React, { ReactNode, useContext } from 'react';
 import { Trash2Icon } from 'lucide-react';
 import { deleteLink } from '../server-actions/links';
-import { EditingModeContext } from './contexts/EditingModeContextProvider';
+import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { toast } from 'sonner';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';

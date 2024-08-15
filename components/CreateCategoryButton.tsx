@@ -15,7 +15,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from './ui/form';
-import { EditingModeContext } from './contexts/EditingModeContextProvider';
+import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { Button } from './ui/button';
 
 const createCategoryFormSchema = z.object({

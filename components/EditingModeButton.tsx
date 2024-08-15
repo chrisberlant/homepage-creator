@@ -3,7 +3,7 @@
 import { useContext } from 'react';
 import { Button } from './ui/button';
 import { PenIcon, PenOffIcon } from 'lucide-react';
-import { EditingModeContext } from './contexts/EditingModeContextProvider';
+import { EditingModeContext } from './providers/EditingModeContextProvider';
 
 export default function EditingModeButton() {
 	const { editingMode, toggleEditingMode } = useContext(EditingModeContext);

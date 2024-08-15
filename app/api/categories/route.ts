@@ -4,7 +4,6 @@ import { getSession } from '@/server-actions/auth';
 
 export async function GET() {
 	const session = await getSession();
-
 	if (!session) return NextResponse.json(null);
 
 	const categories = await prisma.category.findMany({

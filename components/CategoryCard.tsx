@@ -5,7 +5,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { ArrowBigDown, ArrowBigUp, Trash2Icon } from 'lucide-react';
 import { deleteCategory } from '../server-actions/categories';
 import CreateLinkButton from './CreateLinkButton';
-import { EditingModeContext } from './contexts/EditingModeContextProvider';
+import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { toast } from 'sonner';
 import LinkCard from './LinkCard';
 import {

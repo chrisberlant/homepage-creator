@@ -1,14 +1,27 @@
 import CreateCategoryButton from '@/components/CreateCategoryButton';
 import EditingModeButton from '@/components/EditingModeButton';
 import Dashboard from '@/components/Dashboard';
-import Test from '../../components/Test';
+import {
+	dehydrate,
+	HydrationBoundary,
+	QueryClient,
+} from '@tanstack/react-query';
+import { getCategories } from '@/server-actions/categories';
 
-export default function Page() {
+export default async function Page() {
+	const queryClient = new QueryClient();
+	await queryClient.prefetchQuery({
+		queryKey: ['categories'],
+		queryFn: getCategories,
+	});
+
 	return (
 		<section>
 			<EditingModeButton />
 			<CreateCategoryButton />
-			<Dashboard />
+			<HydrationBoundary state={dehydrate(queryClient)}>
+				<Dashboard />
+			</HydrationBoundary>
 			{/* <Test /> */}
 		</section>
 	);
