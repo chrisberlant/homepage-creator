@@ -6,13 +6,13 @@ import {
 	HydrationBoundary,
 	QueryClient,
 } from '@tanstack/react-query';
-import { getCategories } from '@/server-actions/categories';
+import fetchApiFromServer from '@/utils/fetchApiFromServer';
 
 export default async function Page() {
 	const queryClient = new QueryClient();
 	await queryClient.prefetchQuery({
 		queryKey: ['categories'],
-		queryFn: getCategories,
+		queryFn: async () => fetchApiFromServer('/categories'),
 	});
 
 	return (
@@ -22,7 +22,6 @@ export default async function Page() {
 			<HydrationBoundary state={dehydrate(queryClient)}>
 				<Dashboard />
 			</HydrationBoundary>
-			{/* <Test /> */}
 		</section>
 	);
 }
