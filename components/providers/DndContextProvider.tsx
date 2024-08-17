@@ -23,7 +23,7 @@ export default function DndContextProvider({
 		useSensor(MouseSensor, {
 			activationConstraint: { distance: 5 },
 		}),
-		useSensor(PointerSensor),
+		// useSensor(PointerSensor)
 		useSensor(KeyboardSensor, {
 			coordinateGetter: sortableKeyboardCoordinates,
 		})
@@ -46,7 +46,7 @@ export default function DndContextProvider({
 	}
 
 	async function handleDragOver(event: any) {
-		console.log(event);
+		// console.log(event);
 	}
 
 	return (

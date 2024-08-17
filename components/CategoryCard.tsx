@@ -12,6 +12,7 @@ import {
 	SortableContext,
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import { useGetCategories } from '../queries/categories';
 
 interface CategoryCardProps {
 	id: number;
@@ -31,7 +32,7 @@ export default function CategoryCard({
 	title,
 	links,
 }: CategoryCardProps) {
-	const [items, setItems] = useState(links);
+	// const [items, setItems] = useState(links);
 
 	const { editingMode } = useContext(EditingModeContext);
 	const { isOver, setNodeRef } = useDroppable({
@@ -56,7 +57,7 @@ export default function CategoryCard({
 	// }, [opened]);
 
 	return (
-		<SortableContext items={items} strategy={verticalListSortingStrategy}>
+		<SortableContext items={links} strategy={verticalListSortingStrategy}>
 			<div
 				ref={setNodeRef}
 				style={style}
@@ -92,23 +93,24 @@ export default function CategoryCard({
 						/>
 					</>
 				)}
-
-				<div
-					// ref={setNodeRef}
-					className={`flex flex-col gap-2 transition-all duration-500 ease ${
-						opened ? 'opacity-100' : 'opacity-0 overflow-hidden'
-					}`}
-				>
-					{links.map((link) => (
-						<LinkCard
-							key={link.id}
-							id={link.id}
-							index={link.index}
-							categoryId={id}
-							title={link.title}
-						/>
-					))}
-				</div>
+				{opened && (
+					<div
+						// ref={setNodeRef}
+						className={`flex flex-col gap-2 transition-all duration-500 ease ${
+							opened ? 'opacity-100' : 'opacity-0 overflow-hidden'
+						}`}
+					>
+						{links?.map((link) => (
+							<LinkCard
+								key={link.id}
+								id={link.id}
+								index={link.index}
+								categoryId={id}
+								title={link.title}
+							/>
+						))}
+					</div>
+				)}
 			</div>
 		</SortableContext>
 	);
