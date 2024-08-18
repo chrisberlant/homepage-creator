@@ -73,14 +73,14 @@ export default function CreateLinkButton({
 							}
 							form.reset();
 						})}
-						className='flex flex-col mb-4'
+						className='flex flex-col mb-4 border p-4 bg-card rounded-xl'
 					>
 						<FormField
 							control={form.control}
 							name='title'
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Create new Link</FormLabel>
+									<FormLabel>Insert title</FormLabel>
 									<FormControl>
 										<Input {...field} />
 									</FormControl>
@@ -101,7 +101,7 @@ export default function CreateLinkButton({
 								</FormItem>
 							)}
 						/>
-						<Button type='submit' className='mt-2'>
+						<Button type='submit' className='mt-4'>
 							Create link
 						</Button>
 					</form>

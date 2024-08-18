@@ -38,17 +38,22 @@ export default function CreateCategoryButton() {
 
 	return (
 		editingMode && (
-			<div className='flex gap-4'>
+			<div className='flex gap-4 items-center mb-4'>
 				{openedMenu ? (
-					<MinusIcon
+					<Button
+						className='bg-accent'
 						onClick={() => setOpenedMenu(!openedMenu)}
-						className='mb-4'
-					/>
+					>
+						Close menu
+					</Button>
 				) : (
-					<PlusIcon
-						onClick={() => setOpenedMenu(!openedMenu)}
-						className='mb-4'
-					/>
+					<Button onClick={() => setOpenedMenu(!openedMenu)}>
+						Create a new category
+					</Button>
+					// <PlusIcon
+					// 	onClick={() => setOpenedMenu(!openedMenu)}
+					// 	className='mb-4'
+					// />
 				)}
 				{openedMenu && (
 					<Form {...form}>

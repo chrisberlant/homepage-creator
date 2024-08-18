@@ -126,6 +126,7 @@ export default function LinkCardEditButton({
 						</AlertDialogHeader>
 						<AlertDialogFooter className='mt-4'>
 							<AlertDialogCancel
+								type='reset'
 								onClick={() => {
 									form.reset();
 									disableDragging(false);

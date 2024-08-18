@@ -1,6 +1,7 @@
 'use client';
-import React, { ReactNode, useContext, useState } from 'react';
-import { PenIcon, PenOffIcon, SaveIcon, Trash2Icon } from 'lucide-react';
+
+import React, { useContext, useState } from 'react';
+import { Trash2Icon } from 'lucide-react';
 import { deleteLink } from '../server-actions/links';
 import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { toast } from 'sonner';
@@ -58,7 +59,7 @@ export default function LinkCard({
 						defaultUrl={url}
 						id={id}
 					/>
-					<span className=''>{title}</span>
+					<span>{title}</span>
 					<Trash2Icon
 						stroke='red'
 						size={18}
