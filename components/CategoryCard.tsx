@@ -8,10 +8,7 @@ import CreateLinkButton from './CreateLinkButton';
 import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { toast } from 'sonner';
 import LinkCard from './LinkCard';
-import {
-	SortableContext,
-	verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { SortableContext } from '@dnd-kit/sortable';
 
 interface CategoryCardProps {
 	id: number;
@@ -31,8 +28,7 @@ export default function CategoryCard({
 	title,
 	links,
 }: CategoryCardProps) {
-	// const [items, setItems] = useState(links);
-
+	// const [items, setItems] = useState(links.map((link) => link.id));
 	const { editingMode } = useContext(EditingModeContext);
 	const { isOver, setNodeRef } = useDroppable({
 		id,
@@ -56,7 +52,7 @@ export default function CategoryCard({
 	// }, [opened]);
 
 	return (
-		<SortableContext items={links} strategy={verticalListSortingStrategy}>
+		<SortableContext items={links}>
 			<div
 				ref={setNodeRef}
 				style={style}

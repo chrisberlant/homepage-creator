@@ -5,13 +5,12 @@ import {
 	DndContext,
 	KeyboardSensor,
 	MouseSensor,
-	PointerSensor,
 	useSensor,
 	useSensors,
 } from '@dnd-kit/core';
 import { toast } from 'sonner';
 import { changeLinkCategory } from '../../server-actions/links';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
 export default function DndContextProvider({
@@ -19,6 +18,7 @@ export default function DndContextProvider({
 }: {
 	children: ReactNode;
 }) {
+	const [items] = useState([1, 2, 3]);
 	const sensors = useSensors(
 		useSensor(MouseSensor, {
 			activationConstraint: { distance: 5 },
@@ -33,8 +33,12 @@ export default function DndContextProvider({
 		const { active, over } = event;
 		const { index, categoryId } = active.data.current;
 
+		if (active.id === over.id || !over.id)
+			return toast.info('Link did not move');
+		console.log(over.id);
+
 		// If category changed
-		if (over?.id && categoryId !== over.id) {
+		if (categoryId !== over.id) {
 			const changedCategory = await changeLinkCategory({
 				id: active.id,
 				index,

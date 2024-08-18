@@ -10,7 +10,5 @@ export default async function Layout({
 	const session = await getSession();
 	if (!session) redirect('/');
 
-	// const categories = await fetchApi('/categories');
-
 	return <EditingModeContextProvider>{children}</EditingModeContextProvider>;
 }

@@ -86,8 +86,6 @@ export async function updateLink({
 				url,
 			},
 		});
-
-		revalidatePath('/home');
 	} catch (error) {
 		return { error: 'Cannot update link' };
 	}

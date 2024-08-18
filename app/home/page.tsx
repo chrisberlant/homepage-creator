@@ -12,7 +12,7 @@ export default async function Page() {
 	const queryClient = new QueryClient();
 	await queryClient.prefetchQuery({
 		queryKey: ['categories'],
-		queryFn: async () => fetchApiFromServer('/categories'),
+		queryFn: async () => await fetchApiFromServer('/categories'),
 	});
 
 	return (
