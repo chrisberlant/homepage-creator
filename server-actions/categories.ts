@@ -4,40 +4,6 @@ import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { getSession } from './auth';
 
-// export async function getCategories() {
-// 	const session = await getSession();
-// 	if (!session) return;
-
-// 	try {
-// 		return await prisma.category.findMany({
-// 			where: {
-// 				ownerId: session.user.id,
-// 			},
-// 			select: {
-// 				id: true,
-// 				title: true,
-// 				index: true,
-// 				links: {
-// 					select: {
-// 						id: true,
-// 						title: true,
-// 						url: true,
-// 						index: true,
-// 					},
-// 					orderBy: {
-// 						index: 'asc',
-// 					},
-// 				},
-// 			},
-// 			orderBy: {
-// 				index: 'asc',
-// 			},
-// 		});
-// 	} catch (error) {
-// 		return null;
-// 	}
-// }
-
 export async function createCategory(title: string) {
 	const session = await getSession();
 	if (!session) return;
@@ -70,22 +36,22 @@ export async function createCategory(title: string) {
 	}
 }
 
-export async function deleteCategory({
-	id,
-	index,
-}: {
-	id: number;
-	index: number;
-}) {
+export async function deleteCategory(id: number) {
 	const session = await getSession();
 	if (!session) return;
 
 	try {
 		await prisma.$transaction(async (prisma) => {
+			const category = await prisma.category.findUnique({
+				where: { id, ownerId: session.user.id },
+			});
+
+			if (!category) throw new Error('Category does not exist');
+
 			await prisma.category.updateMany({
 				where: {
 					index: {
-						gt: index,
+						gt: category?.index,
 					},
 					ownerId: session.user.id,
 				},
@@ -96,10 +62,14 @@ export async function deleteCategory({
 				},
 			});
 
+			await prisma.link.deleteMany({
+				where: { categoryId: id },
+			});
+
 			await prisma.category.delete({
 				where: {
-					ownerId: session.user.id,
 					id,
+					ownerId: session.user.id,
 				},
 			});
 		});

@@ -12,7 +12,6 @@ import {
 	SortableContext,
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useGetCategories } from '../queries/categories';
 
 interface CategoryCardProps {
 	id: number;
@@ -84,10 +83,7 @@ export default function CategoryCard({
 							stroke='red'
 							className='absolute right-4 top-3 cursor-pointer'
 							onClick={async () => {
-								const result = await deleteCategory({
-									id,
-									index,
-								});
+								const result = await deleteCategory(id);
 								if (result?.error) toast.error(result.error);
 							}}
 						/>

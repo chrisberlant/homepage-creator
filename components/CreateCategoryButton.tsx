@@ -50,10 +50,6 @@ export default function CreateCategoryButton() {
 					<Button onClick={() => setOpenedMenu(!openedMenu)}>
 						Create a new category
 					</Button>
-					// <PlusIcon
-					// 	onClick={() => setOpenedMenu(!openedMenu)}
-					// 	className='mb-4'
-					// />
 				)}
 				{openedMenu && (
 					<Form {...form}>
