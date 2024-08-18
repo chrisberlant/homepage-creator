@@ -6,7 +6,7 @@ export default async function Header() {
 	const session = await getSession();
 
 	return (
-		<header className='flex items-center my-4'>
+		<header className='flex items-center p-5'>
 			<h1 className='text-4xl font-bold text-center ml-auto'>
 				My Homepage
 			</h1>

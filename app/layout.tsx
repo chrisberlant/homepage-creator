@@ -18,9 +18,9 @@ export default function RootLayout({
 	return (
 		<ThemeProvider>
 			<html lang='en'>
-				<body>
+				<body className='bg-background text-foreground'>
 					<Header />
-					<main>
+					<main className='p-5'>
 						<Toaster />
 						<QueryProvider>{children}</QueryProvider>
 					</main>

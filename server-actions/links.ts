@@ -63,6 +63,36 @@ export async function deleteLink(id: number) {
 	}
 }
 
+export async function updateLink({
+	id,
+	title,
+	url,
+}: {
+	id: number;
+	title: string;
+	url: string;
+}) {
+	const session = await getSession();
+	if (!session) return;
+
+	try {
+		await prisma.link.update({
+			where: {
+				id,
+				ownerId: session.user.id,
+			},
+			data: {
+				title,
+				url,
+			},
+		});
+
+		revalidatePath('/home');
+	} catch (error) {
+		return { error: 'Cannot update link' };
+	}
+}
+
 export async function changeLinkCategory({
 	id,
 	index,

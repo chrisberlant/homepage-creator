@@ -105,8 +105,9 @@ export default function CategoryCard({
 								key={link.id}
 								id={link.id}
 								index={link.index}
-								categoryId={id}
 								title={link.title}
+								url={link.url}
+								categoryId={id}
 							/>
 						))}
 					</div>
