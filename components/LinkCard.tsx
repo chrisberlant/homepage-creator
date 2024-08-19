@@ -31,6 +31,7 @@ export default function LinkCard({
 		useSortable({
 			id,
 			data: {
+				isLink: true,
 				categoryId,
 				index,
 			},

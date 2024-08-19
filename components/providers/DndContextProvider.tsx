@@ -9,9 +9,10 @@ import {
 	useSensors,
 } from '@dnd-kit/core';
 import { toast } from 'sonner';
-import { changeLinkCategory } from '../../server-actions/links';
+import { changeLinkCategory } from '@/server-actions/links';
 import { ReactNode, useState } from 'react';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { useChangeLinkCategory } from '../../queries/links';
 
 export default function DndContextProvider({
 	children,
@@ -28,6 +29,7 @@ export default function DndContextProvider({
 			coordinateGetter: sortableKeyboardCoordinates,
 		})
 	);
+	const { mutate: changeLinkCategory } = useChangeLinkCategory();
 
 	async function handleDragEnd(event: any) {
 		const { active, over } = event;
@@ -35,18 +37,21 @@ export default function DndContextProvider({
 
 		if (active.id === over.id || !over.id)
 			return toast.info('Link did not move');
-		console.log(over.id);
 
-		// If category changed
-		if (categoryId !== over.id) {
-			const changedCategory = await changeLinkCategory({
+		console.log(event);
+
+		// If dropped into another category
+		if (over.data.current?.isCategory) {
+			return changeLinkCategory({
 				id: active.id,
 				index,
-				categoryId,
+				oldCategoryId: categoryId,
 				newCategoryId: over.id,
 			});
-			if (changedCategory?.error) toast.error(changedCategory.error);
 		}
+
+		// TODO index handling when dropped on another link
+		console.log('new index', over.data.current.index);
 	}
 
 	async function handleDragOver(event: any) {

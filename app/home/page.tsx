@@ -17,8 +17,10 @@ export default async function Page() {
 
 	return (
 		<section>
-			<EditingModeButton />
-			<CreateCategoryButton />
+			<div className='flex justify-between mb-4'>
+				<EditingModeButton />
+				<CreateCategoryButton />
+			</div>
 			<HydrationBoundary state={dehydrate(queryClient)}>
 				<Dashboard />
 			</HydrationBoundary>

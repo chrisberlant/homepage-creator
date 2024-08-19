@@ -76,7 +76,7 @@ export async function updateLink({
 	if (!session) return;
 
 	try {
-		await prisma.link.update({
+		return await prisma.link.update({
 			where: {
 				id,
 				ownerId: session.user.id,
@@ -91,15 +91,64 @@ export async function updateLink({
 	}
 }
 
+export async function changeLinkIndex({
+	id,
+	newIndex,
+}: {
+	id: number;
+	newIndex: number;
+}) {
+	const session = await getSession();
+	if (!session) return;
+	try {
+		await prisma.$transaction(async (prisma) => {
+			const link = await prisma.link.findUnique({
+				where: {
+					id,
+					ownerId: session.user.id,
+				},
+			});
+			if (!link) throw new Error('Cannot find link');
+			const currentIndex = link.index;
+
+			await prisma.link.update({
+				where: {
+					id,
+					ownerId: session.user.id,
+				},
+				data: {
+					index: newIndex,
+				},
+			});
+			//TODO
+			await prisma.link.updateMany({
+				where: {
+					id: {
+						not: id,
+					},
+					index: {
+						gte: newIndex,
+					},
+				},
+				data: {
+					index: {},
+				},
+			});
+		});
+	} catch (error) {
+		return { error: 'Cannot change link index' };
+	}
+}
+
 export async function changeLinkCategory({
 	id,
 	index,
-	categoryId,
+	oldCategoryId,
 	newCategoryId,
 }: {
 	id: number;
 	index: number;
-	categoryId: number;
+	oldCategoryId: number;
 	newCategoryId: number;
 }) {
 	const session = await getSession();
@@ -112,7 +161,7 @@ export async function changeLinkCategory({
 					index: {
 						gt: index,
 					},
-					categoryId,
+					categoryId: oldCategoryId,
 					ownerId: session.user.id,
 				},
 				data: {
@@ -137,7 +186,7 @@ export async function changeLinkCategory({
 					? highestIndex.index + 1
 					: 0;
 
-			await prisma.link.update({
+			const updatedLink = await prisma.link.update({
 				where: {
 					id,
 					ownerId: session.user.id,
@@ -147,9 +196,16 @@ export async function changeLinkCategory({
 					index: newIndex,
 				},
 			});
-		});
+			const { title, url } = updatedLink;
+			const returnedValue = {
+				id,
+				title,
+				url,
+				index: newIndex,
+			};
 
-		revalidatePath('/home');
+			return returnedValue;
+		});
 	} catch (error) {
 		return { error: 'Cannot change link category' };
 	}

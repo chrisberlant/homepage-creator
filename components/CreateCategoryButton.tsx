@@ -38,7 +38,7 @@ export default function CreateCategoryButton() {
 
 	return (
 		editingMode && (
-			<div className='flex gap-4 items-center mb-4'>
+			<div className='flex gap-4 items-center'>
 				{openedMenu ? (
 					<Button
 						className='bg-accent'

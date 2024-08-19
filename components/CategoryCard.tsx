@@ -28,10 +28,12 @@ export default function CategoryCard({
 	title,
 	links,
 }: CategoryCardProps) {
-	// const [items, setItems] = useState(links.map((link) => link.id));
 	const { editingMode } = useContext(EditingModeContext);
 	const { isOver, setNodeRef } = useDroppable({
 		id,
+		data: {
+			isCategory: true,
+		},
 	});
 	const style = {
 		color: isOver ? 'green' : undefined,
