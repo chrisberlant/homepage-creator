@@ -94,12 +94,15 @@ export async function updateLink({
 export async function changeLinkIndex({
 	id,
 	newIndex,
+	newCategoryId,
 }: {
 	id: number;
 	newIndex: number;
+	newCategoryId: number;
 }) {
 	const session = await getSession();
 	if (!session) return;
+
 	try {
 		await prisma.$transaction(async (prisma) => {
 			const link = await prisma.link.findUnique({
@@ -109,7 +112,9 @@ export async function changeLinkIndex({
 				},
 			});
 			if (!link) throw new Error('Cannot find link');
-			const currentIndex = link.index;
+
+			const { index: currentIndex, categoryId: currentCategoryId } = link;
+			if (currentIndex === newIndex) return;
 
 			await prisma.link.update({
 				where: {
@@ -118,37 +123,57 @@ export async function changeLinkIndex({
 				},
 				data: {
 					index: newIndex,
+					categoryId: newCategoryId,
 				},
 			});
-			//TODO
-			await prisma.link.updateMany({
-				where: {
-					id: {
-						not: id,
+
+			// If moved in the same category
+			if (currentCategoryId === newCategoryId) {
+				if (newIndex < currentIndex)
+					return await prisma.link.updateMany({
+						where: {
+							ownerId: session.user.id,
+							index: {
+								gte: newIndex,
+								lt: currentIndex,
+							},
+							categoryId: currentCategoryId,
+						},
+						data: {
+							index: {
+								increment: 1,
+							},
+						},
+					});
+
+				return await prisma.link.updateMany({
+					where: {
+						ownerId: session.user.id,
+						index: {
+							lte: newIndex,
+							gt: currentIndex,
+						},
+						categoryId: currentCategoryId,
 					},
-					index: {
-						gte: newIndex,
+					data: {
+						index: {
+							decrement: 1,
+						},
 					},
-				},
-				data: {
-					index: {},
-				},
-			});
+				});
+			}
 		});
 	} catch (error) {
 		return { error: 'Cannot change link index' };
 	}
 }
 
+// When moved to a new category without specific index
 export async function changeLinkCategory({
 	id,
-	index,
-	oldCategoryId,
 	newCategoryId,
 }: {
 	id: number;
-	index: number;
-	oldCategoryId: number;
 	newCategoryId: number;
 }) {
 	const session = await getSession();
@@ -156,6 +181,17 @@ export async function changeLinkCategory({
 
 	try {
 		await prisma.$transaction(async (prisma) => {
+			const link = await prisma.link.findUnique({
+				where: {
+					id,
+					ownerId: session.user.id,
+				},
+			});
+
+			if (!link) throw new Error('Cannot find link');
+
+			const { index, categoryId: oldCategoryId } = link;
+
 			await prisma.link.updateMany({
 				where: {
 					index: {

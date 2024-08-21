@@ -9,10 +9,9 @@ import {
 	useSensors,
 } from '@dnd-kit/core';
 import { toast } from 'sonner';
-import { changeLinkCategory } from '@/server-actions/links';
 import { ReactNode, useState } from 'react';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { useChangeLinkCategory } from '../../queries/links';
+import { useChangeLinkCategory, useChangeLinkIndex } from '@/queries/links';
 
 export default function DndContextProvider({
 	children,
@@ -30,28 +29,36 @@ export default function DndContextProvider({
 		})
 	);
 	const { mutate: changeLinkCategory } = useChangeLinkCategory();
+	const { mutate: changeLinkIndex } = useChangeLinkIndex();
 
 	async function handleDragEnd(event: any) {
 		const { active, over } = event;
-		const { index, categoryId } = active.data.current;
+		const { categoryId: currentCategoryId } = active.data.current;
 
 		if (active.id === over.id || !over.id)
 			return toast.info('Link did not move');
 
 		console.log(event);
 
-		// If dropped into another category
+		// If dropped into another category with no index specified, put it at the end of it
 		if (over.data.current?.isCategory) {
 			return changeLinkCategory({
 				id: active.id,
-				index,
-				oldCategoryId: categoryId,
 				newCategoryId: over.id,
 			});
 		}
+		if (over.data.current?.index) {
+			// new infos
+			const { categoryId: newCategoryId, index: newIndex } =
+				over.data.current;
 
-		// TODO index handling when dropped on another link
-		console.log('new index', over.data.current.index);
+			console.log(
+				'new index',
+				over.data.current.index,
+				'new category',
+				over.data.current.categoryId
+			);
+		}
 	}
 
 	async function handleDragOver(event: any) {
