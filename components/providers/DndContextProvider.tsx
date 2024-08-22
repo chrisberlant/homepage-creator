@@ -33,31 +33,36 @@ export default function DndContextProvider({
 
 	async function handleDragEnd(event: any) {
 		const { active, over } = event;
-		const { categoryId: currentCategoryId } = active.data.current;
+		const { categoryId: currentCategoryId, index } = active.data.current;
 
-		if (active.id === over.id || !over.id)
+		if (
+			!over.id ||
+			(currentCategoryId === over.data.current.categoryId &&
+				index === over.data.current.index)
+		)
 			return toast.info('Link did not move');
 
 		console.log(event);
 
 		// If dropped into another category with no index specified, put it at the end of it
 		if (over.data.current?.isCategory) {
+			console.log('category change');
 			return changeLinkCategory({
 				id: active.id,
 				newCategoryId: over.id,
 			});
 		}
-		if (over.data.current?.index) {
+		if (over.data.current?.index !== undefined) {
 			// new infos
 			const { categoryId: newCategoryId, index: newIndex } =
 				over.data.current;
+			console.log('index change', newIndex);
 
-			console.log(
-				'new index',
-				over.data.current.index,
-				'new category',
-				over.data.current.categoryId
-			);
+			return changeLinkIndex({
+				id: active.id,
+				newIndex,
+				newCategoryId,
+			});
 		}
 	}
 

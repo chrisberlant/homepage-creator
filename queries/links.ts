@@ -144,65 +144,86 @@ export const useChangeLinkIndex = () =>
 
 			const previousCategories: CategoryType[] | undefined =
 				browserQueryClient?.getQueryData(['categories']);
+			if (!previousCategories || !browserQueryClient) return;
 
-			const linkInfos = previousCategories?.find((category) =>
-				category.links.find((link) => link.id === updatedLink.id)
+			const link = previousCategories
+				.map((category) => {
+					const link = category.links.find(
+						(link) => link.id === updatedLink.id
+					);
+					if (link)
+						return {
+							oldCategoryId: category.id,
+							oldLinkInfos: link,
+						};
+				})
+				.filter((item) => item !== undefined)[0];
+			if (!link) throw new Error('Link cannot be found');
+
+			const { oldCategoryId, oldLinkInfos } = link;
+
+			// If moved in the same category
+			if (oldCategoryId == updatedLink.newCategoryId) {
+				if (oldLinkInfos.index === updatedLink.newIndex) return;
+
+				if (updatedLink.newIndex < oldLinkInfos.index) {
+					browserQueryClient.setQueryData(
+						['categories'],
+						(categories: CategoryType[]) =>
+							categories.map((category) =>
+								category.id === oldCategoryId
+									? {
+											...category,
+											links: category.links.map((link) =>
+												link.id !== updatedLink.id &&
+												link.index >=
+													updatedLink.newIndex &&
+												link.index < oldLinkInfos.index
+													? {
+															...link,
+															index:
+																link.index + 1,
+													  }
+													: link
+											),
+									  }
+									: category
+							)
+					);
+				}
+				// If new index is bigger than the current one
+				browserQueryClient.setQueryData(
+					['categories'],
+					(categories: CategoryType[]) =>
+						categories.map((category) =>
+							category.id === oldCategoryId
+								? {
+										...category,
+										links: category.links.map((link) =>
+											link.id !== updatedLink.id &&
+											link.index <=
+												updatedLink.newIndex &&
+											link.index > oldLinkInfos.index
+												? {
+														...link,
+														index: link.index - 1,
+												  }
+												: link
+										),
+								  }
+								: category
+						)
+				);
+			}
+			return previousCategories;
+		},
+
+		onSuccess: () => toast.success('Link successfully moved'),
+		onError: (_, __, previousCategories) => {
+			toast.error('Cannot change link category');
+			browserQueryClient?.setQueryData(
+				['categories'],
+				previousCategories
 			);
-			console.log(linkInfos);
-
-			// 	browserQueryClient?.setQueryData(
-			// 		['categories'],
-			// 		(categories: CategoryType[]) =>
-			// 			categories.map((category) => {
-			// 				// Update the old category links and their indexes
-			// 				if (category.id === updatedLink.oldCategoryId)
-			// 					return {
-			// 						...category,
-			// 						links: category.links
-			// 							.filter(
-			// 								(link) => link.id !== updatedLink.id
-			// 							)
-			// 							.map((link) =>
-			// 								link.index > updatedLink.index
-			// 									? { ...link, index: link.index - 1 }
-			// 									: link
-			// 							),
-			// 					};
-			// 				// Update the moved link index and its new category
-			// 				if (category.id === updatedLink.newCategoryId) {
-			// 					const highestIndex = Math.max(
-			// 						...category.links.map((link) => link.index)
-			// 					);
-			// 					const newIndex =
-			// 						highestIndex != -Infinity
-			// 							? highestIndex + 1
-			// 							: 0;
-
-			// 					const updatedLinkWithNewIndex = {
-			// 						...linkInfos,
-			// 						index: newIndex,
-			// 					};
-			// 					return {
-			// 						...category,
-			// 						links: [
-			// 							...category.links,
-			// 							updatedLinkWithNewIndex,
-			// 						],
-			// 					};
-			// 				}
-			// 				return category;
-			// 			})
-			// 	);
-
-			// 	return previousCategories;
-			// },
-			// onSuccess: () => toast.success('Link successfully moved'),
-			// onError: (_, __, previousCategories) => {
-			// 	toast.error('Cannot change link category');
-			// 	browserQueryClient?.setQueryData(
-			// 		['categories'],
-			// 		previousCategories
-			// 	);
-			// },
 		},
 	});

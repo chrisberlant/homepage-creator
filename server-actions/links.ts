@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { getSession } from './auth';
+import console from 'console';
 
 interface CreateLinkProps {
 	title: string;
@@ -102,7 +103,6 @@ export async function changeLinkIndex({
 }) {
 	const session = await getSession();
 	if (!session) return;
-
 	try {
 		await prisma.$transaction(async (prisma) => {
 			const link = await prisma.link.findUnique({
@@ -114,7 +114,6 @@ export async function changeLinkIndex({
 			if (!link) throw new Error('Cannot find link');
 
 			const { index: currentIndex, categoryId: currentCategoryId } = link;
-			if (currentIndex === newIndex) return;
 
 			await prisma.link.update({
 				where: {
@@ -129,10 +128,15 @@ export async function changeLinkIndex({
 
 			// If moved in the same category
 			if (currentCategoryId === newCategoryId) {
+				if (currentIndex === newIndex) return;
+
 				if (newIndex < currentIndex)
 					return await prisma.link.updateMany({
 						where: {
 							ownerId: session.user.id,
+							id: {
+								not: id,
+							},
 							index: {
 								gte: newIndex,
 								lt: currentIndex,
@@ -146,8 +150,12 @@ export async function changeLinkIndex({
 						},
 					});
 
+				// If new index is bigger than the current one
 				return await prisma.link.updateMany({
 					where: {
+						id: {
+							not: id,
+						},
 						ownerId: session.user.id,
 						index: {
 							lte: newIndex,

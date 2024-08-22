@@ -19,7 +19,6 @@ export default function Dashboard() {
 							key={category.id}
 							id={category.id}
 							title={category.title}
-							index={category.index}
 							links={category.links}
 						/>
 					))}

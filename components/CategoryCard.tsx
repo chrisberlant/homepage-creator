@@ -12,7 +12,6 @@ import { SortableContext } from '@dnd-kit/sortable';
 
 interface CategoryCardProps {
 	id: number;
-	index: number;
 	title: string;
 	links: {
 		id: number;
@@ -22,12 +21,7 @@ interface CategoryCardProps {
 	}[];
 }
 
-export default function CategoryCard({
-	id,
-	index,
-	title,
-	links,
-}: CategoryCardProps) {
+export default function CategoryCard({ id, title, links }: CategoryCardProps) {
 	const { editingMode } = useContext(EditingModeContext);
 	const { isOver, setNodeRef } = useDroppable({
 		id,
