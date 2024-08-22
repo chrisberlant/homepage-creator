@@ -21,7 +21,7 @@ export default function RootLayout({
 				<body className='bg-background text-foreground'>
 					<Header />
 					<main className='p-5'>
-						<Toaster />
+						<Toaster richColors closeButton />
 						<QueryProvider>{children}</QueryProvider>
 					</main>
 				</body>

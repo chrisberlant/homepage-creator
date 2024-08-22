@@ -47,11 +47,13 @@ export default function DndContextProvider({
 		// If dropped into another category with no index specified, put it at the end of it
 		if (over.data.current?.isCategory) {
 			console.log('category change');
+			if (over.id === currentCategoryId) return;
 			return changeLinkCategory({
 				id: active.id,
 				newCategoryId: over.id,
 			});
 		}
+
 		if (over.data.current?.index !== undefined) {
 			// new infos
 			const { categoryId: newCategoryId, index: newIndex } =

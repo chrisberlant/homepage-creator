@@ -164,7 +164,10 @@ export const useChangeLinkIndex = () =>
 
 			// If moved in the same category
 			if (oldCategoryId == updatedLink.newCategoryId) {
-				if (oldLinkInfos.index === updatedLink.newIndex) return;
+				if (oldLinkInfos.index === updatedLink.newIndex)
+					throw new Error(
+						'The link is already at the specified location'
+					);
 
 				if (updatedLink.newIndex < oldLinkInfos.index) {
 					browserQueryClient.setQueryData(
@@ -174,17 +177,31 @@ export const useChangeLinkIndex = () =>
 								category.id === oldCategoryId
 									? {
 											...category,
-											links: category.links.map((link) =>
-												link.id !== updatedLink.id &&
-												link.index >=
-													updatedLink.newIndex &&
-												link.index < oldLinkInfos.index
-													? {
+											links: category.links.map(
+												(link) => {
+													if (
+														link.id !==
+															updatedLink.id &&
+														link.index >=
+															updatedLink.newIndex &&
+														link.index <
+															oldLinkInfos.index
+													)
+														return {
 															...link,
 															index:
 																link.index + 1,
-													  }
-													: link
+														};
+													if (
+														link.id ===
+														updatedLink.id
+													)
+														return {
+															...link,
+															index: updatedLink.newIndex,
+														};
+													return link;
+												}
 											),
 									  }
 									: category
@@ -199,22 +216,77 @@ export const useChangeLinkIndex = () =>
 							category.id === oldCategoryId
 								? {
 										...category,
-										links: category.links.map((link) =>
-											link.id !== updatedLink.id &&
-											link.index <=
-												updatedLink.newIndex &&
-											link.index > oldLinkInfos.index
-												? {
-														...link,
-														index: link.index - 1,
-												  }
-												: link
-										),
+										links: category.links.map((link) => {
+											if (
+												link.id !== updatedLink.id &&
+												link.index <=
+													updatedLink.newIndex &&
+												link.index > oldLinkInfos.index
+											)
+												return {
+													...link,
+													index: link.index - 1,
+												};
+											if (link.id === updatedLink.id)
+												return {
+													...link,
+													index: updatedLink.newIndex,
+												};
+											return link;
+										}),
 								  }
 								: category
 						)
 				);
 			}
+
+			// If moved in another category
+			browserQueryClient.setQueryData(
+				['categories'],
+				(categories: CategoryType[]) =>
+					categories.map((category) => {
+						if (category.id === updatedLink.newCategoryId)
+							return {
+								...category,
+								links: [
+									...category.links.map((link) => {
+										if (
+											link.id !== updatedLink.id &&
+											link.index >= updatedLink.newIndex
+										)
+											return {
+												...link,
+												index: link.index + 1,
+											};
+										return link;
+									}),
+									{
+										...oldLinkInfos,
+										index: updatedLink.newIndex,
+									},
+								].sort((a, b) => a.index - b.index),
+							};
+
+						if (category.id === oldCategoryId)
+							return {
+								...category,
+								links: category.links
+									.filter(
+										(link) => link.id !== updatedLink.id
+									)
+									.map((link) => {
+										if (link.index > updatedLink.newIndex)
+											return {
+												...link,
+												index: link.index - 1,
+											};
+										return link;
+									}),
+							};
+						return category;
+					})
+			);
+
 			return previousCategories;
 		},
 

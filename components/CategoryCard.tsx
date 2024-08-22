@@ -88,16 +88,18 @@ export default function CategoryCard({ id, title, links }: CategoryCardProps) {
 							opened ? 'opacity-100' : 'opacity-0 overflow-hidden'
 						}`}
 					>
-						{links?.map((link) => (
-							<LinkCard
-								key={link.id}
-								id={link.id}
-								index={link.index}
-								title={link.title}
-								url={link.url}
-								categoryId={id}
-							/>
-						))}
+						{links
+							?.sort((a, b) => a.index - b.index)
+							.map((link) => (
+								<LinkCard
+									key={link.id}
+									id={link.id}
+									index={link.index}
+									title={link.title}
+									url={link.url}
+									categoryId={id}
+								/>
+							))}
 					</div>
 				)}
 			</div>

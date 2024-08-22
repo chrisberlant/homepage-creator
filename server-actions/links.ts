@@ -115,6 +115,14 @@ export async function changeLinkIndex({
 
 			const { index: currentIndex, categoryId: currentCategoryId } = link;
 
+			if (
+				newIndex === currentIndex &&
+				currentCategoryId === newCategoryId
+			)
+				throw new Error(
+					'The link is already at the specified location'
+				);
+
 			await prisma.link.update({
 				where: {
 					id,
@@ -128,8 +136,6 @@ export async function changeLinkIndex({
 
 			// If moved in the same category
 			if (currentCategoryId === newCategoryId) {
-				if (currentIndex === newIndex) return;
-
 				if (newIndex < currentIndex)
 					return await prisma.link.updateMany({
 						where: {
@@ -170,6 +176,43 @@ export async function changeLinkIndex({
 					},
 				});
 			}
+
+			// If moved in another category
+			await prisma.link.updateMany({
+				where: {
+					id: {
+						not: id,
+					},
+					ownerId: session.user.id,
+					index: {
+						gte: newIndex,
+					},
+					categoryId: newCategoryId,
+				},
+				data: {
+					index: {
+						increment: 1,
+					},
+				},
+			});
+
+			return prisma.link.updateMany({
+				where: {
+					id: {
+						not: id,
+					},
+					ownerId: session.user.id,
+					index: {
+						gt: currentIndex,
+					},
+					categoryId: currentCategoryId,
+				},
+				data: {
+					index: {
+						decrement: 1,
+					},
+				},
+			});
 		});
 	} catch (error) {
 		return { error: 'Cannot change link index' };
@@ -197,6 +240,8 @@ export async function changeLinkCategory({
 			});
 
 			if (!link) throw new Error('Cannot find link');
+			if (link.categoryId === newCategoryId)
+				throw new Error('Link is already in this category');
 
 			const { index, categoryId: oldCategoryId } = link;
 
