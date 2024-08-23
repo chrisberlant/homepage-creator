@@ -21,13 +21,10 @@ interface CategoryCardProps {
 	}[];
 }
 
-export default function CategoryCard({ id, title, links }: CategoryCardProps) {
+function CategoryContent({ id, title, links }: CategoryCardProps) {
 	const { editingMode } = useContext(EditingModeContext);
 	const { isOver, setNodeRef } = useDroppable({
-		id,
-		data: {
-			isCategory: true,
-		},
+		id: `container-${id}`,
 	});
 	const style = {
 		color: isOver ? 'green' : undefined,
@@ -48,61 +45,65 @@ export default function CategoryCard({ id, title, links }: CategoryCardProps) {
 	// }, [opened]);
 
 	return (
-		<SortableContext items={links}>
-			<div
-				ref={setNodeRef}
-				style={style}
-				className='border-2 shadow-md dark:shadow-none bg-card p-2 px-5 m-4 w-1/3 rounded-2xl relative'
-			>
-				<div className='flex mb-4'>
-					{opened ? (
-						<ArrowBigUp
-							onClick={toggleView}
-							className='absolute cursor-pointer'
-						/>
-					) : (
-						<ArrowBigDown
-							onClick={toggleView}
-							className='absolute cursor-pointer'
-						/>
-					)}
-					<h2 className='font-bold text-center flex-1'>{title}</h2>
-				</div>
-				{editingMode && (
-					<>
-						<CreateLinkButton categoryId={id} />
-						<Trash2Icon
-							stroke='red'
-							className='absolute right-4 top-3 cursor-pointer'
-							onClick={async () => {
-								const result = await deleteCategory(id);
-								if (result?.error) toast.error(result.error);
-							}}
-						/>
-					</>
+		<div
+			ref={setNodeRef}
+			style={style}
+			className='border-2 shadow-md dark:shadow-none bg-card p-2 px-5 m-4 w-1/3 rounded-2xl relative'
+		>
+			<div className='flex mb-4'>
+				{opened ? (
+					<ArrowBigUp
+						onClick={toggleView}
+						className='absolute cursor-pointer'
+					/>
+				) : (
+					<ArrowBigDown
+						onClick={toggleView}
+						className='absolute cursor-pointer'
+					/>
 				)}
-				{opened && (
-					<div
-						// ref={setNodeRef}
-						className={`flex flex-col gap-2 transition-all duration-500 ease ${
-							opened ? 'opacity-100' : 'opacity-0 overflow-hidden'
-						}`}
-					>
-						{links
-							?.sort((a, b) => a.index - b.index)
-							.map((link) => (
-								<LinkCard
-									key={link.id}
-									id={link.id}
-									index={link.index}
-									title={link.title}
-									url={link.url}
-									categoryId={id}
-								/>
-							))}
-					</div>
-				)}
+				<h2 className='font-bold text-center flex-1'>{title}</h2>
 			</div>
+			{editingMode && (
+				<>
+					<CreateLinkButton categoryId={id} />
+					<Trash2Icon
+						stroke='red'
+						className='absolute right-4 top-3 cursor-pointer'
+						onClick={async () => {
+							const result = await deleteCategory(id);
+							if (result?.error) toast.error(result.error);
+						}}
+					/>
+				</>
+			)}
+			{opened && (
+				<div
+					// ref={setNodeRef}
+					className={`flex flex-col gap-2 transition-all duration-500 ease ${
+						opened ? 'opacity-100' : 'opacity-0 overflow-hidden'
+					}`}
+				>
+					{links.map((link) => (
+						<LinkCard
+							key={link.id}
+							id={link.id}
+							index={link.index}
+							title={link.title}
+							url={link.url}
+							categoryId={id}
+						/>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}
+
+export default function CategoryCard({ id, title, links }: CategoryCardProps) {
+	return (
+		<SortableContext items={links}>
+			<CategoryContent id={id} title={title} links={links} />
 		</SortableContext>
 	);
 }

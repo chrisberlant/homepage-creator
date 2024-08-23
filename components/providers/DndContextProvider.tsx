@@ -1,7 +1,6 @@
 'use client';
 
 import {
-	closestCenter,
 	DndContext,
 	KeyboardSensor,
 	MouseSensor,
@@ -9,7 +8,7 @@ import {
 	useSensors,
 } from '@dnd-kit/core';
 import { toast } from 'sonner';
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useChangeLinkCategory, useChangeLinkIndex } from '@/queries/links';
 
@@ -18,7 +17,6 @@ export default function DndContextProvider({
 }: {
 	children: ReactNode;
 }) {
-	const [items] = useState([1, 2, 3]);
 	const sensors = useSensors(
 		useSensor(MouseSensor, {
 			activationConstraint: { distance: 5 },
@@ -34,23 +32,17 @@ export default function DndContextProvider({
 	async function handleDragEnd(event: any) {
 		const { active, over } = event;
 		const { categoryId: currentCategoryId, index } = active.data.current;
-
-		if (
-			!over.id ||
-			(currentCategoryId === over.data.current.categoryId &&
-				index === over.data.current.index)
-		)
-			return toast.info('Link did not move');
-
 		console.log(event);
 
+		if (!over?.id || over.id === active.id)
+			return toast.info('Link did not move');
+
 		// If dropped into another category with no index specified, put it at the end of it
-		if (over.data.current?.isCategory) {
-			console.log('category change');
-			if (over.id === currentCategoryId) return;
+		if (typeof over.id === 'string' && over.id.startsWith('container')) {
+			if (Number(over.id.split('-')[1]) === currentCategoryId) return;
 			return changeLinkCategory({
 				id: active.id,
-				newCategoryId: over.id,
+				newCategoryId: Number(over.id.split('-')[1]),
 			});
 		}
 
@@ -58,7 +50,6 @@ export default function DndContextProvider({
 			// new infos
 			const { categoryId: newCategoryId, index: newIndex } =
 				over.data.current;
-			console.log('index change', newIndex);
 
 			return changeLinkIndex({
 				id: active.id,
@@ -77,7 +68,6 @@ export default function DndContextProvider({
 			id='dnd-context-id'
 			onDragEnd={handleDragEnd}
 			onDragOver={handleDragOver}
-			collisionDetection={closestCenter}
 			sensors={sensors}
 		>
 			{children}

@@ -1,9 +1,9 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { getSession } from './auth';
-import console from 'console';
+import { LinkWithCategoryType } from '@/lib/types';
+import { link } from 'fs';
 
 interface CreateLinkProps {
 	title: string;
@@ -13,11 +13,11 @@ interface CreateLinkProps {
 
 export async function createLink({ title, url, categoryId }: CreateLinkProps) {
 	const session = await getSession();
-	if (!session) return;
+	if (!session) throw new Error('Session not found or invalid');
 
 	try {
-		await prisma.$transaction(async (prisma) => {
-			const lastLink = await prisma.link.findFirst({
+		return (await prisma.$transaction(async (prisma) => {
+			const lastLinkInCategory = await prisma.link.findFirst({
 				where: {
 					ownerId: session.user.id,
 					categoryId,
@@ -27,9 +27,11 @@ export async function createLink({ title, url, categoryId }: CreateLinkProps) {
 				},
 			});
 
-			const newIndex = lastLink?.index ? lastLink.index + 1 : 0;
+			const newIndex = lastLinkInCategory?.index
+				? lastLinkInCategory.index + 1
+				: 0;
 
-			await prisma.link.create({
+			return await prisma.link.create({
 				data: {
 					title,
 					url,
@@ -38,27 +40,43 @@ export async function createLink({ title, url, categoryId }: CreateLinkProps) {
 					ownerId: session.user.id,
 				},
 			});
-		});
-
-		revalidatePath('/home');
+		})) as LinkWithCategoryType;
 	} catch (error) {
-		return { error: 'Cannot create link' };
+		throw new Error('Cannot create link');
 	}
 }
 
 export async function deleteLink(id: number) {
 	const session = await getSession();
-	if (!session) return;
+	if (!session) throw new Error('Session not found or invalid');
 
 	try {
-		await prisma.link.delete({
-			where: {
-				id,
-				ownerId: session.user.id,
-			},
-		});
+		return await prisma.$transaction(async (prisma) => {
+			const link = await prisma.link.delete({
+				where: {
+					id,
+					ownerId: session.user.id,
+				},
+			});
 
-		revalidatePath('/home');
+			await prisma.link.updateMany({
+				where: {
+					ownerId: session.user.id,
+					id: {
+						not: id,
+					},
+					index: {
+						gt: link.index,
+					},
+					categoryId: link.categoryId,
+				},
+				data: {
+					index: {
+						decrement: 1,
+					},
+				},
+			});
+		});
 	} catch (error) {
 		return { error: 'Cannot delete link' };
 	}
@@ -74,7 +92,7 @@ export async function updateLink({
 	url: string;
 }) {
 	const session = await getSession();
-	if (!session) return;
+	if (!session) throw new Error('Session not found or invalid');
 
 	try {
 		return await prisma.link.update({
@@ -88,7 +106,7 @@ export async function updateLink({
 			},
 		});
 	} catch (error) {
-		return { error: 'Cannot update link' };
+		throw new Error('Cannot update link');
 	}
 }
 
@@ -102,9 +120,9 @@ export async function changeLinkIndex({
 	newCategoryId: number;
 }) {
 	const session = await getSession();
-	if (!session) return;
+	if (!session) throw new Error('Session not found or invalid');
 	try {
-		await prisma.$transaction(async (prisma) => {
+		return await prisma.$transaction(async (prisma) => {
 			const link = await prisma.link.findUnique({
 				where: {
 					id,
@@ -196,7 +214,7 @@ export async function changeLinkIndex({
 				},
 			});
 
-			return prisma.link.updateMany({
+			await prisma.link.updateMany({
 				where: {
 					id: {
 						not: id,
@@ -215,7 +233,7 @@ export async function changeLinkIndex({
 			});
 		});
 	} catch (error) {
-		return { error: 'Cannot change link index' };
+		throw new Error('Cannot change link index');
 	}
 }
 
@@ -228,10 +246,10 @@ export async function changeLinkCategory({
 	newCategoryId: number;
 }) {
 	const session = await getSession();
-	if (!session) return;
+	if (!session) throw new Error('Session not found or invalid');
 
 	try {
-		await prisma.$transaction(async (prisma) => {
+		return await prisma.$transaction(async (prisma) => {
 			const link = await prisma.link.findUnique({
 				where: {
 					id,
@@ -296,6 +314,6 @@ export async function changeLinkCategory({
 			return returnedValue;
 		});
 	} catch (error) {
-		return { error: 'Cannot change link category' };
+		throw new Error('Cannot change link category');
 	}
 }

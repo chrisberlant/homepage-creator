@@ -1,7 +1,6 @@
 'use client';
 
 import { PlusIcon, MinusIcon } from 'lucide-react';
-import { createLink } from '../server-actions/links';
 import { useState } from 'react';
 import { Input } from './ui/input';
 import { z } from 'zod';
@@ -16,6 +15,7 @@ import {
 	FormMessage,
 } from './ui/form';
 import { Button } from './ui/button';
+import { useCreateLink } from '@/queries/links';
 
 const createLinkFormSchema = z.object({
 	title: z.string().min(1, {
@@ -41,6 +41,7 @@ export default function CreateLinkButton({
 		},
 	});
 	const [openedMenu, setOpenedMenu] = useState(false);
+	const { mutate: createLink } = useCreateLink({ form, setOpenedMenu });
 
 	return (
 		<>
@@ -61,17 +62,11 @@ export default function CreateLinkButton({
 					<form
 						onSubmit={form.handleSubmit(async (e) => {
 							const { title, url } = e;
-							const creation = await createLink({
+							createLink({
 								title,
 								url,
 								categoryId,
 							});
-							if (creation?.error) {
-								return form.setError('title', {
-									message: creation.error,
-								});
-							}
-							form.reset();
 						})}
 						className='flex flex-col mb-4 border p-4 bg-card rounded-xl absolute z-50'
 					>

@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Trash2Icon } from 'lucide-react';
-import { deleteLink } from '../server-actions/links';
 import { EditingModeContext } from './providers/EditingModeContextProvider';
-import { toast } from 'sonner';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import LinkCardEditButton from './LinkCardEditButton';
+import { useDeleteLink } from '../queries/links';
 
 interface LinkCardProps {
 	id: number;
@@ -26,12 +25,12 @@ export default function LinkCard({
 }: LinkCardProps) {
 	const { editingMode } = useContext(EditingModeContext);
 	const [disabledDragging, setDisabledDragging] = useState(false);
+	const { mutate: deleteLink } = useDeleteLink();
 
 	const { attributes, listeners, setNodeRef, transform, transition } =
 		useSortable({
 			id,
 			data: {
-				isLink: true,
 				categoryId,
 				index,
 			},
@@ -65,10 +64,7 @@ export default function LinkCard({
 						stroke='red'
 						size={18}
 						className='cursor-pointer'
-						onClick={async () => {
-							const result = await deleteLink(id);
-							if (result?.error) toast.error(result.error);
-						}}
+						onClick={() => deleteLink(id)}
 					/>
 				</>
 			) : (
