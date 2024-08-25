@@ -8,9 +8,11 @@ import {
 	useSensors,
 } from '@dnd-kit/core';
 import { toast } from 'sonner';
-import { ReactNode } from 'react';
+import { createContext, ReactNode, useState } from 'react';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useChangeLinkCategory, useChangeLinkIndex } from '@/queries/links';
+
+export const ActiveDraggedContext = createContext(null as number | null);
 
 export default function DndContextProvider({
 	children,
@@ -28,10 +30,12 @@ export default function DndContextProvider({
 	);
 	const { mutate: changeLinkCategory } = useChangeLinkCategory();
 	const { mutate: changeLinkIndex } = useChangeLinkIndex();
+	const [activeId, setActiveId] = useState<number | null>(null);
 
 	async function handleDragEnd(event: any) {
 		const { active, over } = event;
-		const { categoryId: currentCategoryId, index } = active.data.current;
+		const { categoryId: currentCategoryId } = active.data.current;
+		setActiveId(null);
 		console.log(event);
 
 		if (!over?.id || over.id === active.id)
@@ -59,18 +63,21 @@ export default function DndContextProvider({
 		}
 	}
 
-	async function handleDragOver(event: any) {
-		// console.log(event);
+	async function handleDragStart(event: any) {
+		setActiveId(event.active.id);
 	}
 
 	return (
 		<DndContext
 			id='dnd-context-id'
+			onDragStart={handleDragStart}
 			onDragEnd={handleDragEnd}
-			onDragOver={handleDragOver}
+			// onDragOver={handleDragOver}
 			sensors={sensors}
 		>
-			{children}
+			<ActiveDraggedContext.Provider value={activeId}>
+				{children}
+			</ActiveDraggedContext.Provider>
 		</DndContext>
 	);
 }

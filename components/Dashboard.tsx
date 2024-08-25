@@ -1,7 +1,7 @@
 'use client';
 
 import CategoryCard from './CategoryCard';
-import { useGetCategories } from '../queries/categories';
+import { useGetCategories } from '@/queries/categories';
 
 export default function Dashboard() {
 	const { data: categories, isLoading, error } = useGetCategories();
@@ -13,7 +13,7 @@ export default function Dashboard() {
 			{isLoading && <div>Loading...</div>}
 
 			{categories && (
-				<div className='flex flex-wrap justify-around items-start'>
+				<section className='flex flex-wrap justify-around items-start'>
 					{categories?.map((category) => (
 						<CategoryCard
 							key={category.id}
@@ -22,7 +22,7 @@ export default function Dashboard() {
 							links={category.links}
 						/>
 					))}
-				</div>
+				</section>
 			)}
 		</>
 	);

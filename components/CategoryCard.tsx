@@ -1,7 +1,12 @@
 'use client';
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { useDroppable } from '@dnd-kit/core';
+import {
+	defaultDropAnimation,
+	defaultDropAnimationSideEffects,
+	DragOverlay,
+	useDroppable,
+} from '@dnd-kit/core';
 import { ArrowBigDown, ArrowBigUp, Trash2Icon } from 'lucide-react';
 import { deleteCategory } from '../server-actions/categories';
 import CreateLinkButton from './CreateLinkButton';
@@ -9,6 +14,7 @@ import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { toast } from 'sonner';
 import LinkCard from './LinkCard';
 import { SortableContext } from '@dnd-kit/sortable';
+import { ActiveDraggedContext } from './providers/DndContextProvider';
 
 interface CategoryCardProps {
 	id: number;
@@ -31,6 +37,8 @@ function CategoryContent({ id, title, links }: CategoryCardProps) {
 	};
 	const [opened, setOpened] = useState(true);
 	// const contentRef = useRef<HTMLDivElement>(null);
+	const activeDraggedId = useContext(ActiveDraggedContext);
+	const draggedLinkInfos = links.find((link) => link.id === activeDraggedId);
 
 	const toggleView = () => setOpened(!opened);
 
@@ -64,6 +72,28 @@ function CategoryContent({ id, title, links }: CategoryCardProps) {
 				)}
 				<h2 className='font-bold text-center flex-1'>{title}</h2>
 			</div>
+			<DragOverlay
+				dropAnimation={{
+					...defaultDropAnimation,
+					sideEffects: defaultDropAnimationSideEffects({
+						styles: {
+							active: {
+								opacity: '1',
+							},
+						},
+					}),
+				}}
+			>
+				{activeDraggedId && draggedLinkInfos && (
+					<LinkCard
+						id={draggedLinkInfos.id}
+						index={draggedLinkInfos.index}
+						title={draggedLinkInfos.title}
+						url={draggedLinkInfos.url}
+						categoryId={id}
+					/>
+				)}
+			</DragOverlay>
 			{editingMode && (
 				<>
 					<CreateLinkButton categoryId={id} />
