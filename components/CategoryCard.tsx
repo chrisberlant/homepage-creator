@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import LinkCard from './LinkCard';
 import { SortableContext } from '@dnd-kit/sortable';
 import { ActiveDraggedContext } from './providers/DndContextProvider';
+import LinkCardOverlay from './LinkCardOverLay';
 
 interface CategoryCardProps {
 	id: number;
@@ -85,12 +86,9 @@ function CategoryContent({ id, title, links }: CategoryCardProps) {
 				}}
 			>
 				{activeDraggedId && draggedLinkInfos && (
-					<LinkCard
+					<LinkCardOverlay
 						id={draggedLinkInfos.id}
-						index={draggedLinkInfos.index}
 						title={draggedLinkInfos.title}
-						url={draggedLinkInfos.url}
-						categoryId={id}
 					/>
 				)}
 			</DragOverlay>

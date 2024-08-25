@@ -25,8 +25,6 @@ import {
 	FormMessage,
 } from './ui/form';
 import { useState } from 'react';
-import { updateLink } from '../server-actions/links';
-import { toast } from 'sonner';
 import { useUpdateLink } from '../queries/links';
 
 const updateLinkSchema = z.object({
@@ -64,7 +62,7 @@ export default function LinkCardEditButton({
 		},
 	});
 	const [open, setOpen] = useState(false);
-	const { mutate } = useUpdateLink();
+	const { mutate: updateLink } = useUpdateLink();
 
 	return (
 		<AlertDialog open={open} onOpenChange={setOpen}>
@@ -80,15 +78,11 @@ export default function LinkCardEditButton({
 					<form
 						onSubmit={form.handleSubmit(
 							async (data) => {
-								const { title, url } = data;
-								const request = mutate({
+								updateLink({
 									id,
-									title,
-									url,
+									title: data.title,
+									url: data.url,
 								});
-								// if (request?.error) toast.error(request.error);
-								setOpen(false);
-								disableDragging(false);
 							},
 							// If any error in the data
 							() => setOpen(true)

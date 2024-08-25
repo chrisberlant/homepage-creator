@@ -27,17 +27,24 @@ export default function LinkCard({
 	const [disabledDragging, setDisabledDragging] = useState(false);
 	const { mutate: deleteLink } = useDeleteLink();
 
-	const { attributes, listeners, setNodeRef, transform, transition } =
-		useSortable({
-			id,
-			data: {
-				categoryId,
-				index,
-			},
-			disabled: disabledDragging,
-		});
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({
+		id,
+		data: {
+			categoryId,
+			index,
+		},
+		disabled: disabledDragging,
+	});
 	const style = {
 		transform: CSS.Transform.toString(transform),
+		opacity: isDragging ? 0.3 : 1,
 		transition,
 	};
 
