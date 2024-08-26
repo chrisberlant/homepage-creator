@@ -250,7 +250,7 @@ export const useChangeLinkCategory = () =>
 								links: [
 									...category.links,
 									updatedLinkWithNewIndex,
-								].sort((a, b) => a.index - b.index),
+								],
 							};
 						}
 						return category;
@@ -308,8 +308,8 @@ export const useChangeLinkIndex = () =>
 								category.id === oldCategoryId
 									? {
 											...category,
-											links: category.links
-												.map((link) => {
+											links: category.links.map(
+												(link) => {
 													if (
 														link.id ===
 														updatedLink.id
@@ -331,10 +331,8 @@ export const useChangeLinkIndex = () =>
 														};
 
 													return link;
-												})
-												.sort(
-													(a, b) => a.index - b.index
-												),
+												}
+											),
 									  }
 									: category
 							)
@@ -349,27 +347,24 @@ export const useChangeLinkIndex = () =>
 							category.id === oldCategoryId
 								? {
 										...category,
-										links: category.links
-											.map((link) => {
-												if (link.id === updatedLink.id)
-													return {
-														...link,
-														index: updatedLink.newIndex,
-													};
-												if (
-													link.index <=
-														updatedLink.newIndex &&
-													link.index >
-														oldLinkInfos.index
-												)
-													return {
-														...link,
-														index: link.index - 1,
-													};
+										links: category.links.map((link) => {
+											if (link.id === updatedLink.id)
+												return {
+													...link,
+													index: updatedLink.newIndex,
+												};
+											if (
+												link.index <=
+													updatedLink.newIndex &&
+												link.index > oldLinkInfos.index
+											)
+												return {
+													...link,
+													index: link.index - 1,
+												};
 
-												return link;
-											})
-											.sort((a, b) => a.index - b.index),
+											return link;
+										}),
 								  }
 								: category
 						)
@@ -399,7 +394,7 @@ export const useChangeLinkIndex = () =>
 											...oldLinkInfos,
 											index: newIndex,
 										},
-									].sort((a, b) => a.index - b.index),
+									],
 								};
 							if (category.id === oldCategoryId)
 								return {
@@ -413,8 +408,7 @@ export const useChangeLinkIndex = () =>
 													index: link.index - 1,
 												};
 											return link;
-										})
-										.sort((a, b) => a.index - b.index),
+										}),
 								};
 							return category;
 						})

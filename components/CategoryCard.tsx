@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
 	defaultDropAnimation,
 	defaultDropAnimationSideEffects,
@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import LinkCard from './LinkCard';
 import { SortableContext } from '@dnd-kit/sortable';
 import { ActiveDraggedContext } from './providers/DndContextProvider';
-import LinkCardOverlay from './LinkCardOverLay';
+import LinkCardOverlay from './LinkCardOverlay';
 
 interface CategoryCardProps {
 	id: number;
@@ -112,16 +112,18 @@ function CategoryContent({ id, title, links }: CategoryCardProps) {
 						opened ? 'opacity-100' : 'opacity-0 overflow-hidden'
 					}`}
 				>
-					{links.map((link) => (
-						<LinkCard
-							key={link.id}
-							id={link.id}
-							index={link.index}
-							title={link.title}
-							url={link.url}
-							categoryId={id}
-						/>
-					))}
+					{links
+						.sort((a, b) => a.index - b.index)
+						.map((link) => (
+							<LinkCard
+								key={link.id}
+								id={link.id}
+								index={link.index}
+								title={link.title}
+								url={link.url}
+								categoryId={id}
+							/>
+						))}
 				</div>
 			)}
 		</div>
