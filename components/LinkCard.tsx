@@ -75,7 +75,12 @@ export default function LinkCard({
 					/>
 				</>
 			) : (
-				<a href={url} target='_blank' className='flex-1 cursor-pointer'>
+				<a
+					href={url}
+					target='_blank'
+					title={url}
+					className='flex-1 cursor-pointer'
+				>
 					{title}
 				</a>
 			)}

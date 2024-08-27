@@ -1,15 +1,15 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { getSession } from './auth';
+import { CategoryType } from '@/lib/types';
 
 export async function createCategory(title: string) {
 	const session = await getSession();
-	if (!session) return;
+	if (!session) throw new Error('Session not found or invalid');
 
 	try {
-		await prisma.$transaction(async (prisma) => {
+		return await prisma.$transaction(async (prisma) => {
 			const lastCategory = await prisma.category.findFirst({
 				where: {
 					ownerId: session.user.id,
@@ -21,24 +21,47 @@ export async function createCategory(title: string) {
 
 			const newIndex = lastCategory?.index ? lastCategory.index + 1 : 0;
 
-			await prisma.category.create({
+			return (await prisma.category.create({
 				data: {
 					title,
 					index: newIndex,
 					ownerId: session.user.id,
 				},
-			});
+			})) as CategoryType;
 		});
-
-		revalidatePath('/home');
 	} catch (error) {
-		return { error: 'Cannot create category' };
+		throw new Error('Cannot create category');
+	}
+}
+
+export async function updateCategory({
+	id,
+	title,
+}: {
+	id: number;
+	title: string;
+}) {
+	const session = await getSession();
+	if (!session) throw new Error('Session not found or invalid');
+
+	try {
+		return await prisma.category.update({
+			where: {
+				id,
+				ownerId: session.user.id,
+			},
+			data: {
+				title,
+			},
+		});
+	} catch (error) {
+		throw new Error('Cannot update category');
 	}
 }
 
 export async function deleteCategory(id: number) {
 	const session = await getSession();
-	if (!session) return;
+	if (!session) throw new Error('Session not found or invalid');
 
 	try {
 		await prisma.$transaction(async (prisma) => {
@@ -63,7 +86,7 @@ export async function deleteCategory(id: number) {
 			});
 
 			await prisma.link.deleteMany({
-				where: { categoryId: id },
+				where: { categoryId: id, ownerId: session.user.id },
 			});
 
 			await prisma.category.delete({
@@ -73,9 +96,7 @@ export async function deleteCategory(id: number) {
 				},
 			});
 		});
-
-		revalidatePath('/home');
 	} catch (error) {
-		return { error: 'Cannot delete category' };
+		throw new Error('Cannot delete category');
 	}
 }

@@ -7,7 +7,11 @@ import {
 	updateLink,
 } from '@/server-actions/links';
 import { browserQueryClient } from '@/components/providers/QueryClientProvider';
-import { CategoryType, LinkWithCategoryType } from '@/lib/types';
+import {
+	CategoryType,
+	CategoryWithLinksType,
+	LinkWithCategoryType,
+} from '@/lib/types';
 import { toast } from 'sonner';
 import { UseFormReturn } from 'react-hook-form';
 import { Dispatch, SetStateAction } from 'react';
@@ -32,13 +36,13 @@ export const useCreateLink = ({ form, setOpenedMenu }: UseCreateLinkProps) =>
 				queryKey: ['categories'],
 			});
 
-			const previousCategories: CategoryType[] | undefined =
+			const previousCategories: CategoryWithLinksType[] | undefined =
 				browserQueryClient?.getQueryData(['categories']);
 			if (!previousCategories || !browserQueryClient) return;
 
 			browserQueryClient.setQueryData(
 				['categories'],
-				(categories: CategoryType[]) =>
+				(categories: CategoryWithLinksType[]) =>
 					categories.map((category) =>
 						category.id === infos.categoryId
 							? {
@@ -54,22 +58,16 @@ export const useCreateLink = ({ form, setOpenedMenu }: UseCreateLinkProps) =>
 
 			return previousCategories;
 		},
-		onSuccess: (infos: LinkWithCategoryType) => {
+		onSuccess: (apiResponse: LinkWithCategoryType) => {
 			browserQueryClient?.setQueryData(
 				['categories'],
-				(categories: CategoryType[]) =>
+				(categories: CategoryWithLinksType[]) =>
 					categories.map((category) =>
-						category.id === infos.categoryId
+						category.id === apiResponse.categoryId
 							? {
 									...category,
 									links: category.links.map((link) =>
-										link.id === 9999
-											? {
-													...link,
-													id: infos.id,
-													index: infos.index,
-											  }
-											: link
+										link.id === 9999 ? apiResponse : link
 									),
 							  }
 							: category
@@ -97,7 +95,7 @@ export const useDeleteLink = () =>
 				queryKey: ['categories'],
 			});
 
-			const previousCategories: CategoryType[] | undefined =
+			const previousCategories: CategoryWithLinksType[] | undefined =
 				browserQueryClient?.getQueryData(['categories']);
 			if (!previousCategories || !browserQueryClient) return;
 
@@ -111,7 +109,7 @@ export const useDeleteLink = () =>
 
 			browserQueryClient.setQueryData(
 				['categories'],
-				(categories: CategoryType[]) =>
+				(categories: CategoryWithLinksType[]) =>
 					categories.map((category) =>
 						category.id === oldCategory.id
 							? {
@@ -158,7 +156,7 @@ export const useUpdateLink = () =>
 
 			browserQueryClient.setQueryData(
 				['categories'],
-				(categories: CategoryType[]) =>
+				(categories: CategoryWithLinksType[]) =>
 					categories.map((category) => ({
 						...category,
 						links: category.links.map((link) =>
@@ -190,7 +188,7 @@ export const useChangeLinkCategory = () =>
 				queryKey: ['categories'],
 			});
 
-			const previousCategories: CategoryType[] | undefined =
+			const previousCategories: CategoryWithLinksType[] | undefined =
 				browserQueryClient?.getQueryData(['categories']);
 			if (!previousCategories || !browserQueryClient) return;
 
@@ -212,7 +210,7 @@ export const useChangeLinkCategory = () =>
 
 			browserQueryClient.setQueryData(
 				['categories'],
-				(categories: CategoryType[]) =>
+				(categories: CategoryWithLinksType[]) =>
 					categories.map((category) => {
 						// Update the old category links and their indexes
 						if (category.id === oldCategoryId)
@@ -277,7 +275,7 @@ export const useChangeLinkIndex = () =>
 			await browserQueryClient?.cancelQueries({
 				queryKey: ['categories'],
 			});
-			const previousCategories: CategoryType[] | undefined =
+			const previousCategories: CategoryWithLinksType[] | undefined =
 				browserQueryClient?.getQueryData(['categories']);
 			if (!previousCategories || !browserQueryClient) return;
 
@@ -303,7 +301,7 @@ export const useChangeLinkIndex = () =>
 				if (updatedLink.newIndex < oldLinkInfos.index) {
 					browserQueryClient.setQueryData(
 						['categories'],
-						(categories: CategoryType[]) =>
+						(categories: CategoryWithLinksType[]) =>
 							categories.map((category) =>
 								category.id === oldCategoryId
 									? {
@@ -342,7 +340,7 @@ export const useChangeLinkIndex = () =>
 				// If new index is bigger than the current one
 				browserQueryClient.setQueryData(
 					['categories'],
-					(categories: CategoryType[]) =>
+					(categories: CategoryWithLinksType[]) =>
 						categories.map((category) =>
 							category.id === oldCategoryId
 								? {
@@ -373,7 +371,7 @@ export const useChangeLinkIndex = () =>
 				// If moved in another category
 				browserQueryClient.setQueryData(
 					['categories'],
-					(categories: CategoryType[]) =>
+					(categories: CategoryWithLinksType[]) =>
 						categories.map((category) => {
 							if (category.id === newCategoryId)
 								return {

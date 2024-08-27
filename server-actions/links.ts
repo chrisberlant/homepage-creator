@@ -78,7 +78,7 @@ export async function deleteLink(id: number) {
 			});
 		});
 	} catch (error) {
-		return { error: 'Cannot delete link' };
+		throw new Error('Cannot delete link');
 	}
 }
 

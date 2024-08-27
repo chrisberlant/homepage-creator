@@ -17,6 +17,7 @@ import {
 } from './ui/form';
 import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { Button } from './ui/button';
+import { useCreateCategory } from '@/queries/categories';
 
 const createCategoryFormSchema = z.object({
 	title: z.string().min(1, {
@@ -34,6 +35,7 @@ export default function CreateCategoryButton() {
 			title: '',
 		},
 	});
+	const { mutate: createCategory } = useCreateCategory(form);
 	const [openedMenu, setOpenedMenu] = useState(false);
 
 	return (
@@ -54,15 +56,9 @@ export default function CreateCategoryButton() {
 				{openedMenu && (
 					<Form {...form}>
 						<form
-							onSubmit={form.handleSubmit(async (e) => {
-								const creation = await createCategory(e.title);
-								if (creation?.error)
-									return form.setError('title', {
-										message: creation.error,
-									});
-
-								form.reset();
-							})}
+							onSubmit={form.handleSubmit((e) =>
+								createCategory(e.title)
+							)}
 							className='flex mb-4'
 						>
 							<FormField

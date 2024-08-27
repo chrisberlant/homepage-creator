@@ -5,14 +5,17 @@ export type LinkType = {
 	index: number;
 };
 
+export type LinkWithCategoryType = LinkType & {
+	categoryId: number;
+	ownerId: number;
+};
+
 export type CategoryType = {
 	id: number;
 	title: string;
 	index: number;
-	links: LinkType[];
 };
 
-export type LinkWithCategoryType = LinkType & {
-	categoryId: number;
-	ownerId: number;
+export type CategoryWithLinksType = CategoryType & {
+	links: LinkType[];
 };

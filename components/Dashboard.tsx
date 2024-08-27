@@ -14,14 +14,16 @@ export default function Dashboard() {
 
 			{categories && (
 				<section className='flex flex-wrap justify-around items-start'>
-					{categories?.map((category) => (
-						<CategoryCard
-							key={category.id}
-							id={category.id}
-							title={category.title}
-							links={category.links}
-						/>
-					))}
+					{categories
+						?.sort((a, b) => a.index - b.index)
+						.map((category) => (
+							<CategoryCard
+								key={category.id}
+								id={category.id}
+								title={category.title}
+								links={category.links}
+							/>
+						))}
 				</section>
 			)}
 		</>

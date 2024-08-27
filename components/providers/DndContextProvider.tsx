@@ -2,8 +2,10 @@
 
 import {
 	DndContext,
+	DragOverlay,
 	KeyboardSensor,
 	MouseSensor,
+	PointerSensor,
 	useSensor,
 	useSensors,
 } from '@dnd-kit/core';
@@ -11,6 +13,7 @@ import { toast } from 'sonner';
 import { createContext, ReactNode, useState } from 'react';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useChangeLinkCategory, useChangeLinkIndex } from '@/queries/links';
+import LinkCardOverlay from '../LinkCardOverlay';
 
 export const ActiveDraggedContext = createContext(null as number | null);
 
@@ -23,7 +26,7 @@ export default function DndContextProvider({
 		useSensor(MouseSensor, {
 			activationConstraint: { distance: 5 },
 		}),
-		// useSensor(PointerSensor)
+		// useSensor(PointerSensor),
 		useSensor(KeyboardSensor, {
 			coordinateGetter: sortableKeyboardCoordinates,
 		})
@@ -36,6 +39,7 @@ export default function DndContextProvider({
 		const { active, over } = event;
 		const { categoryId: currentCategoryId } = active.data.current;
 		setActiveId(null);
+		console.log(event);
 
 		if (!over?.id || over.id === active.id)
 			return toast.info('Link did not move');
@@ -78,9 +82,12 @@ export default function DndContextProvider({
 			onDragOver={handleDragOver}
 			sensors={sensors}
 		>
-			<ActiveDraggedContext.Provider value={activeId}>
-				{children}
-			</ActiveDraggedContext.Provider>
+			{activeId && (
+				<DragOverlay>
+					<LinkCardOverlay id={activeId} />
+				</DragOverlay>
+			)}
+			{children}
 		</DndContext>
 	);
 }
