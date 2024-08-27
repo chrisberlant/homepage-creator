@@ -67,12 +67,16 @@ export default function DndContextProvider({
 		setActiveId(event.active.id);
 	}
 
+	async function handleDragOver(event: any) {
+		console.log(event);
+	}
+
 	return (
 		<DndContext
 			id='dnd-context-id'
 			onDragStart={handleDragStart}
 			onDragEnd={handleDragEnd}
-			// onDragOver={handleDragOver}
+			onDragOver={handleDragOver}
 			sensors={sensors}
 		>
 			<ActiveDraggedContext.Provider value={activeId}>
