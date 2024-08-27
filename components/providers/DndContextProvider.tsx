@@ -12,7 +12,11 @@ import {
 import { toast } from 'sonner';
 import { createContext, ReactNode, useState } from 'react';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { useChangeLinkCategory, useChangeLinkIndex } from '@/queries/links';
+import {
+	updateCache,
+	useChangeLinkCategory,
+	useChangeLinkIndex,
+} from '@/queries/links';
 import LinkCardOverlay from '../LinkCardOverlay';
 
 export const ActiveDraggedContext = createContext(null as number | null);
@@ -66,20 +70,36 @@ export default function DndContextProvider({
 		}
 	}
 
-	async function handleDragStart(event: any) {
-		setActiveId(event.active.id);
-	}
-
+	// Used to reorder elements when category changes
 	async function handleDragOver(event: any) {
-		// console.log(event);
+		const { active, over } = event;
+		if (!over) return;
+		const newCategoryId =
+			over.data.current?.categoryId ?? Number(over.id.split('-')[1]);
+		const currentCategoryId = active.data.current.categoryId;
+
+		if (currentCategoryId === newCategoryId || active.id === over.id)
+			return;
+
+		const linkId = active.id;
+		const newIndex = over.data.current?.index ?? 0;
+		console.log('linkId', linkId);
+		console.log('newIndex', newIndex);
+		console.log('query');
+		updateCache({
+			linkId,
+			newIndex,
+			newCategoryId,
+		});
 	}
 
 	return (
 		<DndContext
 			id='dnd-context-id'
-			onDragStart={handleDragStart}
+			onDragStart={(event) => setActiveId(Number(event.active.id))}
 			onDragEnd={handleDragEnd}
 			onDragOver={handleDragOver}
+			onDragCancel={() => setActiveId(null)}
 			sensors={sensors}
 		>
 			{activeId && (

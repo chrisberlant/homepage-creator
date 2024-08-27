@@ -105,7 +105,8 @@ export const useDeleteLink = () =>
 			const linkIndex = oldCategory?.links.find(
 				(link) => link.id === linkId
 			)?.index;
-			if (!linkIndex || !oldCategory) return;
+
+			if (linkIndex === undefined || !oldCategory) return;
 
 			browserQueryClient.setQueryData(
 				['categories'],
@@ -367,51 +368,54 @@ export const useChangeLinkIndex = () =>
 								: category
 						)
 				);
-			} else {
-				// If moved in another category
-				browserQueryClient.setQueryData(
-					['categories'],
-					(categories: CategoryWithLinksType[]) =>
-						categories.map((category) => {
-							if (category.id === newCategoryId)
-								return {
-									...category,
-									links: [
-										...category.links.map((link) => {
-											if (
-												link.id !== linkId &&
-												link.index >= newIndex
-											)
-												return {
-													...link,
-													index: link.index + 1,
-												};
-											return link;
-										}),
-										{
-											...oldLinkInfos,
-											index: newIndex,
-										},
-									],
-								};
-							if (category.id === oldCategoryId)
-								return {
-									...category,
-									links: category.links
-										.filter((link) => link.id !== linkId)
-										.map((link) => {
-											if (link.index > newIndex)
-												return {
-													...link,
-													index: link.index - 1,
-												};
-											return link;
-										}),
-								};
-							return category;
-						})
-				);
 			}
+
+			// If moved in another category
+
+			// else {
+			// 	browserQueryClient.setQueryData(
+			// 		['categories'],
+			// 		(categories: CategoryWithLinksType[]) =>
+			// 			categories.map((category) => {
+			// 				if (category.id === newCategoryId)
+			// 					return {
+			// 						...category,
+			// 						links: [
+			// 							...category.links.map((link) => {
+			// 								if (
+			// 									link.id !== linkId &&
+			// 									link.index >= newIndex
+			// 								)
+			// 									return {
+			// 										...link,
+			// 										index: link.index + 1,
+			// 									};
+			// 								return link;
+			// 							}),
+			// 							{
+			// 								...oldLinkInfos,
+			// 								index: newIndex,
+			// 							},
+			// 						],
+			// 					};
+			// 				if (category.id === oldCategoryId)
+			// 					return {
+			// 						...category,
+			// 						links: category.links
+			// 							.filter((link) => link.id !== linkId)
+			// 							.map((link) => {
+			// 								if (link.index > newIndex)
+			// 									return {
+			// 										...link,
+			// 										index: link.index - 1,
+			// 									};
+			// 								return link;
+			// 							}),
+			// 					};
+			// 				return category;
+			// 			})
+			// 	);
+			// }
 
 			return previousCategories;
 		},
@@ -425,3 +429,71 @@ export const useChangeLinkIndex = () =>
 			);
 		},
 	});
+
+export async function updateCache({
+	linkId,
+	newIndex,
+	newCategoryId,
+}: {
+	linkId: number;
+	newIndex: number;
+	newCategoryId: number;
+}) {
+	await browserQueryClient?.cancelQueries({
+		queryKey: ['categories'],
+	});
+	const previousCategories: CategoryWithLinksType[] | undefined =
+		browserQueryClient?.getQueryData(['categories']);
+	if (!previousCategories || !browserQueryClient) return;
+
+	const currentCategory = previousCategories.find((category) =>
+		category.links.some((link) => link.id === linkId)
+	);
+	const currentLinkInfos = currentCategory?.links.find(
+		(link) => link.id === linkId
+	);
+	if (!currentCategory || !currentLinkInfos) return;
+
+	browserQueryClient?.setQueryData(
+		['categories'],
+		(categories: CategoryWithLinksType[]) =>
+			categories.map((category) => {
+				if (category.id === newCategoryId)
+					return {
+						...category,
+						links: [
+							...category.links.map((link) => {
+								if (
+									link.index >= newIndex &&
+									link.id !== linkId
+								)
+									return {
+										...link,
+										index: link.index + 1,
+									};
+								return link;
+							}),
+							{
+								...currentLinkInfos,
+								index: newIndex,
+							},
+						],
+					};
+				if (category.id === currentCategory.id)
+					return {
+						...category,
+						links: category.links
+							.filter((link) => link.id !== linkId)
+							.map((link) =>
+								link.index > currentLinkInfos.index
+									? {
+											...link,
+											index: link.index - 1,
+									  }
+									: link
+							),
+					};
+				return category;
+			})
+	);
+}

@@ -121,6 +121,7 @@ export async function changeLinkIndex({
 }) {
 	const session = await getSession();
 	if (!session) throw new Error('Session not found or invalid');
+	console.log('server action');
 	try {
 		return await prisma.$transaction(async (prisma) => {
 			const link = await prisma.link.findUnique({
