@@ -36,7 +36,6 @@ export default function DndContextProvider({
 		const { active, over } = event;
 		const { categoryId: currentCategoryId } = active.data.current;
 		setActiveId(null);
-		console.log(event);
 
 		if (!over?.id || over.id === active.id)
 			return toast.info('Link did not move');
@@ -68,7 +67,7 @@ export default function DndContextProvider({
 	}
 
 	async function handleDragOver(event: any) {
-		console.log(event);
+		// console.log(event);
 	}
 
 	return (

@@ -74,25 +74,25 @@ export default function CategoryCard({ id, title, links }: CategoryCardProps) {
 					)}
 					<h2 className='font-bold text-center flex-1'>{title}</h2>
 				</div>
-				<DragOverlay
-					dropAnimation={{
-						...defaultDropAnimation,
-						sideEffects: defaultDropAnimationSideEffects({
-							styles: {
-								active: {
-									opacity: '1',
+				{activeDraggedId && draggedLinkInfos && (
+					<DragOverlay
+						dropAnimation={{
+							...defaultDropAnimation,
+							sideEffects: defaultDropAnimationSideEffects({
+								styles: {
+									active: {
+										opacity: '1',
+									},
 								},
-							},
-						}),
-					}}
-				>
-					{activeDraggedId && draggedLinkInfos && (
+							}),
+						}}
+					>
 						<LinkCardOverlay
 							id={draggedLinkInfos.id}
 							title={draggedLinkInfos.title}
 						/>
-					)}
-				</DragOverlay>
+					</DragOverlay>
+				)}
 				{editingMode && (
 					<>
 						<CreateLinkButton categoryId={id} />
