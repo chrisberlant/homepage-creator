@@ -1,9 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
 import {
-	changeLinkCategory,
-	changeLinkIndex,
 	createLink,
 	deleteLink,
+	moveLink,
 	updateLink,
 } from '@/server-actions/links';
 import { browserQueryClient } from '@/components/providers/QueryClientProvider';
@@ -180,10 +179,10 @@ export const useUpdateLink = () =>
 		},
 	});
 
-// Change category of a link
+// Change category of a link with no index specified
 export const useChangeLinkCategory = () =>
 	useMutation({
-		mutationFn: changeLinkCategory,
+		mutationFn: moveLink,
 		onMutate: async (updatedLink) => {
 			await browserQueryClient?.cancelQueries({
 				queryKey: ['categories'],
@@ -269,10 +268,11 @@ export const useChangeLinkCategory = () =>
 	});
 
 // Change index of a link, and category if needed
-export const useChangeLinkIndex = () =>
+export const useMoveLink = () =>
 	useMutation({
-		mutationFn: changeLinkIndex,
+		mutationFn: moveLink,
 		onMutate: async (updatedLink) => {
+			console.log('tanstack query useMoveLink');
 			await browserQueryClient?.cancelQueries({
 				queryKey: ['categories'],
 			});
@@ -292,14 +292,15 @@ export const useChangeLinkIndex = () =>
 			if (!oldLinkInfos) throw new Error('Link cannot be found');
 
 			// If moved in the same category
+			// TODO FIX oldCategory being already updated when changing category
 			if (oldCategoryId == newCategoryId) {
+				console.log(oldCategoryId, newCategoryId);
 				if (oldLinkInfos.index === newIndex)
 					throw new Error(
 						'The link is already at the specified location'
 					);
-
-				// If new index is smaller than the current one
-				if (updatedLink.newIndex < oldLinkInfos.index) {
+				// If no index specified, put the link at the end of the list
+				if (newIndex === undefined) {
 					browserQueryClient.setQueryData(
 						['categories'],
 						(categories: CategoryWithLinksType[]) =>
@@ -309,24 +310,93 @@ export const useChangeLinkIndex = () =>
 											...category,
 											links: category.links.map(
 												(link) => {
+													if (link.id === linkId)
+														return {
+															...link,
+															index:
+																category.links
+																	.length - 1,
+														};
 													if (
-														link.id ===
-														updatedLink.id
+														link.index >
+														oldLinkInfos.index
 													)
+														return {
+															...link,
+															index:
+																link.index - 1,
+														};
+													return link;
+												}
+											),
+									  }
+									: category
+							)
+					);
+				} else {
+					// If new index is smaller than the current one
+					if (newIndex < oldLinkInfos.index) {
+						browserQueryClient.setQueryData(
+							['categories'],
+							(categories: CategoryWithLinksType[]) =>
+								categories.map((category) =>
+									category.id === oldCategoryId
+										? {
+												...category,
+												links: category.links.map(
+													(link) => {
+														if (link.id === linkId)
+															return {
+																...link,
+																index: newIndex,
+															};
+														if (
+															link.index >=
+																newIndex &&
+															link.index <
+																oldLinkInfos.index
+														)
+															return {
+																...link,
+																index:
+																	link.index +
+																	1,
+															};
+
+														return link;
+													}
+												),
+										  }
+										: category
+								)
+						);
+					}
+
+					// If new index is bigger than the current one
+					browserQueryClient.setQueryData(
+						['categories'],
+						(categories: CategoryWithLinksType[]) =>
+							categories.map((category) =>
+								category.id === oldCategoryId
+									? {
+											...category,
+											links: category.links.map(
+												(link) => {
+													if (link.id === linkId)
 														return {
 															...link,
 															index: updatedLink.newIndex,
 														};
 													if (
-														link.index >=
-															updatedLink.newIndex &&
-														link.index <
+														link.index <=
+															newIndex &&
+														link.index >
 															oldLinkInfos.index
 													)
 														return {
 															...link,
 															index:
-																link.index + 1,
+																link.index - 1,
 														};
 
 													return link;
@@ -337,39 +407,7 @@ export const useChangeLinkIndex = () =>
 							)
 					);
 				}
-
-				// If new index is bigger than the current one
-				browserQueryClient.setQueryData(
-					['categories'],
-					(categories: CategoryWithLinksType[]) =>
-						categories.map((category) =>
-							category.id === oldCategoryId
-								? {
-										...category,
-										links: category.links.map((link) => {
-											if (link.id === updatedLink.id)
-												return {
-													...link,
-													index: updatedLink.newIndex,
-												};
-											if (
-												link.index <=
-													updatedLink.newIndex &&
-												link.index > oldLinkInfos.index
-											)
-												return {
-													...link,
-													index: link.index - 1,
-												};
-
-											return link;
-										}),
-								  }
-								: category
-						)
-				);
 			}
-
 			// If moved in another category
 
 			// else {
@@ -436,14 +474,17 @@ export async function updateCache({
 	newCategoryId,
 }: {
 	linkId: number;
-	newIndex: number;
+	newIndex: number | undefined;
 	newCategoryId: number;
 }) {
-	await browserQueryClient?.cancelQueries({
+	if (!browserQueryClient) return;
+	console.log('cache update');
+
+	await browserQueryClient.cancelQueries({
 		queryKey: ['categories'],
 	});
 	const previousCategories: CategoryWithLinksType[] | undefined =
-		browserQueryClient?.getQueryData(['categories']);
+		browserQueryClient.getQueryData(['categories']);
 	if (!previousCategories || !browserQueryClient) return;
 
 	const currentCategory = previousCategories.find((category) =>
@@ -454,7 +495,7 @@ export async function updateCache({
 	);
 	if (!currentCategory || !currentLinkInfos) return;
 
-	browserQueryClient?.setQueryData(
+	browserQueryClient.setQueryData(
 		['categories'],
 		(categories: CategoryWithLinksType[]) =>
 			categories.map((category) => {
@@ -464,6 +505,7 @@ export async function updateCache({
 						links: [
 							...category.links.map((link) => {
 								if (
+									newIndex &&
 									link.index >= newIndex &&
 									link.id !== linkId
 								)
@@ -475,7 +517,7 @@ export async function updateCache({
 							}),
 							{
 								...currentLinkInfos,
-								index: newIndex,
+								index: category.links.length,
 							},
 						],
 					};

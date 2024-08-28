@@ -5,7 +5,6 @@ import {
 	DragOverlay,
 	KeyboardSensor,
 	MouseSensor,
-	PointerSensor,
 	useSensor,
 	useSensors,
 } from '@dnd-kit/core';
@@ -15,7 +14,7 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import {
 	updateCache,
 	useChangeLinkCategory,
-	useChangeLinkIndex,
+	useMoveLink,
 } from '@/queries/links';
 import LinkCardOverlay from '../LinkCardOverlay';
 
@@ -36,38 +35,43 @@ export default function DndContextProvider({
 		})
 	);
 	const { mutate: changeLinkCategory } = useChangeLinkCategory();
-	const { mutate: changeLinkIndex } = useChangeLinkIndex();
+	const { mutate: moveLink } = useMoveLink();
 	const [activeId, setActiveId] = useState<number | null>(null);
 
 	async function handleDragEnd(event: any) {
 		const { active, over } = event;
-		const { categoryId: currentCategoryId } = active.data.current;
+		const { categoryId: currentCategoryId, currentIndex } =
+			active.data.current;
 		setActiveId(null);
 		console.log(event);
 
-		if (!over?.id || over.id === active.id)
+		if (
+			!over?.id ||
+			(over.data.current?.index === currentIndex &&
+				over.data.current?.categoryId === currentCategoryId)
+		)
 			return toast.info('Link did not move');
 
 		// If dropped into another category with no index specified, put it at the end of it
 		if (typeof over.id === 'string' && over.id.startsWith('container')) {
-			if (Number(over.id.split('-')[1]) === currentCategoryId) return;
-			return changeLinkCategory({
+			console.log('change category with no index', over.id);
+			return moveLink({
 				id: active.id,
 				newCategoryId: Number(over.id.split('-')[1]),
 			});
 		}
-
 		if (over.data.current?.index !== undefined) {
 			// new infos
 			const { categoryId: newCategoryId, index: newIndex } =
 				over.data.current;
-
-			return changeLinkIndex({
+			console.log('move link with index', newIndex);
+			return moveLink({
 				id: active.id,
 				newIndex,
 				newCategoryId,
 			});
 		}
+		console.log('test');
 	}
 
 	// Used to reorder elements when category changes
@@ -78,14 +82,15 @@ export default function DndContextProvider({
 			over.data.current?.categoryId ?? Number(over.id.split('-')[1]);
 		const currentCategoryId = active.data.current.categoryId;
 
+		// Only use the function when dragging to another category
 		if (currentCategoryId === newCategoryId || active.id === over.id)
 			return;
 
 		const linkId = active.id;
-		const newIndex = over.data.current?.index ?? 0;
+		const newIndex = over.data.current?.index;
 		console.log('linkId', linkId);
 		console.log('newIndex', newIndex);
-		console.log('query');
+
 		updateCache({
 			linkId,
 			newIndex,
