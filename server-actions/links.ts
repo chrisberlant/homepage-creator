@@ -164,7 +164,7 @@ export async function moveLink({
 						data: {
 							index:
 								highestIndex !== null
-									? highestIndex.index + 1
+									? highestIndex?.index + 1
 									: 0,
 						},
 					});
@@ -251,7 +251,6 @@ export async function moveLink({
 			}
 
 			// If index is specified
-			console.log(newIndex);
 			await prisma.link.updateMany({
 				where: {
 					index: {

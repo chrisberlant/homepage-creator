@@ -7,22 +7,14 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import LinkCardEditButton from './LinkCardEditButton';
 import { useDeleteLink } from '../queries/links';
-
-interface LinkCardProps {
-	id: number;
-	index: number;
-	title: string;
-	url: string;
-	categoryId: number;
-}
+import { LinkWithCategoryType } from '../lib/types';
 
 export default function LinkCard({
 	id,
-	index,
 	title,
 	url,
 	categoryId,
-}: LinkCardProps) {
+}: LinkWithCategoryType) {
 	const { editingMode } = useContext(EditingModeContext);
 	const [disabledDragging, setDisabledDragging] = useState(false);
 	const { mutate: deleteLink } = useDeleteLink();
@@ -38,7 +30,6 @@ export default function LinkCard({
 		id,
 		data: {
 			categoryId,
-			index,
 		},
 		disabled: disabledDragging,
 	});

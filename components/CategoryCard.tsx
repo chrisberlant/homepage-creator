@@ -11,19 +11,13 @@ import {
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useDeleteCategory } from '@/queries/categories';
+import { CategoryWithLinksType } from '../lib/types';
 
-interface CategoryCardProps {
-	id: number;
-	title: string;
-	links: {
-		id: number;
-		title: string;
-		url: string;
-		index: number;
-	}[];
-}
-
-export default function CategoryCard({ id, title, links }: CategoryCardProps) {
+export default function CategoryCard({
+	id,
+	title,
+	links,
+}: CategoryWithLinksType) {
 	const { editingMode } = useContext(EditingModeContext);
 	const { mutate: deleteCategory } = useDeleteCategory();
 	const { isOver, setNodeRef } = useDroppable({
@@ -85,18 +79,15 @@ export default function CategoryCard({ id, title, links }: CategoryCardProps) {
 							opened ? 'opacity-100' : 'opacity-0 overflow-hidden'
 						}`}
 					>
-						{links
-							.sort((a, b) => a.index - b.index)
-							.map((link) => (
-								<LinkCard
-									key={link.id}
-									id={link.id}
-									index={link.index}
-									title={link.title}
-									url={link.url}
-									categoryId={id}
-								/>
-							))}
+						{links.map((link) => (
+							<LinkCard
+								key={link.id}
+								id={link.id}
+								title={link.title}
+								url={link.url}
+								categoryId={id}
+							/>
+						))}
 					</div>
 				)}
 			</div>
