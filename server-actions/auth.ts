@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { credentialsType } from '@/components/LoginForm';
+import { registerSchema, registerType } from '../components/RegisterForm';
 
 const secretKey = new TextEncoder().encode(process.env.SECRET_KEY);
 
@@ -19,7 +20,7 @@ export async function login(values: credentialsType) {
 	try {
 		const user = await prisma.user.findFirst({
 			where: {
-				name: values.username,
+				username: values.username,
 			},
 		});
 		if (!user || values.password !== user.password)
@@ -27,12 +28,12 @@ export async function login(values: credentialsType) {
 
 		// Create the session
 		const expires = new Date(Date.now() + 60 * 60 * 10000);
-		const { id, name, email } = user;
+		const { id, username, email } = user;
 		const session = await encrypt({ user: { id, name }, expires });
 		// Save the session in a cookie
 		cookies().set('session', session, { expires, httpOnly: true });
 
-		return { name, email };
+		return { username, email };
 	} catch (error) {
 		throw new Error('Incorrect credentials');
 	}
@@ -83,13 +84,37 @@ export async function updateSession(request: NextRequest) {
 
 export async function getAuth() {
 	const session = await getSession();
-	if (!session) return;
-	const user = await prisma.user.findFirst({
+	if (!session) throw new Error('Session not found or invalid');
+	const user = await prisma.user.findUnique({
 		where: {
 			id: session.user.id,
 		},
 	});
-	if (!user) return;
-	const { name, email } = user;
-	return { name, email };
+	if (!user) throw new Error('Session not found or invalid');
+	const { username, email } = user;
+	return { username, email };
+}
+
+export async function register(values: registerType) {
+	// const result = registerSchema.safeParse(values);
+	// if (result.error) throw new Error('Invalid data');
+
+	try {
+		const alreadyExistingUser = await prisma.user.findFirst({
+			where: {
+				OR: [{ username: values.username }, { email: values.email }],
+			},
+		});
+		if (alreadyExistingUser) throw new Error('User already exists');
+
+		return await prisma.user.create({
+			data: {
+				username: values.username,
+				email: values.email,
+				password: values.password,
+			},
+		});
+	} catch (error) {
+		throw new Error('Cannot register the user');
+	}
 }

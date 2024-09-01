@@ -9,7 +9,7 @@ export default function LogoutButton() {
 
 	return (
 		<div className=''>
-			<span className='mr-4'>{user?.name}</span>
+			<span className='mr-4'>{user?.username}</span>
 			<Button onClick={() => logout()} className='mr-8'>
 				Logout
 			</Button>

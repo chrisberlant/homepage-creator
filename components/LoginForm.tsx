@@ -15,11 +15,11 @@ import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { useLogin } from '@/queries/auth';
 
-const credentialsSchema = z.object({
-	username: z.string().min(2, {
+const credentialsSchema = z.strictObject({
+	username: z.string({ required_error: 'Username is required' }).min(2, {
 		message: 'Username must be at least 2 characters.',
 	}),
-	password: z.string().min(8, {
+	password: z.string({ required_error: 'Password is required' }).min(8, {
 		message: 'Password must be at least 8 characters.',
 	}),
 });
@@ -40,7 +40,7 @@ export default function LoginForm() {
 		<Form {...form}>
 			<form
 				onSubmit={form.handleSubmit((e) => login(e))}
-				className='mt-8 flex-1 max-w-md'
+				className='mt-8 min-w-[300px]'
 			>
 				<FormField
 					control={form.control}
@@ -68,7 +68,7 @@ export default function LoginForm() {
 						</FormItem>
 					)}
 				/>
-				<Button type='submit' className='mt-3 w-full'>
+				<Button type='submit' className='mt-5 w-full'>
 					Login
 				</Button>
 			</form>
