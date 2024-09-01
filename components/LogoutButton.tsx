@@ -1,12 +1,15 @@
 'use client';
 
-import { logout } from '../server-actions/auth';
+import { useGetUser, useLogout } from '@/queries/auth';
 import { Button } from './ui/button';
 
-export default function LogoutButton({ name }: { name: string }) {
+export default function LogoutButton() {
+	const { data: user } = useGetUser();
+	const { mutate: logout } = useLogout();
+
 	return (
 		<div className=''>
-			<span className='mr-4'>{name}</span>
+			<span className='mr-4'>{user?.name}</span>
 			<Button onClick={() => logout()} className='mr-8'>
 				Logout
 			</Button>

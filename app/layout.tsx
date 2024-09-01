@@ -19,11 +19,13 @@ export default function RootLayout({
 		<ThemeProvider>
 			<html lang='en'>
 				<body className='bg-background text-foreground'>
-					<Header />
-					<main className='p-5'>
-						<Toaster richColors closeButton />
-						<QueryProvider>{children}</QueryProvider>
-					</main>
+					<QueryProvider>
+						<Header />
+						<main className='p-5'>
+							<Toaster richColors closeButton />
+							{children}
+						</main>
+					</QueryProvider>
 				</body>
 			</html>
 		</ThemeProvider>

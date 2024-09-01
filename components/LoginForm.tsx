@@ -12,10 +12,10 @@ import {
 	FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { login } from '../server-actions/auth';
 import { z } from 'zod';
+import { useLogin } from '@/queries/auth';
 
-const loginFormSchema = z.object({
+const credentialsSchema = z.object({
 	username: z.string().min(2, {
 		message: 'Username must be at least 2 characters.',
 	}),
@@ -24,31 +24,22 @@ const loginFormSchema = z.object({
 	}),
 });
 
-export type loginFormType = z.infer<typeof loginFormSchema>;
+export type credentialsType = z.infer<typeof credentialsSchema>;
 
 export default function LoginForm() {
-	const form = useForm<loginFormType>({
-		resolver: zodResolver(loginFormSchema),
+	const form = useForm<credentialsType>({
+		resolver: zodResolver(credentialsSchema),
 		defaultValues: {
 			username: '',
 			password: '',
 		},
 	});
+	const { mutate: login } = useLogin();
 
 	return (
 		<Form {...form}>
 			<form
-				onSubmit={form.handleSubmit(async (e) => {
-					const loginSuccess = await login(e);
-					if (loginSuccess?.error) {
-						form.setError('username', {
-							message: loginSuccess.error,
-						});
-						form.setError('password', {
-							message: loginSuccess.error,
-						});
-					}
-				})}
+				onSubmit={form.handleSubmit((e) => login(e))}
 				className='mt-8 flex-1 max-w-md'
 			>
 				<FormField

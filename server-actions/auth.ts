@@ -4,8 +4,7 @@ import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { redirect } from 'next/navigation';
-import { loginFormType } from '../components/LoginForm';
+import { credentialsType } from '@/components/LoginForm';
 
 const secretKey = new TextEncoder().encode(process.env.SECRET_KEY);
 
@@ -15,7 +14,8 @@ type SessionType = {
 	iat: number;
 	exp: number;
 };
-export async function login(values: loginFormType) {
+
+export async function login(values: credentialsType) {
 	try {
 		const user = await prisma.user.findFirst({
 			where: {
@@ -23,20 +23,19 @@ export async function login(values: loginFormType) {
 			},
 		});
 		if (!user || values.password !== user.password)
-			return { error: 'Username or password incorrect' };
+			throw new Error('Incorrect credentials');
 
-		if (values.password === user.password) {
-			// Create the session
-			const expires = new Date(Date.now() + 60 * 60 * 10000);
-			const { id, name } = user;
-			const session = await encrypt({ user: { id, name }, expires });
-			// Save the session in a cookie
-			cookies().set('session', session, { expires, httpOnly: true });
-		}
+		// Create the session
+		const expires = new Date(Date.now() + 60 * 60 * 10000);
+		const { id, name, email } = user;
+		const session = await encrypt({ user: { id, name }, expires });
+		// Save the session in a cookie
+		cookies().set('session', session, { expires, httpOnly: true });
+
+		return { name, email };
 	} catch (error) {
-		throw error;
+		throw new Error('Incorrect credentials');
 	}
-	redirect('/home');
 }
 
 export async function encrypt(payload: any) {
@@ -80,4 +79,17 @@ export async function updateSession(request: NextRequest) {
 		expires: parsed.expires,
 	});
 	return res;
+}
+
+export async function getAuth() {
+	const session = await getSession();
+	if (!session) return;
+	const user = await prisma.user.findFirst({
+		where: {
+			id: session.user.id,
+		},
+	});
+	if (!user) return;
+	const { name, email } = user;
+	return { name, email };
 }
