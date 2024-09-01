@@ -188,8 +188,7 @@ export const useMoveLink = () =>
 				browserQueryClient?.getQueryData(['categories']);
 			if (!previousCategories || !browserQueryClient) return;
 
-			const { currentIndex, newIndex, newCategoryId, id } = updatedLink;
-			console.log(updatedLink);
+			const { currentIndex, newIndex, id } = updatedLink;
 
 			const currentCategory = previousCategories.find((category) =>
 				category.links.find((link) => link.id === id)
@@ -198,13 +197,6 @@ export const useMoveLink = () =>
 				(link) => link.id === id
 			);
 			if (!currentCategory || !linkInfos) return;
-
-			// If moved in the same category, if not cache is already updated by updateCache function
-			// if (currentCategoryId == newCategoryId) {
-			// 	if (currentIndex === newIndex)
-			// 		throw new Error(
-			// 			'The link is already at the specified location'
-			// 		);
 
 			// If no index specified, put the link at the end of the list
 			if (newIndex === undefined) {
@@ -258,19 +250,16 @@ export const useMoveLink = () =>
 		},
 	});
 
+// Update the elements when category is changing
 export async function updateCache({
 	id,
-	currentIndex,
-	newIndex,
 	newCategoryId,
 }: {
 	id: number;
-	currentIndex: number;
-	newIndex: number | undefined;
 	newCategoryId: number;
 }) {
 	if (!browserQueryClient) return;
-	console.log('cache update', 'new index', newIndex);
+	console.log('cache update');
 
 	await browserQueryClient.cancelQueries({
 		queryKey: ['categories'],
@@ -286,87 +275,28 @@ export async function updateCache({
 		(link) => link.id === id
 	);
 	if (!currentCategory || !currentLinkInfos) return;
-	console.log('newIndex query', newIndex);
 
-	// If index is specified
-	if (newIndex) {
-		console.log('newIndex', newIndex);
-		browserQueryClient.setQueryData(
-			['categories'],
-			(categories: CategoryWithLinksType[]) =>
-				categories.map((category) => {
-					if (category.id === newCategoryId)
-						return {
-							...category,
-							links: [
-								...category.links.map((link) => {
-									if (
-										category.links.indexOf(link) >=
-											newIndex &&
-										link.id !== id
-									)
-										return {
-											...link,
-											index: link.index + 1,
-										};
-									return link;
-								}),
-								{
-									...currentLinkInfos,
-									index: newIndex,
-								},
-							],
-						};
-					if (category.id === currentCategory.id)
-						return {
-							...category,
-							links: category.links
-								.filter((link) => link.id !== id)
-								.map((link) =>
-									link.index > currentIndex
-										? {
-												...link,
-												index: link.index - 1,
-										  }
-										: link
-								),
-						};
-					return category;
-				})
-		);
-	} else {
-		console.log('no index specified', newCategoryId, currentLinkInfos);
-		browserQueryClient.setQueryData(
-			['categories'],
-			(categories: CategoryWithLinksType[]) =>
-				categories.map((category) => {
-					if (category.id === newCategoryId)
-						return {
-							...category,
-							links: [
-								...category.links,
-								{
-									...currentLinkInfos,
-									index: category.links.length,
-								},
-							],
-						};
-					if (category.id === currentCategoryId)
-						return {
-							...category,
-							links: category.links
-								.filter((link) => link.id !== linkId)
-								.map((link) =>
-									link.index > currentLinkInfos.index
-										? {
-												...link,
-												index: link.index - 1,
-										  }
-										: link
-								),
-						};
-					return category;
-				})
-		);
-	}
+	browserQueryClient.setQueryData(
+		['categories'],
+		(categories: CategoryWithLinksType[]) =>
+			categories.map((category) => {
+				if (category.id === newCategoryId)
+					return {
+						...category,
+						links: [
+							...category.links,
+							{
+								...currentLinkInfos,
+								index: category.links.length,
+							},
+						],
+					};
+				if (category.id === currentCategory.id)
+					return {
+						...category,
+						links: category.links.filter((link) => link.id !== id),
+					};
+				return category;
+			})
+	);
 }

@@ -12,6 +12,8 @@ import { createContext, ReactNode, useRef, useState } from 'react';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { updateCache, useMoveLink } from '@/queries/links';
 import LinkCardOverlay from '../LinkCardOverlay';
+import { CategoryType } from '@/lib/types';
+import { browserQueryClient } from './QueryClientProvider';
 
 export const ActiveDraggedContext = createContext(null as number | null);
 
@@ -29,9 +31,32 @@ export default function DndContextProvider({
 			coordinateGetter: sortableKeyboardCoordinates,
 		})
 	);
-	const [activeId, setActiveId] = useState<number | null>(null);
-
 	const { mutate: moveLink } = useMoveLink();
+
+	const [activeId, setActiveId] = useState<number | null>(null);
+	const previousCategories = useRef<CategoryType[] | undefined>();
+
+	function handleDragStart(event: any) {
+		setActiveId(event.active.id);
+		previousCategories.current = browserQueryClient?.getQueryData([
+			'categories',
+		]);
+	}
+
+	// Used to reorder elements when category changes
+	function handleDragOver(event: any) {
+		const { active, over } = event;
+		if (!over) return;
+		const newCategoryId: number =
+			over?.data.current?.categoryId ?? Number(over?.id.split('-')[1]);
+		const currentCategoryId = active?.data.current?.categoryId;
+
+		if (newCategoryId !== currentCategoryId)
+			return updateCache({
+				id: active.id,
+				newCategoryId,
+			});
+	}
 
 	function handleDragEnd(event: any) {
 		setActiveId(null);
@@ -51,32 +76,12 @@ export default function DndContextProvider({
 		});
 	}
 
-	// Used to reorder elements when category changes
-	function handleDragOver(event: any) {
-		const { active, over } = event;
-		// console.log('onDrag event', event);
-		if (!over) return;
-		const newCategoryId: number =
-			over?.data.current?.categoryId ?? Number(over?.id.split('-')[1]);
-		const currentIndex: number = active.data.current.sortable.index;
-		const newIndex: number | undefined = over.data.current?.sortable?.index;
-		const currentCategoryId = active?.data.current?.categoryId;
-
-		if (newCategoryId !== currentCategoryId)
-			return updateCache({
-				id: active.id as number,
-				currentIndex,
-				newIndex,
-				newCategoryId,
-			});
-	}
-
-	function handleDragStart(event: any) {
-		setActiveId(event.active.id);
-		// movingElement.current = {
-		// 	categoryId: event.active.data.current.categoryId,
-		// 	index: event.active.data.current.index,
-		// };
+	function handleDragCancel() {
+		setActiveId(null);
+		browserQueryClient?.setQueryData(
+			['categories'],
+			previousCategories.current
+		);
 	}
 
 	return (
@@ -85,7 +90,7 @@ export default function DndContextProvider({
 			onDragStart={handleDragStart}
 			onDragEnd={handleDragEnd}
 			onDragOver={handleDragOver}
-			onDragCancel={() => setActiveId(null)}
+			onDragCancel={handleDragCancel}
 			sensors={sensors}
 		>
 			<DragOverlay>
