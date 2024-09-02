@@ -61,7 +61,12 @@ export default function DndContextProvider({
 	function handleDragEnd(event: any) {
 		setActiveId(null);
 		const { active, over } = event;
-		if (active.id === over.id) return;
+		if (
+			active.id === over.id &&
+			active.data.current.sortable.index !== 0 &&
+			over.data.current.sortable.index !== 0
+		)
+			return;
 
 		const newCategoryId =
 			over?.data.current?.categoryId ?? Number(over?.id.split('-')[1]);
