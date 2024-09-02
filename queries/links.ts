@@ -58,7 +58,7 @@ export const useCreateLink = ({ form, setOpenedMenu }: UseCreateLinkProps) =>
 
 			return previousCategories;
 		},
-		onSuccess: (apiResponse: LinkWithCategoryType) => {
+		onSuccess: (apiResponse) => {
 			browserQueryClient?.setQueryData(
 				['categories'],
 				(categories: CategoryWithLinksType[]) =>
@@ -67,7 +67,9 @@ export const useCreateLink = ({ form, setOpenedMenu }: UseCreateLinkProps) =>
 							? {
 									...category,
 									links: category.links.map((link) =>
-										link.id === 9999 ? apiResponse : link
+										link.id === 9999
+											? { ...link, id: apiResponse.id }
+											: link
 									),
 							  }
 							: category

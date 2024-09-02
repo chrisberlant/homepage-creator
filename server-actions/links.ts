@@ -16,7 +16,7 @@ export async function createLink({ title, url, categoryId }: CreateLinkProps) {
 	if (!session) throw new Error('Session not found or invalid');
 
 	try {
-		return (await prisma.$transaction(async (prisma) => {
+		return await prisma.$transaction(async (prisma) => {
 			const lastLinkInCategory = await prisma.link.findFirst({
 				where: {
 					ownerId: session.user.id,
@@ -27,11 +27,10 @@ export async function createLink({ title, url, categoryId }: CreateLinkProps) {
 				},
 			});
 
-			const newIndex = lastLinkInCategory?.index
-				? lastLinkInCategory.index + 1
-				: 0;
+			const newIndex =
+				lastLinkInCategory !== null ? lastLinkInCategory.index + 1 : 0;
 
-			return await prisma.link.create({
+			const createdLink = await prisma.link.create({
 				data: {
 					title,
 					url,
@@ -40,7 +39,9 @@ export async function createLink({ title, url, categoryId }: CreateLinkProps) {
 					ownerId: session.user.id,
 				},
 			});
-		})) as LinkWithCategoryType;
+			const { ownerId, ...infos } = createdLink;
+			return infos;
+		});
 	} catch (error) {
 		throw new Error('Cannot create link');
 	}

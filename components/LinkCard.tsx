@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Trash2Icon } from 'lucide-react';
 import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { useSortable } from '@dnd-kit/sortable';

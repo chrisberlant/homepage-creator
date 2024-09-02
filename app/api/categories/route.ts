@@ -13,13 +13,12 @@ export async function GET() {
 		select: {
 			id: true,
 			title: true,
-			index: true,
+
 			links: {
 				select: {
 					id: true,
 					title: true,
 					url: true,
-					index: true,
 				},
 				orderBy: {
 					index: 'asc',

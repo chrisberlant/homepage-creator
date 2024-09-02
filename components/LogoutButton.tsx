@@ -8,9 +8,13 @@ export default function LogoutButton() {
 	const { mutate: logout } = useLogout();
 
 	return (
-		<div className=''>
+		<div className='mr-12'>
 			<span className='mr-4'>{user?.username}</span>
-			<Button onClick={() => logout()} className='mr-8'>
+			<Button
+				variant='destructive'
+				onClick={() => logout()}
+				className='mr-8'
+			>
 				Logout
 			</Button>
 		</div>

@@ -3,8 +3,18 @@ import { toast } from 'sonner';
 import { browserQueryClient } from '@/components/providers/QueryClientProvider';
 import { getAuth, login, logout, register } from '@/server-actions/auth';
 import { useRouter } from 'next/navigation';
+import { UseFormReturn } from 'react-hook-form';
 
-export const useLogin = () => {
+export const useLogin = (
+	form: UseFormReturn<
+		{
+			username: string;
+			password: string;
+		},
+		any,
+		undefined
+	>
+) => {
 	const { push } = useRouter();
 	return useMutation({
 		mutationFn: login,
@@ -16,7 +26,18 @@ export const useLogin = () => {
 			browserQueryClient?.setQueryData(['user'], apiResponse);
 			push('/home');
 		},
-		onError: (error) => toast.error(error.message),
+		onError: (error) => {
+			toast.error(error.message);
+			form.setError('username', {
+				type: 'custom',
+				message: 'Incorrect credentials',
+			});
+			form.setError(
+				'password',
+				{ type: 'custom', message: 'Incorrect credentials' },
+				{ shouldFocus: true }
+			);
+		},
 	});
 };
 

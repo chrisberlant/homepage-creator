@@ -34,7 +34,7 @@ export default function LoginForm() {
 			password: '',
 		},
 	});
-	const { mutate: login } = useLogin();
+	const { mutate: login } = useLogin(form);
 
 	return (
 		<Form {...form}>

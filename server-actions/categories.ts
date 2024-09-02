@@ -19,7 +19,7 @@ export async function createCategory(title: string) {
 				},
 			});
 
-			const newIndex = lastCategory?.index ? lastCategory.index + 1 : 0;
+			const newIndex = lastCategory !== null ? lastCategory.index + 1 : 0;
 
 			return (await prisma.category.create({
 				data: {

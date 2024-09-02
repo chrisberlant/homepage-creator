@@ -23,16 +23,15 @@ export async function login(values: credentialsType) {
 				username: values.username,
 			},
 		});
+		console.log(user);
 		if (!user || values.password !== user.password)
 			throw new Error('Incorrect credentials');
-
 		// Create the session
 		const expires = new Date(Date.now() + 60 * 60 * 10000);
 		const { id, username, email } = user;
-		const session = await encrypt({ user: { id, name }, expires });
+		const session = await encrypt({ user: { id }, expires });
 		// Save the session in a cookie
 		cookies().set('session', session, { expires, httpOnly: true });
-
 		return { username, email };
 	} catch (error) {
 		throw new Error('Incorrect credentials');
