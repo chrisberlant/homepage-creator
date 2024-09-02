@@ -25,7 +25,7 @@ import {
 	FormMessage,
 } from './ui/form';
 import { useState } from 'react';
-import { useUpdateLink } from '../queries/links';
+import { useUpdateLink } from '@/queries/links';
 
 const updateLinkSchema = z.object({
 	title: z.string().min(2, {
@@ -61,8 +61,8 @@ export default function LinkCardEditButton({
 			url: defaultUrl,
 		},
 	});
-	const [open, setOpen] = useState(false);
 	const { mutate: updateLink } = useUpdateLink();
+	const [open, setOpen] = useState(false);
 
 	return (
 		<AlertDialog open={open} onOpenChange={setOpen}>
@@ -77,13 +77,12 @@ export default function LinkCardEditButton({
 				<Form {...form}>
 					<form
 						onSubmit={form.handleSubmit(
-							async (data) => {
+							(data) =>
 								updateLink({
 									id,
 									title: data.title,
 									url: data.url,
-								});
-							},
+								}),
 							// If any error in the data
 							() => setOpen(true)
 						)}
@@ -93,33 +92,34 @@ export default function LinkCardEditButton({
 							<AlertDialogDescription>
 								Update the title and URL
 							</AlertDialogDescription>
-							<FormField
-								control={form.control}
-								name='title'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Title</FormLabel>
-										<FormControl>
-											<Input {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name='url'
-								render={({ field }) => (
-									<FormItem className='mt-2'>
-										<FormLabel>URL</FormLabel>
-										<FormControl>
-											<Input {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
 						</AlertDialogHeader>
+						<FormField
+							control={form.control}
+							name='title'
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Title</FormLabel>
+									<FormControl>
+										<Input {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name='url'
+							render={({ field }) => (
+								<FormItem className='mt-2'>
+									<FormLabel>URL</FormLabel>
+									<FormControl>
+										<Input {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
 						<AlertDialogFooter className='mt-4'>
 							<AlertDialogCancel
 								type='reset'

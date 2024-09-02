@@ -1,21 +1,6 @@
 'use client';
 
-import { Moon, Sun } from 'lucide-react';
 import { createContext, useEffect, useState, useContext } from 'react';
-
-export function ThemeToggler() {
-	const { theme, toggleTheme } = useContext(ThemeProviderContext);
-
-	return (
-		<button
-			onClick={toggleTheme}
-			className='absolute hover:scale-110 right-8'
-			aria-label='Toggle color theme'
-		>
-			{theme === 'light' ? <Sun /> : <Moon />}
-		</button>
-	);
-}
 
 type Theme = 'dark' | 'light';
 

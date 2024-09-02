@@ -1,14 +1,14 @@
 import EditingModeContextProvider from '@/components/providers/EditingModeContextProvider';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/server-actions/auth';
-import CreateCategoryButton from '../../components/CreateCategoryButton';
-import EditingModeButton from '../../components/EditingModeButton';
+import CreateCategoryButton from '@/components/CreateCategoryButton';
+import EditingModeButton from '@/components/EditingModeButton';
 import {
 	dehydrate,
 	HydrationBoundary,
 	QueryClient,
 } from '@tanstack/react-query';
-import fetchApiFromServer from '../../utils/fetchApiFromServer';
+import fetchApiFromServer from '@/utils/fetchApiFromServer';
 
 export default async function Layout({
 	children,

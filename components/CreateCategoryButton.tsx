@@ -1,7 +1,5 @@
 'use client';
 
-import { MinusIcon, PlusIcon } from 'lucide-react';
-import { createCategory } from '../server-actions/categories';
 import { useContext, useState } from 'react';
 import { Input } from './ui/input';
 import { z } from 'zod';
@@ -18,6 +16,17 @@ import {
 import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { Button } from './ui/button';
 import { useCreateCategory } from '@/queries/categories';
+import {
+	AlertDialog,
+	AlertDialogTrigger,
+	AlertDialogContent,
+	AlertDialogTitle,
+	AlertDialogDescription,
+	AlertDialogCancel,
+	AlertDialogAction,
+	AlertDialogHeader,
+	AlertDialogFooter,
+} from '@/components/ui/alert-dialog';
 
 const createCategoryFormSchema = z.object({
 	title: z.string().min(1, {
@@ -36,31 +45,30 @@ export default function CreateCategoryButton() {
 		},
 	});
 	const { mutate: createCategory } = useCreateCategory(form);
-	const [openedMenu, setOpenedMenu] = useState(false);
+	const [open, setOpen] = useState(false);
 
 	return (
 		editingMode && (
-			<div className='flex gap-4 items-center'>
-				{openedMenu ? (
-					<Button
-						className='bg-accent'
-						onClick={() => setOpenedMenu(!openedMenu)}
-					>
-						Close menu
-					</Button>
-				) : (
-					<Button onClick={() => setOpenedMenu(!openedMenu)}>
-						Create a new category
-					</Button>
-				)}
-				{openedMenu && (
+			<AlertDialog open={open} onOpenChange={setOpen}>
+				<AlertDialogTrigger asChild>
+					<Button>Create a new category</Button>
+				</AlertDialogTrigger>
+				<AlertDialogContent>
 					<Form {...form}>
 						<form
-							onSubmit={form.handleSubmit((e) =>
-								createCategory(e.title)
+							onSubmit={form.handleSubmit(
+								(data) => createCategory(data.title),
+								() => setOpen(true)
 							)}
-							className='flex mb-4'
 						>
+							<AlertDialogHeader>
+								<AlertDialogTitle>
+									Create a new category
+								</AlertDialogTitle>
+								<AlertDialogDescription>
+									Enter the category name
+								</AlertDialogDescription>
+							</AlertDialogHeader>
 							<FormField
 								control={form.control}
 								name='title'
@@ -76,13 +84,21 @@ export default function CreateCategoryButton() {
 									</FormItem>
 								)}
 							/>
-							<Button type='submit' className='self-end ml-2'>
-								Valider
-							</Button>
+							<AlertDialogFooter className='mt-4'>
+								<AlertDialogCancel
+									type='reset'
+									onClick={() => form.reset()}
+								>
+									Cancel
+								</AlertDialogCancel>
+								<AlertDialogAction type='submit'>
+									Continue
+								</AlertDialogAction>
+							</AlertDialogFooter>
 						</form>
 					</Form>
-				)}
-			</div>
+				</AlertDialogContent>
+			</AlertDialog>
 		)
 	);
 }
