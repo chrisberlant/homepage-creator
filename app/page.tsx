@@ -15,7 +15,7 @@ export default async function Home() {
 				className={`${buttonVariants({ variant: 'outline' })} mt-8`}
 				href='/register'
 			>
-				Don&apos;t have an account? Register now
+				Don&apos;t have an account? Register here
 			</Link>
 		</div>
 	);

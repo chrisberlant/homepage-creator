@@ -172,7 +172,7 @@ export const useUpdateLink = () =>
 		},
 	});
 
-// Change index of a link, and category if needed
+// Change index of a link
 export const useMoveLink = () =>
 	useMutation({
 		mutationFn: ({ id, newIndex, newCategoryId }) =>
@@ -285,13 +285,7 @@ export async function updateCache({
 				if (category.id === newCategoryId)
 					return {
 						...category,
-						links: [
-							...category.links,
-							{
-								...currentLinkInfos,
-								index: category.links.length,
-							},
-						],
+						links: [...category.links, currentLinkInfos],
 					};
 				if (category.id === currentCategory.id)
 					return {

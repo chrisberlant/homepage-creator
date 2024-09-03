@@ -12,7 +12,7 @@ import { createContext, ReactNode, useRef, useState } from 'react';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { updateCache, useMoveLink } from '@/queries/links';
 import LinkCardOverlay from '../LinkCardOverlay';
-import { CategoryType } from '@/lib/types';
+import { CategoryType, LinkType } from '@/lib/types';
 import { browserQueryClient } from './QueryClientProvider';
 
 export const ActiveDraggedContext = createContext(null as number | null);
@@ -34,10 +34,15 @@ export default function DndContextProvider({
 	const { mutate: moveLink } = useMoveLink();
 
 	const [activeId, setActiveId] = useState<number | null>(null);
-	const previousCategories = useRef<CategoryType[] | undefined>();
+	const previousCategories = useRef<CategoryType[]>();
+	const previousLinkInfos = useRef<{ index: number; categoryId: number }>();
 
 	function handleDragStart(event: any) {
 		setActiveId(event.active.id);
+		previousLinkInfos.current = {
+			index: event.active.data.current.sortable.index,
+			categoryId: event.active.data.current.categoryId,
+		};
 		previousCategories.current = browserQueryClient?.getQueryData([
 			'categories',
 		]);
@@ -45,35 +50,37 @@ export default function DndContextProvider({
 
 	// Used to reorder elements when category changes
 	function handleDragOver(event: any) {
-		const { active, over } = event;
+		const { over, active } = event;
 		if (!over) return;
+
 		const newCategoryId: number =
 			over?.data.current?.categoryId ?? Number(over?.id.split('-')[1]);
-		const currentCategoryId = active?.data.current?.categoryId;
+		const currentCategoryId = active?.data?.current?.categoryId;
+		if (newCategoryId === currentCategoryId) return;
 
-		if (newCategoryId !== currentCategoryId)
-			return updateCache({
-				id: active.id,
-				newCategoryId,
-			});
+		updateCache({
+			id: active.id,
+			newCategoryId,
+		});
 	}
 
 	function handleDragEnd(event: any) {
 		setActiveId(null);
 		const { active, over } = event;
-		if (
-			active.id === over.id &&
-			active.data.current.sortable.index !== 0 &&
-			over.data.current.sortable.index !== 0
-		)
-			return;
+		if (!over) return;
 
 		const newCategoryId =
 			over?.data.current?.categoryId ?? Number(over?.id.split('-')[1]);
+		if (
+			active.id === over.id &&
+			newCategoryId === previousLinkInfos.current?.categoryId
+		)
+			return;
+
 		const currentIndex = active.data.current.sortable.index;
 		const newIndex = over.data.current?.sortable?.index;
 
-		return moveLink({
+		moveLink({
 			id: active.id,
 			currentIndex,
 			newIndex,
