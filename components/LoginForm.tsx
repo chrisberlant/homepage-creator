@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
-import { useLogin } from '@/queries/auth';
+import { useLogin } from '@/queries/auth.queries';
 
 const credentialsSchema = z.strictObject({
 	username: z.string({ required_error: 'Username is required' }).min(2, {

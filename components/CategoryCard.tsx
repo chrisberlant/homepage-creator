@@ -1,17 +1,18 @@
 'use client';
 
 import React, { useContext, useState } from 'react';
-import { useDroppable } from '@dnd-kit/core';
 import { ArrowBigDown, ArrowBigUp, Trash2Icon } from 'lucide-react';
 import CreateLinkButton from './CreateLinkButton';
 import { EditingModeContext } from './providers/EditingModeContextProvider';
 import LinkCard from './LinkCard';
 import {
 	SortableContext,
+	useSortable,
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useDeleteCategory } from '@/queries/categories';
-import { CategoryWithLinksType } from '../lib/types';
+import { useDeleteCategory } from '@/queries/categories.queries';
+import { CategoryWithLinksType } from '@/lib/types';
+import { CSS } from '@dnd-kit/utilities';
 
 export default function CategoryCard({
 	id,
@@ -20,11 +21,22 @@ export default function CategoryCard({
 }: CategoryWithLinksType) {
 	const { editingMode } = useContext(EditingModeContext);
 	const { mutate: deleteCategory } = useDeleteCategory();
-	const { isOver, setNodeRef } = useDroppable({
+	const {
+		isOver,
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({
 		id: `container-${id}`,
 	});
 	const style = {
 		color: isOver ? 'green' : undefined,
+		transform: CSS.Transform.toString(transform),
+		opacity: isDragging ? 0.3 : 1,
+		transition,
 	};
 	const [opened, setOpened] = useState(true);
 	// const contentRef = useRef<HTMLDivElement>(null);
@@ -41,10 +53,15 @@ export default function CategoryCard({
 	// }, [opened]);
 
 	return (
-		<SortableContext items={links} strategy={verticalListSortingStrategy}>
+		<SortableContext
+			items={links.map((link) => link.id)}
+			strategy={verticalListSortingStrategy}
+		>
 			<div
 				ref={setNodeRef}
 				style={style}
+				{...listeners}
+				{...attributes}
 				className='border-2 shadow-md dark:shadow-none bg-card p-2 px-5 m-4 w-1/3 rounded-2xl relative'
 			>
 				<div className='flex mb-4'>

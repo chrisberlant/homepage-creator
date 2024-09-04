@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import LoginForm from '@/components/LoginForm';
-import { getSession } from '@/server-actions/auth';
+import { getSession } from '@/server-actions/auth.actions';
 import { buttonVariants } from '../components/ui/button';
 import Link from 'next/link';
 

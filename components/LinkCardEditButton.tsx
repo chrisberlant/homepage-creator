@@ -25,7 +25,7 @@ import {
 	FormMessage,
 } from './ui/form';
 import { useState } from 'react';
-import { useUpdateLink } from '@/queries/links';
+import { useUpdateLink } from '@/queries/links.queries';
 
 const updateLinkSchema = z.object({
 	title: z.string().min(2, {

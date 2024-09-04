@@ -15,7 +15,7 @@ import {
 	FormMessage,
 } from './ui/form';
 import { Button } from './ui/button';
-import { useCreateLink } from '@/queries/links';
+import { useCreateLink } from '@/queries/links.queries';
 
 const createLinkFormSchema = z.object({
 	title: z.string().min(1, {

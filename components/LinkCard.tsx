@@ -6,8 +6,8 @@ import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import LinkCardEditButton from './LinkCardEditButton';
-import { useDeleteLink } from '../queries/links';
-import { LinkWithCategoryType } from '../lib/types';
+import { useDeleteLink } from '@/queries/links.queries';
+import { LinkWithCategoryType } from '@/lib/types';
 
 export default function LinkCard({
 	id,

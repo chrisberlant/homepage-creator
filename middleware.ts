@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { updateSession } from './server-actions/auth';
+import { updateSession } from './server-actions/auth.actions';
 
 export async function middleware(request: NextRequest) {
 	console.log('Route Middleware', request.nextUrl.pathname);

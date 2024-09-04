@@ -9,11 +9,17 @@ import {
 	useSensors,
 } from '@dnd-kit/core';
 import { createContext, ReactNode, useRef, useState } from 'react';
-import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { updateCache, useMoveLink } from '@/queries/links';
+import {
+	rectSwappingStrategy,
+	SortableContext,
+	sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
 import LinkCardOverlay from '../LinkCardOverlay';
-import { CategoryType, LinkType } from '@/lib/types';
+import { CategoryType } from '@/lib/types';
 import { browserQueryClient } from './QueryClientProvider';
+import { updateCache, useMoveLink } from '@/queries/links.queries';
+import { useMoveCategory } from '@/queries/categories.queries';
+import CategoryCardOverlay from '../CategoryCardOverlay';
 
 export const ActiveDraggedContext = createContext(null as number | null);
 
@@ -31,57 +37,100 @@ export default function DndContextProvider({
 			coordinateGetter: sortableKeyboardCoordinates,
 		})
 	);
-	const { mutate: moveLink } = useMoveLink();
 
-	const [activeId, setActiveId] = useState<number | null>(null);
-	const previousCategories = useRef<CategoryType[]>();
-	const previousLinkInfos = useRef<{ index: number; categoryId: number }>();
+	const { mutate: moveLink } = useMoveLink();
+	const { mutate: moveCategory } = useMoveCategory();
+
+	const [activeLinkId, setActiveLinkId] = useState<number | null>(null);
+	const [activeCategoryId, setActiveCategoryId] = useState<number | null>(
+		null
+	);
+	const currentCategories = useRef<CategoryType[]>();
+	const currentLinkInfos = useRef<{ index: number; categoryId: number }>();
+	const currentCategoryIndex = useRef<number>();
 
 	function handleDragStart(event: any) {
-		setActiveId(event.active.id);
-		previousLinkInfos.current = {
+		const draggedElementId = event.active.id;
+		currentCategories.current = browserQueryClient?.getQueryData([
+			'categories',
+		]);
+		if (
+			typeof draggedElementId === 'string' &&
+			draggedElementId.startsWith('container')
+		) {
+			setActiveCategoryId(Number(draggedElementId.split('-')[1]));
+			return console.log('category moving');
+		}
+
+		setActiveLinkId(draggedElementId);
+		console.log('link moving');
+		currentLinkInfos.current = {
 			index: event.active.data.current.sortable.index,
 			categoryId: event.active.data.current.categoryId,
 		};
-		previousCategories.current = browserQueryClient?.getQueryData([
-			'categories',
-		]);
 	}
 
 	// Used to reorder elements when category changes
 	function handleDragOver(event: any) {
-		const { over, active } = event;
-		if (!over) return;
-
-		const newCategoryId: number =
-			over?.data.current?.categoryId ?? Number(over?.id.split('-')[1]);
-		const currentCategoryId = active?.data?.current?.categoryId;
-		if (newCategoryId === currentCategoryId) return;
-
-		updateCache({
-			id: active.id,
-			newCategoryId,
-		});
+		// console.log(event);
+		// const { over, active } = event;
+		// if (!over) return;
+		// const draggedElementId = active.id;
+		// if (
+		// 	typeof draggedElementId === 'string' &&
+		// 	draggedElementId.startsWith('container') &&
+		// 	typeof over.id === 'string' &&
+		// 	over.id.startsWith('container')
+		// ) {
+		// 	const newIndex = Number(over.id.split('-')[1]);
+		// 	console.log(newIndex);
+		// 	return;
+		// }
+		// const newCategoryId: number =
+		// 	over.data.current?.categoryId ?? Number(over.id.split('-')[1]);
+		// const currentCategoryId = active.data?.current?.categoryId;
+		// if (newCategoryId === currentCategoryId) return;
+		// updateCache({
+		// 	id: draggedElementId,
+		// 	newCategoryId,
+		// });
 	}
 
 	function handleDragEnd(event: any) {
-		setActiveId(null);
+		setActiveLinkId(null);
+		setActiveCategoryId(null);
 		const { active, over } = event;
 		if (!over) return;
+		console.log(event);
+		const draggedElementId = active.id;
+
+		if (
+			typeof draggedElementId === 'string' &&
+			draggedElementId.startsWith('container') &&
+			typeof over.id === 'string' &&
+			over.id.startsWith('container')
+		) {
+			const newIndex = over.data.current.sortable.index;
+			console.log(newIndex);
+			return;
+		}
 
 		const newCategoryId =
 			over?.data.current?.categoryId ?? Number(over?.id.split('-')[1]);
 		if (
-			active.id === over.id &&
-			newCategoryId === previousLinkInfos.current?.categoryId
+			draggedElementId === over.id &&
+			newCategoryId === currentLinkInfos.current?.categoryId
 		)
 			return;
 
 		const currentIndex = active.data.current.sortable.index;
-		const newIndex = over.data.current?.sortable?.index;
+		const newIndex =
+			over.data.current?.sortable?.index === -1
+				? undefined
+				: over.data.current?.sortable?.index;
 
 		moveLink({
-			id: active.id,
+			id: draggedElementId,
 			currentIndex,
 			newIndex,
 			newCategoryId,
@@ -89,10 +138,11 @@ export default function DndContextProvider({
 	}
 
 	function handleDragCancel() {
-		setActiveId(null);
+		setActiveLinkId(null);
+		setActiveCategoryId(null);
 		browserQueryClient?.setQueryData(
 			['categories'],
-			previousCategories.current
+			currentCategories.current
 		);
 	}
 
@@ -106,7 +156,10 @@ export default function DndContextProvider({
 			sensors={sensors}
 		>
 			<DragOverlay>
-				{activeId ? <LinkCardOverlay id={activeId} /> : null}
+				{activeLinkId ? <LinkCardOverlay id={activeLinkId} /> : null}
+				{activeCategoryId ? (
+					<CategoryCardOverlay id={activeCategoryId} />
+				) : null}
 			</DragOverlay>
 			{children}
 		</DndContext>

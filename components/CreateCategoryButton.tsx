@@ -15,7 +15,7 @@ import {
 } from './ui/form';
 import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { Button } from './ui/button';
-import { useCreateCategory } from '@/queries/categories';
+import { useCreateCategory } from '@/queries/categories.queries';
 import {
 	AlertDialog,
 	AlertDialogTrigger,

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { PenIcon, Trash2Icon } from 'lucide-react';
-import { useGetCategories } from '@/queries/categories';
+import { useGetCategories } from '@/queries/categories.queries';
 
 export default function LinkCardOverlay({ id }: { id: number }) {
 	const { data: categories } = useGetCategories();

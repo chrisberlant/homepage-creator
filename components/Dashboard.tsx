@@ -1,7 +1,8 @@
 'use client';
 
+import { SortableContext } from '@dnd-kit/sortable';
 import CategoryCard from './CategoryCard';
-import { useGetCategories } from '@/queries/categories';
+import { useGetCategories } from '@/queries/categories.queries';
 
 export default function Dashboard() {
 	const { data: categories, isLoading, error } = useGetCategories();
@@ -13,16 +14,22 @@ export default function Dashboard() {
 			{isLoading && <div>Loading...</div>}
 
 			{categories && (
-				<section className='flex flex-wrap justify-around items-start'>
-					{categories.map((category) => (
-						<CategoryCard
-							key={category.id}
-							id={category.id}
-							title={category.title}
-							links={category.links}
-						/>
-					))}
-				</section>
+				<SortableContext
+					items={categories.map(
+						(category) => `category-${category.id}`
+					)}
+				>
+					<section className='flex flex-wrap justify-around items-start'>
+						{categories.map((category) => (
+							<CategoryCard
+								key={category.id}
+								id={category.id}
+								title={category.title}
+								links={category.links}
+							/>
+						))}
+					</section>
+				</SortableContext>
 			)}
 		</>
 	);

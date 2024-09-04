@@ -1,6 +1,6 @@
 'use client';
 
-import { useGetUser, useLogout } from '@/queries/auth';
+import { useGetUser, useLogout } from '@/queries/auth.queries';
 import { Button } from './ui/button';
 import { Sun, Moon } from 'lucide-react';
 import { useContext } from 'react';

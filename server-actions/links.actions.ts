@@ -1,7 +1,7 @@
 'use server';
 
 import prisma from '@/lib/prisma';
-import { getSession } from './auth';
+import { getSession } from './auth.actions';
 import { LinkWithCategoryType } from '@/lib/types';
 import { link } from 'fs';
 
@@ -47,42 +47,6 @@ export async function createLink({ title, url, categoryId }: CreateLinkProps) {
 	}
 }
 
-export async function deleteLink(id: number) {
-	const session = await getSession();
-	if (!session) throw new Error('Session not found or invalid');
-
-	try {
-		return await prisma.$transaction(async (prisma) => {
-			const link = await prisma.link.delete({
-				where: {
-					id,
-					ownerId: session.user.id,
-				},
-			});
-
-			await prisma.link.updateMany({
-				where: {
-					ownerId: session.user.id,
-					id: {
-						not: id,
-					},
-					index: {
-						gt: link.index,
-					},
-					categoryId: link.categoryId,
-				},
-				data: {
-					index: {
-						decrement: 1,
-					},
-				},
-			});
-		});
-	} catch (error) {
-		throw new Error('Cannot delete link');
-	}
-}
-
 export async function updateLink({
 	id,
 	title,
@@ -120,7 +84,7 @@ export async function moveLink({
 	newIndex?: number | undefined;
 	newCategoryId: number;
 }) {
-	console.log('newIndex', newIndex, 'newCategory'), newCategoryId;
+	console.log('newIndex', newIndex);
 	const session = await getSession();
 	if (!session) throw new Error('Session not found or invalid');
 
@@ -299,5 +263,41 @@ export async function moveLink({
 		});
 	} catch (error) {
 		throw new Error('Cannot move link');
+	}
+}
+
+export async function deleteLink(id: number) {
+	const session = await getSession();
+	if (!session) throw new Error('Session not found or invalid');
+
+	try {
+		return await prisma.$transaction(async (prisma) => {
+			const link = await prisma.link.delete({
+				where: {
+					id,
+					ownerId: session.user.id,
+				},
+			});
+
+			await prisma.link.updateMany({
+				where: {
+					ownerId: session.user.id,
+					id: {
+						not: id,
+					},
+					index: {
+						gt: link.index,
+					},
+					categoryId: link.categoryId,
+				},
+				data: {
+					index: {
+						decrement: 1,
+					},
+				},
+			});
+		});
+	} catch (error) {
+		throw new Error('Cannot delete link');
 	}
 }

@@ -4,11 +4,13 @@ import fetchApiFromClient from '@/utils/fetchApiFromClient';
 import {
 	createCategory,
 	deleteCategory,
+	moveCategory,
 	updateCategory,
-} from '@/server-actions/categories';
+} from '@/server-actions/categories.actions';
 import { toast } from 'sonner';
 import { browserQueryClient } from '@/components/providers/QueryClientProvider';
 import { UseFormReturn } from 'react-hook-form';
+import { arrayMove } from '@dnd-kit/sortable';
 
 export const useGetCategories = () =>
 	useQuery({
@@ -99,6 +101,48 @@ export const useUpdateCategory = () =>
 			return previousCategories;
 		},
 		onSuccess: () => toast.success('Category successfully updated'),
+		onError: (error, __, previousCategories) => {
+			toast.error(error.message);
+			browserQueryClient?.setQueryData(
+				['categories'],
+				previousCategories
+			);
+		},
+	});
+
+// Change index of a category
+export const useMoveCategory = () =>
+	useMutation({
+		mutationFn: moveCategory,
+		onMutate: async (updatedCategory: {
+			id: number;
+			currentIndex: number;
+			newIndex: number;
+		}) => {
+			await browserQueryClient?.cancelQueries({
+				queryKey: ['categories'],
+			});
+			const previousCategories: CategoryWithLinksType[] | undefined =
+				browserQueryClient?.getQueryData(['categories']);
+			if (!previousCategories || !browserQueryClient) return;
+
+			const { currentIndex, newIndex, id } = updatedCategory;
+
+			const currentCategory = previousCategories.find(
+				(category) => category.id === id
+			);
+			if (!currentCategory) return;
+
+			browserQueryClient.setQueryData(
+				['categories'],
+				(categories: CategoryWithLinksType[]) =>
+					arrayMove(categories, currentIndex, newIndex)
+			);
+
+			return previousCategories;
+		},
+
+		onSuccess: () => toast.success('Category successfully moved'),
 		onError: (error, __, previousCategories) => {
 			toast.error(error.message);
 			browserQueryClient?.setQueryData(

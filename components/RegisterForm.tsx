@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
-import { useLogin, useRegister } from '@/queries/auth';
+import { useRegister } from '@/queries/auth.queries';
 
 export const registerSchema = z
 	.strictObject({

@@ -4,7 +4,7 @@ import {
 	deleteLink,
 	moveLink,
 	updateLink,
-} from '@/server-actions/links';
+} from '@/server-actions/links.actions';
 import { browserQueryClient } from '@/components/providers/QueryClientProvider';
 import {
 	CategoryType,
