@@ -48,12 +48,12 @@ export default function CreateLinkButton({
 			{openedMenu ? (
 				<MinusIcon
 					onClick={() => setOpenedMenu(!openedMenu)}
-					className='mb-4'
+					className='mb-4 cursor-pointer'
 				/>
 			) : (
 				<PlusIcon
 					onClick={() => setOpenedMenu(!openedMenu)}
-					className='mb-4'
+					className='mb-4 cursor-pointer'
 				/>
 			)}
 

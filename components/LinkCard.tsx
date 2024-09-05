@@ -8,16 +8,26 @@ import { CSS } from '@dnd-kit/utilities';
 import LinkCardEditButton from './LinkCardEditButton';
 import { useDeleteLink } from '@/queries/links.queries';
 import { LinkWithCategoryType } from '@/lib/types';
+import Image from 'next/image';
+import { urlSchema } from '../schemas/index.schemas';
 
 export default function LinkCard({
 	id,
 	title,
 	url,
 	categoryId,
-}: LinkWithCategoryType) {
+	disabledDragging,
+	setDisabledDragging,
+}: LinkWithCategoryType & {
+	disabledDragging: boolean;
+	setDisabledDragging: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
 	const { editingMode } = useContext(EditingModeContext);
-	const [disabledDragging, setDisabledDragging] = useState(false);
 	const { mutate: deleteLink } = useDeleteLink();
+	const [imgSrc, setImgSrc] = useState(
+		`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`
+	);
+	console.log(imgSrc);
 
 	const {
 		attributes,
@@ -52,12 +62,26 @@ export default function LinkCard({
 			{editingMode ? (
 				<>
 					<LinkCardEditButton
-						disableDragging={setDisabledDragging}
+						setDisabledDragging={setDisabledDragging}
 						defaultTitle={title}
 						defaultUrl={url}
 						id={id}
 					/>
-					<span>{title}</span>
+					<div className='flex'>
+						<div className='flex items-center justify-center mr-2'>
+							<Image
+								height={15}
+								width={15}
+								src={imgSrc}
+								alt='favicon'
+								onError={() =>
+									setImgSrc('/image-not-found.svg')
+								}
+							/>
+						</div>
+
+						{title}
+					</div>
 					<Trash2Icon
 						stroke='red'
 						size={18}

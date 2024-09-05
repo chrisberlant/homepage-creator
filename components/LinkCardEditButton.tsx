@@ -15,7 +15,6 @@ import { PenIcon } from 'lucide-react';
 import { Input } from './ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import {
 	Form,
 	FormField,
@@ -26,36 +25,26 @@ import {
 } from './ui/form';
 import { useState } from 'react';
 import { useUpdateLink } from '@/queries/links.queries';
-
-const updateLinkSchema = z.object({
-	title: z.string().min(2, {
-		message: 'Title must be at least 2 characters.',
-	}),
-	url: z
-		.string()
-		.min(1, {
-			message: 'URL cannot be empty',
-		})
-		.url({ message: 'Please enter a valid URL.' }),
-});
-
-export type updateLinkType = z.infer<typeof updateLinkSchema>;
+import Image from 'next/image';
+import { updateLinkType } from '../lib/types';
+import { updateLinkSchema, urlSchema } from '../schemas/index.schemas';
 
 interface LinkCardEditButtonProps {
-	disableDragging: React.Dispatch<React.SetStateAction<boolean>>;
+	setDisabledDragging: React.Dispatch<React.SetStateAction<boolean>>;
 	defaultTitle: string;
 	defaultUrl: string;
 	id: number;
 }
 
 export default function LinkCardEditButton({
-	disableDragging,
+	setDisabledDragging,
 	defaultTitle,
 	defaultUrl,
 	id,
 }: LinkCardEditButtonProps) {
 	const form = useForm<updateLinkType>({
 		resolver: zodResolver(updateLinkSchema),
+		mode: 'onTouched',
 		defaultValues: {
 			title: defaultTitle,
 			url: defaultUrl,
@@ -63,6 +52,7 @@ export default function LinkCardEditButton({
 	});
 	const { mutate: updateLink } = useUpdateLink();
 	const [open, setOpen] = useState(false);
+	const url = form.getValues('url');
 
 	return (
 		<AlertDialog open={open} onOpenChange={setOpen}>
@@ -70,7 +60,7 @@ export default function LinkCardEditButton({
 				<PenIcon
 					className='cursor-pointer'
 					size={18}
-					onClick={() => disableDragging(true)}
+					onClick={() => setDisabledDragging(true)}
 				/>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
@@ -89,9 +79,7 @@ export default function LinkCardEditButton({
 					>
 						<AlertDialogHeader>
 							<AlertDialogTitle>Editing a link</AlertDialogTitle>
-							<AlertDialogDescription>
-								Update the title and URL
-							</AlertDialogDescription>
+							<AlertDialogDescription></AlertDialogDescription>
 						</AlertDialogHeader>
 						<FormField
 							control={form.control}
@@ -106,6 +94,7 @@ export default function LinkCardEditButton({
 								</FormItem>
 							)}
 						/>
+
 						<FormField
 							control={form.control}
 							name='url'
@@ -113,7 +102,20 @@ export default function LinkCardEditButton({
 								<FormItem className='mt-2'>
 									<FormLabel>URL</FormLabel>
 									<FormControl>
-										<Input {...field} />
+										<div className='flex'>
+											{urlSchema.safeParse(url)
+												.success && (
+												<div className='flex items-center justify-center mr-4'>
+													<Image
+														height={22}
+														width={22}
+														src={`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`}
+														alt='favicon'
+													/>
+												</div>
+											)}
+											<Input {...field} />
+										</div>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -125,7 +127,7 @@ export default function LinkCardEditButton({
 								type='reset'
 								onClick={() => {
 									form.reset();
-									disableDragging(false);
+									setDisabledDragging(false);
 								}}
 							>
 								Cancel

@@ -22,6 +22,7 @@ export default function CategoryCard({
 }: CategoryWithLinksType) {
 	const { editingMode } = useContext(EditingModeContext);
 	const draggingCategory = useContext(DraggingCategoryContext);
+	const [disabledDragging, setDisabledDragging] = useState(false);
 	const { mutate: deleteCategory } = useDeleteCategory();
 	const {
 		isOver,
@@ -33,6 +34,7 @@ export default function CategoryCard({
 		isDragging,
 	} = useSortable({
 		id: `container-${id}`,
+		disabled: disabledDragging,
 	});
 	const style = {
 		// color: isOver ? 'green' : undefined,
@@ -125,6 +127,8 @@ export default function CategoryCard({
 									title={link.title}
 									url={link.url}
 									categoryId={id}
+									disabledDragging={disabledDragging}
+									setDisabledDragging={setDisabledDragging}
 								/>
 							))}
 						</div>
