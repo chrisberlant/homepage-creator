@@ -2,7 +2,6 @@
 
 import { ReactNode, useState } from 'react';
 import { createContext } from 'react';
-import LinksDndContextProvider from './DndContextProvider';
 import DndContextProvider from './DndContextProvider';
 
 type EditingModeContextType = {

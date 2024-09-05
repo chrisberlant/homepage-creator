@@ -16,10 +16,10 @@ export default function Dashboard() {
 			{categories && (
 				<SortableContext
 					items={categories.map(
-						(category) => `category-${category.id}`
+						(category) => `container-${category.id}`
 					)}
 				>
-					<section className='flex flex-wrap justify-around items-start'>
+					<section className='flex flex-wrap items-start justify-center gap-4'>
 						{categories.map((category) => (
 							<CategoryCard
 								key={category.id}

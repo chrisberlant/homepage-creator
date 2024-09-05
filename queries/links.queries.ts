@@ -261,7 +261,6 @@ export async function updateCache({
 	newCategoryId: number;
 }) {
 	if (!browserQueryClient) return;
-	console.log('cache update');
 
 	await browserQueryClient.cancelQueries({
 		queryKey: ['categories'],

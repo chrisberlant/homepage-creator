@@ -23,7 +23,7 @@ export async function login(values: credentialsType) {
 				username: values.username,
 			},
 		});
-		console.log(user);
+
 		if (!user || values.password !== user.password)
 			throw new Error('Incorrect credentials');
 		// Create the session

@@ -9,11 +9,7 @@ import {
 	useSensors,
 } from '@dnd-kit/core';
 import { createContext, ReactNode, useRef, useState } from 'react';
-import {
-	rectSwappingStrategy,
-	SortableContext,
-	sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable';
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import LinkCardOverlay from '../LinkCardOverlay';
 import { CategoryType } from '@/lib/types';
 import { browserQueryClient } from './QueryClientProvider';
@@ -21,7 +17,8 @@ import { updateCache, useMoveLink } from '@/queries/links.queries';
 import { useMoveCategory } from '@/queries/categories.queries';
 import CategoryCardOverlay from '../CategoryCardOverlay';
 
-export const ActiveDraggedContext = createContext(null as number | null);
+// Used to reduce categories cards when dragging one of them
+export const DraggingCategoryContext = createContext(false);
 
 export default function DndContextProvider({
 	children,
@@ -45,76 +42,79 @@ export default function DndContextProvider({
 	const [activeCategoryId, setActiveCategoryId] = useState<number | null>(
 		null
 	);
+	const [draggingCategory, setDraggingCategory] = useState(false);
+
 	const currentCategories = useRef<CategoryType[]>();
 	const currentLinkInfos = useRef<{ index: number; categoryId: number }>();
-	const currentCategoryIndex = useRef<number>();
 
 	function handleDragStart(event: any) {
 		const draggedElementId = event.active.id;
 		currentCategories.current = browserQueryClient?.getQueryData([
 			'categories',
 		]);
+
 		if (
 			typeof draggedElementId === 'string' &&
 			draggedElementId.startsWith('container')
 		) {
 			setActiveCategoryId(Number(draggedElementId.split('-')[1]));
-			return console.log('category moving');
+			return setDraggingCategory(true);
 		}
 
 		setActiveLinkId(draggedElementId);
-		console.log('link moving');
 		currentLinkInfos.current = {
 			index: event.active.data.current.sortable.index,
 			categoryId: event.active.data.current.categoryId,
 		};
 	}
 
-	// Used to reorder elements when category changes
+	// Used to reorder links when changing categories
 	function handleDragOver(event: any) {
-		// console.log(event);
-		// const { over, active } = event;
-		// if (!over) return;
-		// const draggedElementId = active.id;
-		// if (
-		// 	typeof draggedElementId === 'string' &&
-		// 	draggedElementId.startsWith('container') &&
-		// 	typeof over.id === 'string' &&
-		// 	over.id.startsWith('container')
-		// ) {
-		// 	const newIndex = Number(over.id.split('-')[1]);
-		// 	console.log(newIndex);
-		// 	return;
-		// }
-		// const newCategoryId: number =
-		// 	over.data.current?.categoryId ?? Number(over.id.split('-')[1]);
-		// const currentCategoryId = active.data?.current?.categoryId;
-		// if (newCategoryId === currentCategoryId) return;
-		// updateCache({
-		// 	id: draggedElementId,
-		// 	newCategoryId,
-		// });
+		const { over, active } = event;
+		if (!over) return;
+
+		const draggedElementId = active.id;
+		const newCategoryId: number =
+			over.data.current?.categoryId ?? Number(over.id.split('-')[1]);
+		const currentCategoryId = active.data?.current?.categoryId;
+		if (newCategoryId === currentCategoryId) return;
+
+		// Update the cache only if link was moved to another category
+		updateCache({
+			id: draggedElementId,
+			newCategoryId,
+		});
 	}
 
 	function handleDragEnd(event: any) {
-		setActiveLinkId(null);
-		setActiveCategoryId(null);
 		const { active, over } = event;
 		if (!over) return;
-		console.log(event);
-		const draggedElementId = active.id;
 
+		setActiveLinkId(null);
+		setActiveCategoryId(null);
+		if (draggingCategory) setDraggingCategory(false);
+
+		const draggedElementId = active.id;
+		const currentIndex = active.data.current.sortable.index;
+
+		// If a category container is moving
 		if (
 			typeof draggedElementId === 'string' &&
 			draggedElementId.startsWith('container') &&
 			typeof over.id === 'string' &&
 			over.id.startsWith('container')
 		) {
+			if (draggedElementId === over.id) return;
+
 			const newIndex = over.data.current.sortable.index;
-			console.log(newIndex);
-			return;
+			return moveCategory({
+				id: Number(draggedElementId.split('-')[1]),
+				currentIndex,
+				newIndex,
+			});
 		}
 
+		// If a link is moving
 		const newCategoryId =
 			over?.data.current?.categoryId ?? Number(over?.id.split('-')[1]);
 		if (
@@ -123,7 +123,6 @@ export default function DndContextProvider({
 		)
 			return;
 
-		const currentIndex = active.data.current.sortable.index;
 		const newIndex =
 			over.data.current?.sortable?.index === -1
 				? undefined
@@ -140,6 +139,8 @@ export default function DndContextProvider({
 	function handleDragCancel() {
 		setActiveLinkId(null);
 		setActiveCategoryId(null);
+		if (draggingCategory) setDraggingCategory(false);
+
 		browserQueryClient?.setQueryData(
 			['categories'],
 			currentCategories.current
@@ -161,7 +162,9 @@ export default function DndContextProvider({
 					<CategoryCardOverlay id={activeCategoryId} />
 				) : null}
 			</DragOverlay>
-			{children}
+			<DraggingCategoryContext.Provider value={draggingCategory}>
+				{children}
+			</DraggingCategoryContext.Provider>
 		</DndContext>
 	);
 }

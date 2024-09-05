@@ -84,7 +84,6 @@ export async function moveLink({
 	newIndex?: number | undefined;
 	newCategoryId: number;
 }) {
-	console.log('newIndex', newIndex);
 	const session = await getSession();
 	if (!session) throw new Error('Session not found or invalid');
 
