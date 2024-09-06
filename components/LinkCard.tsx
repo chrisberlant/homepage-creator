@@ -9,7 +9,6 @@ import LinkCardEditButton from './LinkCardEditButton';
 import { useDeleteLink } from '@/queries/links.queries';
 import { LinkWithCategoryType } from '@/lib/types';
 import Image from 'next/image';
-import { urlSchema } from '../schemas/index.schemas';
 
 export default function LinkCard({
 	id,
@@ -27,7 +26,6 @@ export default function LinkCard({
 	const [imgSrc, setImgSrc] = useState(
 		`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`
 	);
-	console.log(imgSrc);
 
 	const {
 		attributes,
@@ -48,6 +46,7 @@ export default function LinkCard({
 		opacity: isDragging ? 0.3 : 1,
 		transition,
 	};
+	if (id === 10) console.log(disabledDragging);
 
 	return (
 		<div
@@ -72,7 +71,7 @@ export default function LinkCard({
 							<Image
 								height={15}
 								width={15}
-								src={imgSrc}
+								src={`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`}
 								alt='favicon'
 								onError={() =>
 									setImgSrc('/image-not-found.svg')

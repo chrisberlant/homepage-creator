@@ -1,41 +1,19 @@
 'use client';
 
-import { createContext, useEffect, useState, useContext } from 'react';
+import { Sun, Moon } from 'lucide-react';
+import { useContext } from 'react';
+import { ThemeProviderContext } from './providers/ThemeProvider';
 
-type Theme = 'dark' | 'light';
-
-type ThemeProviderState = {
-	theme: Theme;
-	toggleTheme: () => void;
-};
-
-const initialState: ThemeProviderState = {
-	theme: 'dark',
-	toggleTheme: () => null,
-};
-
-export const ThemeProviderContext = createContext(initialState);
-
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-	const [theme, setTheme] = useState<Theme>('dark');
-	const toggleTheme = () => {
-		theme === 'dark' ? setTheme('light') : setTheme('dark');
-	};
-
-	useEffect(() => {
-		const root = window.document.documentElement;
-		root.classList.remove('light', 'dark');
-		root.classList.add(theme);
-	}, [theme]);
-
-	const value = {
-		theme,
-		toggleTheme,
-	};
+export default function ThemeToggler() {
+	const { theme, toggleTheme } = useContext(ThemeProviderContext);
 
 	return (
-		<ThemeProviderContext.Provider value={value}>
-			{children}
-		</ThemeProviderContext.Provider>
+		<button
+			onClick={toggleTheme}
+			className='hover:scale-110'
+			aria-label='Toggle color theme'
+		>
+			{theme === 'light' ? <Sun /> : <Moon />}
+		</button>
 	);
 }

@@ -11,7 +11,7 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { PenIcon } from 'lucide-react';
+import { Globe2Icon, GlobeIcon, PenIcon } from 'lucide-react';
 import { Input } from './ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -44,7 +44,6 @@ export default function LinkCardEditButton({
 }: LinkCardEditButtonProps) {
 	const form = useForm<updateLinkType>({
 		resolver: zodResolver(updateLinkSchema),
-		mode: 'onTouched',
 		defaultValues: {
 			title: defaultTitle,
 			url: defaultUrl,
@@ -53,6 +52,9 @@ export default function LinkCardEditButton({
 	const { mutate: updateLink } = useUpdateLink();
 	const [open, setOpen] = useState(false);
 	const url = form.getValues('url');
+	const [imgSrc, setImgSrc] = useState(
+		`https://s2.googleusercontent.com/s2/favicons?domain_url=${defaultUrl}`
+	);
 
 	return (
 		<AlertDialog open={open} onOpenChange={setOpen}>
@@ -102,19 +104,29 @@ export default function LinkCardEditButton({
 								<FormItem className='mt-2'>
 									<FormLabel>URL</FormLabel>
 									<FormControl>
-										<div className='flex'>
-											{urlSchema.safeParse(url)
-												.success && (
-												<div className='flex items-center justify-center mr-4'>
+										<div className='flex relative'>
+											<div className='flex items-center justify-center mr-4 absolute bottom-2 left-2'>
+												{urlSchema.safeParse(url)
+													.success ? (
 													<Image
 														height={22}
 														width={22}
 														src={`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`}
 														alt='favicon'
+														onError={() =>
+															setImgSrc(
+																'/image-not-found.svg'
+															)
+														}
 													/>
-												</div>
-											)}
-											<Input {...field} />
+												) : (
+													<GlobeIcon size={22} />
+												)}
+											</div>
+											<Input
+												className='pl-10'
+												{...field}
+											/>
 										</div>
 									</FormControl>
 									<FormMessage />

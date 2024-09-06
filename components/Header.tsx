@@ -5,6 +5,8 @@ import {
 } from '@tanstack/react-query';
 import { getAuth, getSession } from '../server-actions/auth.actions';
 import LogoutButton from './LogoutButton';
+import AccountDetails from './AccountDetails';
+import ThemeToggler from './ThemeToggler';
 
 export default async function Header() {
 	const session = await getSession();
@@ -18,9 +20,13 @@ export default async function Header() {
 		<header className='flex justify-center items-center p-5'>
 			<h1 className='text-4xl font-bold text-center'>My Homepage</h1>
 			{session && (
-				<HydrationBoundary state={dehydrate(queryClient)}>
+				<div className='absolute flex items-center right-8'>
+					<HydrationBoundary state={dehydrate(queryClient)}>
+						<AccountDetails />
+					</HydrationBoundary>
 					<LogoutButton />
-				</HydrationBoundary>
+					<ThemeToggler />
+				</div>
 			)}
 		</header>
 	);
