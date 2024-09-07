@@ -46,7 +46,6 @@ export default function LinkCard({
 		opacity: isDragging ? 0.3 : 1,
 		transition,
 	};
-	if (id === 10) console.log(disabledDragging);
 
 	return (
 		<div

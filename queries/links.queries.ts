@@ -6,11 +6,7 @@ import {
 	updateLink,
 } from '@/server-actions/links.actions';
 import { browserQueryClient } from '@/components/providers/QueryClientProvider';
-import {
-	CategoryType,
-	CategoryWithLinksType,
-	LinkWithCategoryType,
-} from '@/lib/types';
+import { CategoryType, CategoryWithLinksType } from '@/lib/types';
 import { toast } from 'sonner';
 import { UseFormReturn } from 'react-hook-form';
 import { Dispatch, SetStateAction } from 'react';

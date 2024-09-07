@@ -11,7 +11,7 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Globe2Icon, GlobeIcon, PenIcon } from 'lucide-react';
+import { GlobeIcon, PenIcon } from 'lucide-react';
 import { Input } from './ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';

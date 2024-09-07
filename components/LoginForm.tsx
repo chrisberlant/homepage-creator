@@ -14,15 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { useLogin } from '@/queries/auth.queries';
-
-const credentialsSchema = z.strictObject({
-	username: z.string({ required_error: 'Username is required' }).min(2, {
-		message: 'Username must be at least 2 characters.',
-	}),
-	password: z.string({ required_error: 'Password is required' }).min(8, {
-		message: 'Password must be at least 8 characters.',
-	}),
-});
+import { credentialsSchema } from '@/schemas/index.schemas';
 
 export type credentialsType = z.infer<typeof credentialsSchema>;
 

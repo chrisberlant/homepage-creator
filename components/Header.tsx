@@ -3,7 +3,7 @@ import {
 	HydrationBoundary,
 	QueryClient,
 } from '@tanstack/react-query';
-import { getAuth, getSession } from '../server-actions/auth.actions';
+import { getAuth, getSession } from '@/server-actions/auth.actions';
 import LogoutButton from './LogoutButton';
 import AccountDetails from './AccountDetails';
 import ThemeToggler from './ThemeToggler';

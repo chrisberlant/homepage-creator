@@ -12,25 +12,27 @@ import {
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useState } from 'react';
-import { Form, useForm } from 'react-hook-form';
-import { updateLinkSchema } from '../schemas/index.schemas';
-
+import { useForm } from 'react-hook-form';
 import {
+	Form,
 	FormField,
 	FormItem,
 	FormLabel,
 	FormControl,
 	FormMessage,
 } from './ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useGetUser } from '../queries/auth.queries';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useGetUser } from '@/queries/auth.queries';
+import { updateUserSchema } from '@/schemas/index.schemas';
+import { useUpdateUser } from '@/queries/user.queries';
 
 export default function AccountDetails() {
 	const { data: user } = useGetUser();
+	const { mutate: updateUser } = useUpdateUser();
 	const form = useForm({
-		resolver: zodResolver(updateLinkSchema),
+		resolver: zodResolver(updateUserSchema),
 		defaultValues: {
 			username: user?.username,
 			email: user?.email,
@@ -39,69 +41,71 @@ export default function AccountDetails() {
 	const [open, setOpen] = useState(false);
 
 	return (
-		<AlertDialog open={open} onOpenChange={setOpen}>
-			<AlertDialogTrigger asChild>
-				<Button variant='ghost' className='mr-4'>
-					{user?.username}
-				</Button>
-			</AlertDialogTrigger>
-			<AlertDialogContent>
-				<Form {...form}>
-					<form
-						onSubmit={form.handleSubmit(
-							(data) => console.log(data),
-							// If any error in the data
-							() => setOpen(true)
-						)}
-					>
-						<AlertDialogHeader>
-							<AlertDialogTitle>Editing a link</AlertDialogTitle>
-							<AlertDialogDescription></AlertDialogDescription>
-						</AlertDialogHeader>
-						<FormField
-							control={form.control}
-							name='username'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Username</FormLabel>
-									<FormControl>
-										<Input {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
+		user && (
+			<AlertDialog open={open} onOpenChange={setOpen}>
+				<AlertDialogTrigger asChild>
+					<Button variant='ghost' className='mr-4'>
+						{user?.username}
+					</Button>
+				</AlertDialogTrigger>
+				<AlertDialogContent>
+					<Form {...form}>
+						<form
+							onSubmit={form.handleSubmit(
+								(data) => updateUser(data),
+								// If any error in the data
+								() => setOpen(true)
 							)}
-						/>
+						>
+							<AlertDialogHeader>
+								<AlertDialogTitle>
+									Editing your account
+								</AlertDialogTitle>
+								<AlertDialogDescription></AlertDialogDescription>
+							</AlertDialogHeader>
+							<FormField
+								control={form.control}
+								name='username'
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Username</FormLabel>
+										<FormControl>
+											<Input {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 
-						<FormField
-							control={form.control}
-							name='email'
-							render={({ field }) => (
-								<FormItem className='mt-2'>
-									<FormLabel>Email</FormLabel>
-									<FormControl>
-										<Input {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+							<FormField
+								control={form.control}
+								name='email'
+								render={({ field }) => (
+									<FormItem className='mt-2'>
+										<FormLabel>Email</FormLabel>
+										<FormControl>
+											<Input {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 
-						<AlertDialogFooter className='mt-4'>
-							<AlertDialogCancel
-								type='reset'
-								onClick={() => {
-									form.reset();
-								}}
-							>
-								Cancel
-							</AlertDialogCancel>
-							<AlertDialogAction type='submit'>
-								Continue
-							</AlertDialogAction>
-						</AlertDialogFooter>
-					</form>
-				</Form>
-			</AlertDialogContent>
-		</AlertDialog>
+							<AlertDialogFooter className='mt-4'>
+								<AlertDialogCancel
+									type='reset'
+									onClick={() => form.reset()}
+								>
+									Cancel
+								</AlertDialogCancel>
+								<AlertDialogAction type='submit'>
+									Continue
+								</AlertDialogAction>
+							</AlertDialogFooter>
+						</form>
+					</Form>
+				</AlertDialogContent>
+			</AlertDialog>
+		)
 	);
 }

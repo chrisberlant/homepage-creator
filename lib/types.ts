@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { updateLinkSchema } from '../schemas/index.schemas';
+import { updateLinkSchema, updateUserSchema } from '@/schemas/index.schemas';
 
 export type LinkType = {
 	id: number;
@@ -21,3 +21,10 @@ export type CategoryWithLinksType = CategoryType & {
 };
 
 export type updateLinkType = z.infer<typeof updateLinkSchema>;
+
+export type UserType = {
+	username: string;
+	email: string;
+};
+
+export type updateUserType = z.infer<typeof updateUserSchema>;
