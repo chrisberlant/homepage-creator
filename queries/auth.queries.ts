@@ -1,14 +1,14 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { browserQueryClient } from '@/components/providers/QueryClientProvider';
-import {
-	getAuth,
-	login,
-	logout,
-	register,
-} from '@/server-actions/auth.actions';
 import { useRouter } from 'next/navigation';
 import { UseFormReturn } from 'react-hook-form';
+import {
+	login,
+	getAuth,
+	register,
+	logout,
+} from '@/server-actions/auth.actions';
 
 export const useLogin = (
 	form: UseFormReturn<

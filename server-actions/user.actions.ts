@@ -1,3 +1,5 @@
+'use server';
+
 import prisma from '@/lib/prisma';
 import { updateUserType } from '@/lib/types';
 import { getSession } from './auth.actions';

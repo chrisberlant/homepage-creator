@@ -1,5 +1,18 @@
 import { z } from 'zod';
-import { updateLinkSchema, updateUserSchema } from '@/schemas/index.schemas';
+import {
+	credentialsSchema,
+	updateLinkSchema,
+	updateUserSchema,
+} from '@/schemas/index.schemas';
+
+export type SessionType = {
+	user: { id: number; name: string };
+	expires: string;
+	iat: number;
+	exp: number;
+};
+
+export type credentialsType = z.infer<typeof credentialsSchema>;
 
 export type LinkType = {
 	id: number;

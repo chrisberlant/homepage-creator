@@ -12,11 +12,9 @@ import {
 	FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { z } from 'zod';
 import { useLogin } from '@/queries/auth.queries';
 import { credentialsSchema } from '@/schemas/index.schemas';
-
-export type credentialsType = z.infer<typeof credentialsSchema>;
+import { credentialsType } from '@/lib/types';
 
 export default function LoginForm() {
 	const form = useForm<credentialsType>({

@@ -2,8 +2,6 @@
 
 import prisma from '@/lib/prisma';
 import { getSession } from './auth.actions';
-import { LinkWithCategoryType } from '@/lib/types';
-import { link } from 'fs';
 
 interface CreateLinkProps {
 	title: string;

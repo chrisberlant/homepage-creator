@@ -4,17 +4,10 @@ import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { credentialsType } from '@/components/LoginForm';
 import { registerType } from '@/components/RegisterForm';
+import { credentialsType, SessionType } from '@/lib/types';
 
 const secretKey = new TextEncoder().encode(process.env.SECRET_KEY);
-
-type SessionType = {
-	user: { id: number; name: string };
-	expires: string;
-	iat: number;
-	exp: number;
-};
 
 export async function login(values: credentialsType) {
 	try {
