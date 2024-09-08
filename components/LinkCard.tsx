@@ -92,8 +92,17 @@ export default function LinkCard({
 					href={url}
 					target='_blank'
 					title={url}
-					className='flex-1 cursor-pointer'
+					className='flex justify-center flex-1 cursor-pointer'
 				>
+					<div className='flex items-center justify-center mr-2'>
+						<Image
+							height={15}
+							width={15}
+							src={`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`}
+							alt='favicon'
+							onError={() => setImgSrc('/image-not-found.svg')}
+						/>
+					</div>
 					{title}
 				</a>
 			)}
