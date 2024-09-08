@@ -27,10 +27,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useGetUser } from '@/queries/auth.queries';
 import { updateUserSchema } from '@/schemas/index.schemas';
 import { useUpdateUser } from '@/queries/user.queries';
+import { toast } from 'sonner';
+import PasswordDetails from './PasswordDetails';
 
 export default function AccountDetails() {
 	const { data: user } = useGetUser();
-	const { mutate: updateUser } = useUpdateUser();
 	const form = useForm({
 		resolver: zodResolver(updateUserSchema),
 		defaultValues: {
@@ -38,6 +39,7 @@ export default function AccountDetails() {
 			email: user?.email,
 		},
 	});
+	const { mutate: updateUser } = useUpdateUser();
 	const [open, setOpen] = useState(false);
 
 	return (
@@ -45,7 +47,7 @@ export default function AccountDetails() {
 			<AlertDialog open={open} onOpenChange={setOpen}>
 				<AlertDialogTrigger asChild>
 					<Button variant='ghost' className='mr-4'>
-						{user?.username}
+						{user.username}
 					</Button>
 				</AlertDialogTrigger>
 				<AlertDialogContent>
@@ -59,7 +61,7 @@ export default function AccountDetails() {
 						>
 							<AlertDialogHeader>
 								<AlertDialogTitle>
-									Editing your account
+									Account details
 								</AlertDialogTitle>
 								<AlertDialogDescription></AlertDialogDescription>
 							</AlertDialogHeader>
@@ -92,14 +94,23 @@ export default function AccountDetails() {
 							/>
 
 							<AlertDialogFooter className='mt-4'>
+								<PasswordDetails
+									setOpenAccountModal={setOpen}
+								/>
 								<AlertDialogCancel
 									type='reset'
-									onClick={() => form.reset()}
+									onClick={() => {
+										if (form.formState.isDirty)
+											toast.warning(
+												'Changes were not saved'
+											);
+										form.reset();
+									}}
 								>
 									Cancel
 								</AlertDialogCancel>
 								<AlertDialogAction type='submit'>
-									Continue
+									Update infos
 								</AlertDialogAction>
 							</AlertDialogFooter>
 						</form>

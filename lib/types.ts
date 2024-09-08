@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
 	credentialsSchema,
 	updateLinkSchema,
+	updatePasswordSchema,
 	updateUserSchema,
 } from '@/schemas/index.schemas';
 
@@ -41,3 +42,5 @@ export type UserType = {
 };
 
 export type updateUserType = z.infer<typeof updateUserSchema>;
+
+export type updatePasswordType = z.infer<typeof updatePasswordSchema>;
