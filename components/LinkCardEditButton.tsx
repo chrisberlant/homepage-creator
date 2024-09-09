@@ -28,6 +28,7 @@ import { useUpdateLink } from '@/queries/links.queries';
 import Image from 'next/image';
 import { updateLinkType } from '../lib/types';
 import { updateLinkSchema, urlSchema } from '../schemas/index.schemas';
+import FaviconNotFound from './FaviconNotFound';
 
 interface LinkCardEditButtonProps {
 	setDisabledDragging: React.Dispatch<React.SetStateAction<boolean>>;
@@ -52,9 +53,7 @@ export default function LinkCardEditButton({
 	const { mutate: updateLink } = useUpdateLink();
 	const [open, setOpen] = useState(false);
 	const url = form.getValues('url');
-	const [imgSrc, setImgSrc] = useState(
-		`https://s2.googleusercontent.com/s2/favicons?domain_url=${defaultUrl}`
-	);
+	const [faviconFound, setFaviconFound] = useState(true);
 
 	return (
 		<AlertDialog open={open} onOpenChange={setOpen}>
@@ -105,22 +104,22 @@ export default function LinkCardEditButton({
 									<FormLabel>URL</FormLabel>
 									<FormControl>
 										<div className='flex relative'>
-											<div className='flex items-center justify-center mr-4 absolute bottom-2 left-2'>
+											<div className='flex items-center justify-center absolute bottom-2.5 left-3'>
 												{urlSchema.safeParse(url)
-													.success ? (
+													.success && faviconFound ? (
 													<Image
-														height={22}
-														width={22}
-														src={imgSrc}
+														height={20}
+														width={20}
+														src={`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`}
 														alt='favicon'
 														onError={() =>
-															setImgSrc(
-																'/favicon-not-found.svg'
+															setFaviconFound(
+																false
 															)
 														}
 													/>
 												) : (
-													<GlobeIcon size={22} />
+													<FaviconNotFound className='h-6 w-6' />
 												)}
 											</div>
 											<Input

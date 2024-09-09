@@ -9,6 +9,7 @@ import LinkCardEditButton from './LinkCardEditButton';
 import { useDeleteLink } from '@/queries/links.queries';
 import { LinkWithCategoryType } from '@/lib/types';
 import Image from 'next/image';
+import FaviconNotFound from './FaviconNotFound';
 
 export default function LinkCard({
 	id,
@@ -23,9 +24,7 @@ export default function LinkCard({
 }) {
 	const { editingMode } = useContext(EditingModeContext);
 	const { mutate: deleteLink } = useDeleteLink();
-	const [imgSrc, setImgSrc] = useState(
-		`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`
-	);
+	const [faviconFound, setFaviconFound] = useState(true);
 
 	const {
 		attributes,
@@ -67,15 +66,17 @@ export default function LinkCard({
 					/>
 					<div className='flex'>
 						<div className='flex items-center justify-center mr-2'>
-							<Image
-								height={15}
-								width={15}
-								src={imgSrc}
-								alt='favicon'
-								onError={() =>
-									setImgSrc('/favicon-not-found.svg')
-								}
-							/>
+							{faviconFound ? (
+								<Image
+									height={15}
+									width={15}
+									src={`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`}
+									alt='favicon'
+									onError={() => setFaviconFound(false)}
+								/>
+							) : (
+								<FaviconNotFound />
+							)}
 						</div>
 						{title}
 					</div>
@@ -94,13 +95,17 @@ export default function LinkCard({
 					className='flex justify-center flex-1 cursor-pointer'
 				>
 					<div className='flex items-center justify-center mr-2'>
-						<Image
-							height={15}
-							width={15}
-							src={`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`}
-							alt='favicon'
-							onError={() => setImgSrc('/image-not-found.svg')}
-						/>
+						{faviconFound ? (
+							<Image
+								height={15}
+								width={15}
+								src={`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`}
+								alt='favicon'
+								onError={() => setFaviconFound(false)}
+							/>
+						) : (
+							<FaviconNotFound />
+						)}
 					</div>
 					{title}
 				</a>
