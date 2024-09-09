@@ -111,11 +111,11 @@ export default function LinkCardEditButton({
 													<Image
 														height={22}
 														width={22}
-														src={`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`}
+														src={imgSrc}
 														alt='favicon'
 														onError={() =>
 															setImgSrc(
-																'/image-not-found.svg'
+																'/favicon-not-found.svg'
 															)
 														}
 													/>

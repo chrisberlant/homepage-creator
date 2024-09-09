@@ -17,9 +17,16 @@ const initialState: ThemeProviderState = {
 export const ThemeProviderContext = createContext(initialState);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-	const [theme, setTheme] = useState<Theme>('dark');
+	const [theme, setTheme] = useState<Theme>(
+		(localStorage.getItem('homepage-theme') as 'dark' | 'light') || 'dark'
+	);
+
 	const toggleTheme = () => {
-		theme === 'dark' ? setTheme('light') : setTheme('dark');
+		theme === 'dark'
+			? (localStorage.setItem('homepage-theme', 'light'),
+			  setTheme('light'))
+			: (localStorage.setItem('homepage-theme', 'dark'),
+			  setTheme('dark'));
 	};
 
 	useEffect(() => {

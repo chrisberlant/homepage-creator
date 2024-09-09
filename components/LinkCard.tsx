@@ -70,14 +70,13 @@ export default function LinkCard({
 							<Image
 								height={15}
 								width={15}
-								src={`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`}
+								src={imgSrc}
 								alt='favicon'
 								onError={() =>
-									setImgSrc('/image-not-found.svg')
+									setImgSrc('/favicon-not-found.svg')
 								}
 							/>
 						</div>
-
 						{title}
 					</div>
 					<Trash2Icon
