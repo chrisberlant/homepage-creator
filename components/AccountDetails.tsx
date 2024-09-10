@@ -94,11 +94,9 @@ export default function AccountDetails() {
 							/>
 
 							<AlertDialogFooter className='mt-4'>
-								<PasswordDetails
-									setOpenAccountModal={setOpen}
-								/>
 								<AlertDialogCancel
 									type='reset'
+									className='mr-auto'
 									onClick={() => {
 										if (form.formState.isDirty)
 											toast.warning(
@@ -109,6 +107,9 @@ export default function AccountDetails() {
 								>
 									Cancel
 								</AlertDialogCancel>
+								<PasswordDetails
+									setOpenAccountModal={setOpen}
+								/>
 								<AlertDialogAction type='submit'>
 									Update infos
 								</AlertDialogAction>

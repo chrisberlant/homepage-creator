@@ -58,18 +58,14 @@ export default function CreateCategoryButton() {
 								<AlertDialogTitle>
 									Create a new category
 								</AlertDialogTitle>
-								<AlertDialogDescription>
-									Enter the category name
-								</AlertDialogDescription>
+								<AlertDialogDescription></AlertDialogDescription>
 							</AlertDialogHeader>
 							<FormField
 								control={form.control}
 								name='title'
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>
-											Create new category
-										</FormLabel>
+										<FormLabel>Title</FormLabel>
 										<FormControl>
 											<Input {...field} />
 										</FormControl>

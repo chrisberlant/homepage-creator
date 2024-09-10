@@ -109,6 +109,20 @@ export default function PasswordDetails({
 						/>
 
 						<AlertDialogFooter className='mt-4'>
+							<AlertDialogCancel
+								type='reset'
+								className='mr-auto'
+								onClick={() => {
+									if (form.formState.isDirty)
+										toast.warning(
+											'Changes have not been saved'
+										);
+									form.reset();
+									setOpenAccountModal(false);
+								}}
+							>
+								Cancel
+							</AlertDialogCancel>
 							<Button
 								variant='ghost'
 								type='button'
@@ -121,19 +135,6 @@ export default function PasswordDetails({
 								<UserIcon className='mr-2 h-4 w-4' />
 								Go back to Account details
 							</Button>
-							<AlertDialogCancel
-								type='reset'
-								onClick={() => {
-									if (form.formState.isDirty)
-										toast.warning(
-											'Changes have not been saved'
-										);
-									form.reset();
-									setOpenAccountModal(false);
-								}}
-							>
-								Cancel
-							</AlertDialogCancel>
 							<AlertDialogAction type='submit'>
 								Update password
 							</AlertDialogAction>
