@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { browserQueryClient } from '@/components/providers/QueryClientProvider';
 import { UseFormReturn } from 'react-hook-form';
 import { arrayMove } from '@dnd-kit/sortable';
+import { Dispatch, SetStateAction } from 'react';
 
 export const useGetCategories = () =>
 	useQuery({
@@ -78,7 +79,13 @@ export const useCreateCategory = (
 	});
 
 // Update a category
-export const useUpdateCategory = () =>
+export const useUpdateCategory = ({
+	setEditingTitle,
+	setDisabledDragging,
+}: {
+	setEditingTitle: React.Dispatch<React.SetStateAction<boolean>>;
+	setDisabledDragging: Dispatch<SetStateAction<boolean>>;
+}) =>
 	useMutation({
 		mutationFn: updateCategory,
 		onMutate: async ({ id, title }) => {
@@ -90,6 +97,12 @@ export const useUpdateCategory = () =>
 				browserQueryClient?.getQueryData(['categories']);
 			if (!previousCategories || !browserQueryClient) return;
 
+			const currentTitle = previousCategories.find(
+				(category) => category.id === id
+			)?.title;
+
+			if (currentTitle === title) throw new Error('No data modified');
+
 			browserQueryClient.setQueryData(
 				['categories'],
 				(categories: CategoryWithLinksType[]) =>
@@ -100,13 +113,24 @@ export const useUpdateCategory = () =>
 
 			return previousCategories;
 		},
-		onSuccess: () => toast.success('Category successfully updated'),
+		onSuccess: () => {
+			toast.success('Category successfully updated');
+			setEditingTitle(false);
+			setDisabledDragging(false);
+		},
 		onError: (error, __, previousCategories) => {
+			if (error.message === 'No data modified') {
+				toast.info(error.message);
+				setEditingTitle(false);
+				return setDisabledDragging(false);
+			}
 			toast.error(error.message);
 			browserQueryClient?.setQueryData(
 				['categories'],
 				previousCategories
 			);
+			setEditingTitle(false);
+			setDisabledDragging(false);
 		},
 	});
 

@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import {
+	createCategorySchema,
+	createLinkSchema,
 	credentialsSchema,
 	updateLinkSchema,
 	updatePasswordSchema,
@@ -25,6 +27,8 @@ export type LinkWithCategoryType = LinkType & {
 	categoryId: number;
 };
 
+export type CreateLinkType = z.infer<typeof createLinkSchema>;
+
 export type CategoryType = {
 	id: number;
 	title: string;
@@ -41,6 +45,8 @@ export type UserType = {
 	email: string;
 };
 
-export type updateUserType = z.infer<typeof updateUserSchema>;
+export type UpdateUserType = z.infer<typeof updateUserSchema>;
 
-export type updatePasswordType = z.infer<typeof updatePasswordSchema>;
+export type UpdatePasswordType = z.infer<typeof updatePasswordSchema>;
+
+export type CreateCategoryType = z.infer<typeof createCategorySchema>;

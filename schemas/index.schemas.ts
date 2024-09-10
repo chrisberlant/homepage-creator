@@ -7,11 +7,26 @@ export const urlSchema = z
 	})
 	.url({ message: 'Please enter a valid URL' });
 
+export const createLinkSchema = z.object({
+	title: z.string().min(1, {
+		message: 'Link title must be at least 1 character.',
+	}),
+	url: z.string().min(1, {
+		message: 'URL must be at least 1 character.',
+	}),
+});
+
 export const updateLinkSchema = z.strictObject({
 	title: z.string().min(2, {
 		message: 'Title must be at least 2 characters',
 	}),
 	url: urlSchema,
+});
+
+export const createCategorySchema = z.object({
+	title: z.string().min(1, {
+		message: 'Title must be at least 1 character.',
+	}),
 });
 
 export const registerSchema = z

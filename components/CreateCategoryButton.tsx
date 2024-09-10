@@ -2,7 +2,6 @@
 
 import { useContext, useState } from 'react';
 import { Input } from './ui/input';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import {
@@ -27,19 +26,13 @@ import {
 	AlertDialogHeader,
 	AlertDialogFooter,
 } from '@/components/ui/alert-dialog';
-
-const createCategoryFormSchema = z.object({
-	title: z.string().min(1, {
-		message: 'Title must be at least 1 character.',
-	}),
-});
-
-type createCategoryFormType = z.infer<typeof createCategoryFormSchema>;
+import { createCategorySchema } from '../schemas/index.schemas';
+import { CreateCategoryType } from '@/lib/types';
 
 export default function CreateCategoryButton() {
 	const { editingMode } = useContext(EditingModeContext);
-	const form = useForm<createCategoryFormType>({
-		resolver: zodResolver(createCategoryFormSchema),
+	const form = useForm<CreateCategoryType>({
+		resolver: zodResolver(createCategorySchema),
 		defaultValues: {
 			title: '',
 		},

@@ -22,12 +22,17 @@ interface UseCreateLinkProps {
 		undefined
 	>;
 	setOpenedMenu: Dispatch<SetStateAction<boolean>>;
+	setDisabledDragging: Dispatch<SetStateAction<boolean>>;
 }
 // Create a link
-export const useCreateLink = ({ form, setOpenedMenu }: UseCreateLinkProps) =>
+export const useCreateLink = ({
+	form,
+	setOpenedMenu,
+	setDisabledDragging,
+}: UseCreateLinkProps) =>
 	useMutation({
 		mutationFn: createLink,
-		onMutate: async (infos) => {
+		onMutate: async (data) => {
 			await browserQueryClient?.cancelQueries({
 				queryKey: ['categories'],
 			});
@@ -40,12 +45,12 @@ export const useCreateLink = ({ form, setOpenedMenu }: UseCreateLinkProps) =>
 				['categories'],
 				(categories: CategoryWithLinksType[]) =>
 					categories.map((category) =>
-						category.id === infos.categoryId
+						category.id === data.categoryId
 							? {
 									...category,
 									links: [
 										...category.links,
-										{ ...infos, id: 9999 },
+										{ ...data, id: 9999 },
 									],
 							  }
 							: category
@@ -73,6 +78,7 @@ export const useCreateLink = ({ form, setOpenedMenu }: UseCreateLinkProps) =>
 			);
 			form.reset();
 			setOpenedMenu(false);
+			setDisabledDragging(false);
 			toast.success('Link successfully created');
 		},
 		onError: (error, __, previousCategories) => {

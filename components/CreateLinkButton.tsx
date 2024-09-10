@@ -1,9 +1,14 @@
 'use client';
 
-import { PlusIcon, MinusIcon } from 'lucide-react';
-import { useState } from 'react';
+import {
+	PlusIcon,
+	MinusIcon,
+	XIcon,
+	BookmarkIcon,
+	BookmarkPlusIcon,
+} from 'lucide-react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Input } from './ui/input';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import {
@@ -16,51 +21,50 @@ import {
 } from './ui/form';
 import { Button } from './ui/button';
 import { useCreateLink } from '@/queries/links.queries';
-
-const createLinkFormSchema = z.object({
-	title: z.string().min(1, {
-		message: 'Link title must be at least 1 character.',
-	}),
-	url: z.string().min(1, {
-		message: 'URL must be at least 1 character.',
-	}),
-});
-
-type createLinkFormType = z.infer<typeof createLinkFormSchema>;
+import { createLinkSchema } from '@/schemas/index.schemas';
+import { CreateLinkType } from '@/lib/types';
+import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
 
 export default function CreateLinkButton({
 	categoryId,
 }: {
 	categoryId: number;
 }) {
-	const form = useForm<createLinkFormType>({
-		resolver: zodResolver(createLinkFormSchema),
+	const form = useForm<CreateLinkType>({
+		resolver: zodResolver(createLinkSchema),
 		defaultValues: {
 			title: '',
 			url: '',
 		},
 	});
+	const { setDisabledDragging } = useContext(DisabledDraggingContext);
 	const [openedMenu, setOpenedMenu] = useState(false);
-	const { mutate: createLink } = useCreateLink({ form, setOpenedMenu });
+	const { mutate: createLink } = useCreateLink({
+		form,
+		setOpenedMenu,
+		setDisabledDragging,
+	});
+
+	const inputRef = useRef<HTMLInputElement>(null);
+
+	useEffect(() => {
+		if (inputRef.current && openedMenu) inputRef.current.focus();
+	}, [openedMenu]);
 
 	return (
 		<>
-			{openedMenu ? (
-				<MinusIcon
-					onClick={() => setOpenedMenu(!openedMenu)}
-					className='mb-4 cursor-pointer'
-				/>
-			) : (
-				<PlusIcon
-					onClick={() => setOpenedMenu(!openedMenu)}
-					className='mb-4 cursor-pointer'
-				/>
-			)}
+			<BookmarkPlusIcon
+				onClick={() => {
+					setOpenedMenu(true);
+					setDisabledDragging(true);
+				}}
+				className='mb-4 cursor-pointer'
+			/>
 
 			{openedMenu && (
 				<Form {...form}>
 					<form
-						onSubmit={form.handleSubmit(async (e) => {
+						onSubmit={form.handleSubmit((e) => {
 							const { title, url } = e;
 							createLink({
 								title,
@@ -70,6 +74,13 @@ export default function CreateLinkButton({
 						})}
 						className='flex flex-col mb-4 border p-4 bg-card rounded-xl absolute z-50'
 					>
+						<XIcon
+							className='cursor-pointer absolute right-2 top-2'
+							onClick={() => {
+								setOpenedMenu(false);
+								setDisabledDragging(false);
+							}}
+						/>
 						<FormField
 							control={form.control}
 							name='title'
@@ -77,7 +88,7 @@ export default function CreateLinkButton({
 								<FormItem>
 									<FormLabel>Insert title</FormLabel>
 									<FormControl>
-										<Input {...field} />
+										<Input {...field} ref={inputRef} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>

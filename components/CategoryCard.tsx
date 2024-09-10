@@ -1,7 +1,12 @@
 'use client';
 
 import React, { useContext, useState } from 'react';
-import { ArrowBigDown, ArrowBigUp, Trash2Icon } from 'lucide-react';
+import {
+	ArrowBigDown,
+	ArrowBigUp,
+	FolderPenIcon,
+	Trash2Icon,
+} from 'lucide-react';
 import CreateLinkButton from './CreateLinkButton';
 import { EditingModeContext } from './providers/EditingModeContextProvider';
 import LinkCard from './LinkCard';
@@ -15,6 +20,7 @@ import { CategoryWithLinksType } from '@/lib/types';
 import { CSS } from '@dnd-kit/utilities';
 import { DraggingCategoryContext } from './providers/DndContextProvider';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
+import EditCategoryTitleForm from './EditCategoryTitleForm';
 
 export default function CategoryCard({
 	id,
@@ -24,7 +30,10 @@ export default function CategoryCard({
 	const { editingMode } = useContext(EditingModeContext);
 	const draggingCategory = useContext(DraggingCategoryContext);
 	const { disabledDragging } = useContext(DisabledDraggingContext);
+
+	const [editingTitle, setEditingTitle] = useState(false);
 	const { mutate: deleteCategory } = useDeleteCategory();
+
 	const {
 		isOver,
 		attributes,
@@ -45,6 +54,9 @@ export default function CategoryCard({
 	};
 
 	const [opened, setOpened] = useState(true);
+
+	const { setDisabledDragging } = useContext(DisabledDraggingContext);
+
 	// const contentRef = useRef<HTMLDivElement>(null);
 	const toggleView = () => setOpened(!opened);
 
@@ -85,32 +97,47 @@ export default function CategoryCard({
 						editingMode ? 'cursor-move' : 'cursor-pointer'
 					}`}
 				>
-					<div className='flex mb-5'>
+					<div className='flex mb-5 relative justify-center items-center'>
 						{opened ? (
 							<ArrowBigUp
 								onClick={toggleView}
-								className='absolute cursor-pointer'
+								className='cursor-pointer absolute left-0'
 							/>
 						) : (
 							<ArrowBigDown
 								onClick={toggleView}
-								className='absolute cursor-pointer'
+								className='cursor-pointer absolute left-0'
 							/>
 						)}
-						<h2 className='font-bold text-center flex-1'>
-							{title}
-						</h2>
+						{editingMode && !editingTitle && (
+							<FolderPenIcon
+								className='cursor-pointer size-4 mr-2'
+								onClick={() => {
+									setEditingTitle(!editingTitle);
+									setDisabledDragging(true);
+								}}
+							/>
+						)}
+						{editingTitle ? (
+							<EditCategoryTitleForm
+								id={id}
+								defaultTitle={title}
+								setEditingTitle={setEditingTitle}
+							/>
+						) : (
+							<h2 className='font-bold'>{title}</h2>
+						)}
 					</div>
 
 					{editingMode && (
-						<>
+						<div className='flex justify-between'>
 							<CreateLinkButton categoryId={id} />
 							<Trash2Icon
 								stroke='red'
-								className='absolute right-4 top-3 cursor-pointer'
+								className='cursor-pointer'
 								onClick={() => deleteCategory(id)}
 							/>
-						</>
+						</div>
 					)}
 					{opened && !draggingCategory && (
 						<div
