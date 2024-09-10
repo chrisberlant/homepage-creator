@@ -3,6 +3,9 @@
 import { ReactNode, useState } from 'react';
 import { createContext } from 'react';
 import DndContextProvider from './DndContextProvider';
+import DisabledDraggingContextProvider, {
+	DisabledDraggingContext,
+} from './DisabledDraggingContextProvider';
 
 type EditingModeContextType = {
 	editingMode: boolean;
@@ -28,7 +31,11 @@ export default function EditingModeContextProvider({
 	return (
 		<EditingModeContext.Provider value={value}>
 			{editingMode ? (
-				<DndContextProvider>{children}</DndContextProvider>
+				<DndContextProvider>
+					<DisabledDraggingContextProvider>
+						{children}
+					</DisabledDraggingContextProvider>
+				</DndContextProvider>
 			) : (
 				<>{children}</>
 			)}

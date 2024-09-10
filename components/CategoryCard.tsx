@@ -14,6 +14,7 @@ import { useDeleteCategory } from '@/queries/categories.queries';
 import { CategoryWithLinksType } from '@/lib/types';
 import { CSS } from '@dnd-kit/utilities';
 import { DraggingCategoryContext } from './providers/DndContextProvider';
+import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
 
 export default function CategoryCard({
 	id,
@@ -22,7 +23,7 @@ export default function CategoryCard({
 }: CategoryWithLinksType) {
 	const { editingMode } = useContext(EditingModeContext);
 	const draggingCategory = useContext(DraggingCategoryContext);
-	const [disabledDragging, setDisabledDragging] = useState(false);
+	const { disabledDragging } = useContext(DisabledDraggingContext);
 	const { mutate: deleteCategory } = useDeleteCategory();
 	const {
 		isOver,
@@ -127,8 +128,6 @@ export default function CategoryCard({
 									title={link.title}
 									url={link.url}
 									categoryId={id}
-									disabledDragging={disabledDragging}
-									setDisabledDragging={setDisabledDragging}
 								/>
 							))}
 						</div>

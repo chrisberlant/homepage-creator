@@ -10,22 +10,18 @@ import { useDeleteLink } from '@/queries/links.queries';
 import { LinkWithCategoryType } from '@/lib/types';
 import Image from 'next/image';
 import FaviconNotFound from './FaviconNotFound';
+import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
 
 export default function LinkCard({
 	id,
 	title,
 	url,
 	categoryId,
-	disabledDragging,
-	setDisabledDragging,
-}: LinkWithCategoryType & {
-	disabledDragging: boolean;
-	setDisabledDragging: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+}: LinkWithCategoryType) {
 	const { editingMode } = useContext(EditingModeContext);
+	const { disabledDragging } = useContext(DisabledDraggingContext);
 	const { mutate: deleteLink } = useDeleteLink();
 	const [faviconFound, setFaviconFound] = useState(true);
-
 	const {
 		attributes,
 		listeners,
@@ -40,6 +36,7 @@ export default function LinkCard({
 		},
 		disabled: disabledDragging,
 	});
+
 	const style = {
 		transform: CSS.Transform.toString(transform),
 		opacity: isDragging ? 0.3 : 1,
@@ -59,7 +56,6 @@ export default function LinkCard({
 			{editingMode ? (
 				<>
 					<LinkCardEditButton
-						setDisabledDragging={setDisabledDragging}
 						defaultTitle={title}
 						defaultUrl={url}
 						id={id}

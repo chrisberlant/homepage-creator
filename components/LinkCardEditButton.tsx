@@ -23,22 +23,21 @@ import {
 	FormControl,
 	FormMessage,
 } from './ui/form';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useUpdateLink } from '@/queries/links.queries';
 import Image from 'next/image';
 import { updateLinkType } from '../lib/types';
 import { updateLinkSchema, urlSchema } from '../schemas/index.schemas';
 import FaviconNotFound from './FaviconNotFound';
+import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
 
 interface LinkCardEditButtonProps {
-	setDisabledDragging: React.Dispatch<React.SetStateAction<boolean>>;
 	defaultTitle: string;
 	defaultUrl: string;
 	id: number;
 }
 
 export default function LinkCardEditButton({
-	setDisabledDragging,
 	defaultTitle,
 	defaultUrl,
 	id,
@@ -53,6 +52,7 @@ export default function LinkCardEditButton({
 	const { mutate: updateLink } = useUpdateLink();
 	const [open, setOpen] = useState(false);
 	const url = form.getValues('url');
+	const { setDisabledDragging } = useContext(DisabledDraggingContext);
 	const [faviconFound, setFaviconFound] = useState(true);
 
 	return (
