@@ -96,6 +96,7 @@ export async function moveLink({
 			if (!link) throw new Error('Cannot find link');
 
 			const { index: currentIndex, categoryId: currentCategoryId } = link;
+			let newIndexPosition = 0;
 
 			if (
 				newIndex === currentIndex &&
@@ -135,6 +136,8 @@ export async function moveLink({
 
 				if (newIndex < currentIndex) {
 					// If new index is smaller than the current one
+					newIndexPosition = newIndex <= -1 ? 0 : newIndex;
+
 					await prisma.link.updateMany({
 						where: {
 							ownerId: session.user.id,
@@ -142,7 +145,7 @@ export async function moveLink({
 								not: id,
 							},
 							index: {
-								gte: newIndex,
+								gte: newIndexPosition,
 								lt: currentIndex,
 							},
 							categoryId: currentCategoryId,
@@ -155,6 +158,21 @@ export async function moveLink({
 					});
 				} else {
 					// If new index is bigger than the current one
+					const highestIndex = await prisma.link.findFirst({
+						where: {
+							ownerId: session.user.id,
+							categoryId: currentCategoryId,
+						},
+						orderBy: {
+							index: 'desc',
+						},
+					});
+
+					newIndexPosition =
+						highestIndex && newIndex > highestIndex.index
+							? highestIndex.index
+							: newIndex;
+
 					await prisma.link.updateMany({
 						where: {
 							id: {
@@ -162,7 +180,7 @@ export async function moveLink({
 							},
 							ownerId: session.user.id,
 							index: {
-								lte: newIndex,
+								lte: newIndexPosition,
 								gt: currentIndex,
 							},
 							categoryId: currentCategoryId,
@@ -181,7 +199,7 @@ export async function moveLink({
 						ownerId: session.user.id,
 					},
 					data: {
-						index: newIndex,
+						index: newIndexPosition,
 						categoryId: newCategoryId,
 					},
 				});
@@ -229,6 +247,21 @@ export async function moveLink({
 				},
 			});
 
+			const highestIndex = await prisma.link.findFirst({
+				where: {
+					ownerId: session.user.id,
+					categoryId: newCategoryId,
+				},
+				orderBy: {
+					index: 'desc',
+				},
+			});
+
+			newIndexPosition =
+				highestIndex && newIndex > highestIndex.index + 1
+					? highestIndex.index + 1
+					: newIndex;
+
 			await prisma.link.updateMany({
 				where: {
 					id: {
@@ -236,7 +269,7 @@ export async function moveLink({
 					},
 					ownerId: session.user.id,
 					index: {
-						gte: newIndex,
+						gte: newIndexPosition,
 					},
 					categoryId: newCategoryId,
 				},
@@ -254,7 +287,7 @@ export async function moveLink({
 				},
 				data: {
 					categoryId: newCategoryId,
-					index: newIndex,
+					index: newIndexPosition,
 				},
 			});
 		});

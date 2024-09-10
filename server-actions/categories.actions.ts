@@ -2,7 +2,6 @@
 
 import prisma from '@/lib/prisma';
 import { getSession } from './auth.actions';
-import { CategoryType } from '@/lib/types';
 
 export async function createCategory(title: string) {
 	const session = await getSession();
@@ -21,13 +20,13 @@ export async function createCategory(title: string) {
 
 			const newIndex = lastCategory !== null ? lastCategory.index + 1 : 0;
 
-			return (await prisma.category.create({
+			return await prisma.category.create({
 				data: {
 					title,
 					index: newIndex,
 					ownerId: session.user.id,
 				},
-			})) as CategoryType;
+			});
 		});
 	} catch (error) {
 		throw new Error('Cannot create category');
@@ -80,6 +79,7 @@ export async function moveCategory({
 			if (!category) throw new Error('Cannot find category');
 
 			const { index: currentIndex } = category;
+			let newIndexPosition = 0;
 
 			if (newIndex === currentIndex)
 				throw new Error(
@@ -107,6 +107,19 @@ export async function moveCategory({
 				});
 			} else {
 				// If new index is bigger than the current one
+				const highestIndex = await prisma.category.findFirst({
+					where: {
+						ownerId: session.user.id,
+					},
+					orderBy: {
+						index: 'desc',
+					},
+				});
+				newIndexPosition =
+					highestIndex && newIndex > highestIndex.index
+						? highestIndex.index
+						: newIndex;
+
 				await prisma.category.updateMany({
 					where: {
 						id: {
@@ -114,7 +127,7 @@ export async function moveCategory({
 						},
 						ownerId: session.user.id,
 						index: {
-							lte: newIndex,
+							lte: newIndexPosition,
 							gt: currentIndex,
 						},
 					},
@@ -132,7 +145,7 @@ export async function moveCategory({
 					ownerId: session.user.id,
 				},
 				data: {
-					index: newIndex,
+					index: newIndexPosition,
 				},
 			});
 		});
