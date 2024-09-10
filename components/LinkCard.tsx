@@ -11,6 +11,7 @@ import { LinkWithCategoryType } from '@/lib/types';
 import Image from 'next/image';
 import FaviconNotFound from './FaviconNotFound';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
+import { Button } from './ui/button';
 
 export default function LinkCard({
 	id,
@@ -60,8 +61,8 @@ export default function LinkCard({
 						defaultUrl={url}
 						id={id}
 					/>
-					<div className='flex'>
-						<div className='flex items-center justify-center mr-2'>
+					<div className='flex flex-1 items-center justify-center'>
+						<div className='flex  mr-2'>
 							{faviconFound ? (
 								<Image
 									height={15}
@@ -76,12 +77,12 @@ export default function LinkCard({
 						</div>
 						{title}
 					</div>
-					<Trash2Icon
-						stroke='red'
-						size={18}
-						className='cursor-pointer'
+					<button
+						className='absolute right-1.5 top-1.5 p-0'
 						onClick={() => deleteLink(id)}
-					/>
+					>
+						<Trash2Icon stroke='red' size={18} />
+					</button>
 				</>
 			) : (
 				<a

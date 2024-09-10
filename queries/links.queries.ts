@@ -145,27 +145,49 @@ export const useUpdateLink = () =>
 				queryKey: ['categories'],
 			});
 
-			const previousCategories: CategoryType[] | undefined =
+			const previousCategories: CategoryWithLinksType[] | undefined =
 				browserQueryClient?.getQueryData(['categories']);
-			if (!previousCategories || !browserQueryClient) return;
+
+			const currentCategory = previousCategories?.find((category) =>
+				category.links.some((link) => link.id === updatedLink.id)
+			);
+			const currentLink = currentCategory?.links.find(
+				(link) => link.id === link.id
+			);
+			if (
+				!previousCategories ||
+				!currentCategory ||
+				!currentLink ||
+				!browserQueryClient
+			)
+				return;
+
+			if (JSON.stringify(currentLink) === JSON.stringify(updatedLink))
+				throw new Error('No data modified');
 
 			browserQueryClient.setQueryData(
 				['categories'],
 				(categories: CategoryWithLinksType[]) =>
-					categories.map((category) => ({
-						...category,
-						links: category.links.map((link) =>
-							link.id === updatedLink.id
-								? { ...link, ...updatedLink }
-								: link
-						),
-					}))
+					categories.map((category) =>
+						category.id === currentCategory.id
+							? {
+									...category,
+									links: category.links.map((link) =>
+										link.id === updatedLink.id
+											? { ...link, ...updatedLink }
+											: link
+									),
+							  }
+							: category
+					)
 			);
 
 			return previousCategories;
 		},
 		onSuccess: () => toast.success('Link successfully updated'),
 		onError: (error, __, previousCategories) => {
+			if (error.message === 'No data modified')
+				return toast.info(error.message);
 			toast.error(error.message);
 			browserQueryClient?.setQueryData(
 				['categories'],

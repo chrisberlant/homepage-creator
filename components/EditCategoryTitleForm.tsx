@@ -29,9 +29,7 @@ export default function EditCategoryTitleForm({
 	});
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	const { disabledDragging, setDisabledDragging } = useContext(
-		DisabledDraggingContext
-	);
+	const { setDisabledDragging } = useContext(DisabledDraggingContext);
 	const { mutate: updateCategory } = useUpdateCategory({
 		setEditingTitle,
 		setDisabledDragging,
@@ -57,11 +55,10 @@ export default function EditCategoryTitleForm({
 					name='title'
 					render={({ field }) => (
 						<FormItem>
-							{/* <FormLabel>Insert title</FormLabel> */}
 							<FormControl>
 								<Input
 									{...field}
-									className='h-8'
+									className='h-8 w-32'
 									ref={inputRef}
 								/>
 							</FormControl>
@@ -73,7 +70,7 @@ export default function EditCategoryTitleForm({
 					type='submit'
 					variant='ghost'
 					size='icon'
-					className='h-8'
+					className='h-8 px-1'
 				>
 					<CheckIcon className='h-4 w-4' />
 				</Button>
@@ -81,7 +78,7 @@ export default function EditCategoryTitleForm({
 					type='reset'
 					variant='ghost'
 					size='icon'
-					className='h-8'
+					className='h-8 px-1'
 					onClick={() => {
 						setEditingTitle(false);
 						setDisabledDragging(false);

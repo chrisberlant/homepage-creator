@@ -21,6 +21,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { DraggingCategoryContext } from './providers/DndContextProvider';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
 import EditCategoryTitleForm from './EditCategoryTitleForm';
+import { Button } from './ui/button';
 
 export default function CategoryCard({
 	id,
@@ -81,9 +82,7 @@ export default function CategoryCard({
 					style={style}
 					{...listeners}
 					{...attributes}
-					className={`border-2 shadow-md dark:shadow-none bg-card py-2 px-5 m-4 w-1/4 rounded-2xl relative ${
-						editingMode ? 'cursor-move' : 'cursor-pointer'
-					}`}
+					className='border-2 shadow-md dark:shadow-none bg-card py-3 px-5 m-4 w-1/4 rounded-2xl relative'
 				>
 					<h2 className='font-bold text-center flex-1'>{title}</h2>
 				</div>
@@ -93,30 +92,29 @@ export default function CategoryCard({
 					style={style}
 					{...listeners}
 					{...attributes}
-					className={`border-2 shadow-md dark:shadow-none bg-card py-2 px-5 m-4 w-1/4 rounded-2xl relative ${
-						editingMode ? 'cursor-move' : 'cursor-pointer'
+					className={`border-2 shadow-md dark:shadow-none bg-card pt-3 pb-3 px-5 m-4 w-1/4 rounded-2xl relative ${
+						editingMode ? 'cursor-move pt-1' : 'cursor-default'
 					}`}
 				>
 					<div className='flex mb-5 relative justify-center items-center'>
-						{opened ? (
-							<ArrowBigUp
-								onClick={toggleView}
-								className='cursor-pointer absolute left-0'
-							/>
-						) : (
-							<ArrowBigDown
-								onClick={toggleView}
-								className='cursor-pointer absolute left-0'
-							/>
-						)}
+						<Button
+							variant='ghost'
+							className='py-0 px-1 absolute -left-4'
+							onClick={toggleView}
+						>
+							{opened ? <ArrowBigUp /> : <ArrowBigDown />}
+						</Button>
 						{editingMode && !editingTitle && (
-							<FolderPenIcon
-								className='cursor-pointer size-4 mr-2'
+							<Button
+								variant='ghost'
+								className='mr-2 py-1 px-2'
 								onClick={() => {
 									setEditingTitle(!editingTitle);
 									setDisabledDragging(true);
 								}}
-							/>
+							>
+								<FolderPenIcon className='size-4' />
+							</Button>
 						)}
 						{editingTitle ? (
 							<EditCategoryTitleForm
@@ -132,11 +130,13 @@ export default function CategoryCard({
 					{editingMode && (
 						<div className='flex justify-between'>
 							<CreateLinkButton categoryId={id} />
-							<Trash2Icon
-								stroke='red'
-								className='cursor-pointer'
+							<Button
+								variant='ghost'
+								className='mb-2 py-1 px-2'
 								onClick={() => deleteCategory(id)}
-							/>
+							>
+								<Trash2Icon stroke='red' />
+							</Button>
 						</div>
 					)}
 					{opened && !draggingCategory && (

@@ -30,6 +30,7 @@ import { updateLinkType } from '../lib/types';
 import { updateLinkSchema, urlSchema } from '../schemas/index.schemas';
 import FaviconNotFound from './FaviconNotFound';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
+import { Button } from './ui/button';
 
 interface LinkCardEditButtonProps {
 	defaultTitle: string;
@@ -57,12 +58,14 @@ export default function LinkCardEditButton({
 
 	return (
 		<AlertDialog open={open} onOpenChange={setOpen}>
-			<AlertDialogTrigger>
-				<PenIcon
-					className='cursor-pointer'
-					size={18}
+			<AlertDialogTrigger asChild>
+				<Button
+					variant='ghost'
+					className='px-2 absolute bottom-0 left-3'
 					onClick={() => setDisabledDragging(true)}
-				/>
+				>
+					<PenIcon size={18} />
+				</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<Form {...form}>
@@ -123,7 +126,7 @@ export default function LinkCardEditButton({
 												)}
 											</div>
 											<Input
-												className='pl-10'
+												className='pl-11'
 												{...field}
 											/>
 										</div>
