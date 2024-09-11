@@ -1,13 +1,11 @@
 'use server';
 
-import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { registerType } from '@/components/RegisterForm';
 import { credentialsType, SessionType } from '@/lib/types';
-
-const secretKey = new TextEncoder().encode(process.env.SECRET_KEY);
+import bcrypt from 'bcrypt';
+import { decrypt, encrypt } from '@/lib/jwt';
 
 export async function login(values: credentialsType) {
 	try {
@@ -16,9 +14,14 @@ export async function login(values: credentialsType) {
 				username: values.username,
 			},
 		});
+		if (!user) throw new Error('Incorrect credentials');
 
-		if (!user || values.password !== user.password)
-			throw new Error('Incorrect credentials');
+		const passwordsMatch = await bcrypt.compare(
+			values.password,
+			user.password
+		);
+		if (!passwordsMatch) throw new Error('Incorrect credentials');
+
 		// Create the session
 		const expires = new Date(Date.now() + 60 * 60 * 10000);
 		const { id, username, email } = user;
@@ -29,49 +32,6 @@ export async function login(values: credentialsType) {
 	} catch (error) {
 		throw new Error('Incorrect credentials');
 	}
-}
-
-export async function encrypt(payload: any) {
-	return await new SignJWT(payload)
-		.setProtectedHeader({ alg: 'HS256' })
-		.setIssuedAt()
-		.setExpirationTime('12h')
-		.sign(secretKey);
-}
-
-export async function decrypt(input: string): Promise<any> {
-	const { payload } = await jwtVerify(input, secretKey, {
-		algorithms: ['HS256'],
-	});
-	return payload;
-}
-
-export async function logout() {
-	// Destroy the session
-	cookies().delete('session');
-}
-
-export async function getSession() {
-	const session = cookies().get('session')?.value;
-	if (!session) return null;
-	return (await decrypt(session)) as SessionType;
-}
-
-export async function updateSession(request: NextRequest) {
-	const session = request.cookies.get('session')?.value;
-	if (!session) return;
-
-	// Refresh the session so it doesn't expire
-	const parsed = await decrypt(session);
-	parsed.expires = new Date(Date.now() + 60 * 60 * 1000);
-	const res = NextResponse.next();
-	res.cookies.set({
-		name: 'session',
-		value: await encrypt(parsed),
-		httpOnly: true,
-		expires: parsed.expires,
-	});
-	return res;
 }
 
 export async function getAuth() {
@@ -99,14 +59,28 @@ export async function register(values: registerType) {
 		});
 		if (alreadyExistingUser) throw new Error('User already exists');
 
+		const saltRounds = Number(process.env.SALT_ROUNDS);
+		const hashedPassword = await bcrypt.hash(values.password, saltRounds);
+
 		return await prisma.user.create({
 			data: {
 				username: values.username,
 				email: values.email,
-				password: values.password,
+				password: hashedPassword,
 			},
 		});
 	} catch (error) {
 		throw new Error('Cannot register the user');
 	}
+}
+
+export async function logout() {
+	// Destroy the session
+	cookies().delete('session');
+}
+
+export async function getSession() {
+	const session = cookies().get('session')?.value;
+	if (!session) return null;
+	return (await decrypt(session)) as SessionType;
 }

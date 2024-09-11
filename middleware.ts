@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server';
-import { updateSession } from './server-actions/auth.actions';
+import { updateSession } from './lib/jwt';
 
 export async function middleware(request: NextRequest) {
 	console.log('Route Middleware', request.nextUrl.pathname);
-	// return await updateSession(request);
+	return await updateSession(request);
 }
 
 // Optionally, don't invoke Middleware on some paths
