@@ -82,10 +82,10 @@ export async function moveLink({
 	newIndex?: number | undefined;
 	newCategoryId: number;
 }) {
-	const session = await getSession();
-	if (!session) throw new Error('Session not found or invalid');
-
 	try {
+		const session = await getSession();
+		if (!session) throw new Error('Session not found or invalid');
+
 		return await prisma.$transaction(async (prisma) => {
 			const link = await prisma.link.findUnique({
 				where: {

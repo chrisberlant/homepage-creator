@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation';
 import LoginForm from '@/components/LoginForm';
 import { getSession } from '@/server-actions/auth.actions';
-import { buttonVariants } from '../components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
 
-export default async function Home() {
+export default async function Login() {
 	const session = await getSession();
 	if (session) redirect('/home');
 

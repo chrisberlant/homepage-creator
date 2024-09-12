@@ -2,7 +2,7 @@ import RegisterForm from '@/components/RegisterForm';
 import Link from 'next/link';
 import { buttonVariants } from '../../components/ui/button';
 
-export default function Page() {
+export default function Register() {
 	return (
 		<div className='flex flex-col items-center'>
 			<RegisterForm />

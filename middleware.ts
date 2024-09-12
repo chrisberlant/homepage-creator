@@ -1,9 +1,16 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { updateSession } from './lib/jwt';
 
 export async function middleware(request: NextRequest) {
-	console.log('Route Middleware', request.nextUrl.pathname);
-	return await updateSession(request);
+	const { pathname } = request.nextUrl;
+	const unprotectedRoutes = ['/', '/login', 'register'];
+	console.log('Route Middleware', pathname);
+
+	if (!unprotectedRoutes.includes(pathname)) {
+		return await updateSession(request);
+	}
+
+	return NextResponse.next();
 }
 
 // Optionally, don't invoke Middleware on some paths

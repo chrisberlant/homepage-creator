@@ -1,10 +1,10 @@
 'use server';
 
 import prisma from '@/lib/prisma';
-import { updatePasswordType, updateUserType } from '@/lib/types';
 import { getSession } from './auth.actions';
+import { UpdateUserType, UpdatePasswordType } from '@/lib/types';
 
-export async function updateUser({ username, email }: updateUserType) {
+export async function updateUser({ username, email }: UpdateUserType) {
 	const session = await getSession();
 	if (!session) throw new Error('Session not found or invalid');
 
@@ -29,7 +29,7 @@ export async function updateUser({ username, email }: updateUserType) {
 export async function updatePassword({
 	password,
 	newPassword,
-}: updatePasswordType) {
+}: UpdatePasswordType) {
 	const session = await getSession();
 	if (!session) throw new Error('Session not found or invalid');
 
