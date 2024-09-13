@@ -25,7 +25,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useGetUser } from '@/queries/auth.queries';
-import { updateUserSchema } from '@/schemas/index.schemas';
+import { updateUserSchema } from '@/schemas/auth.schemas.ts';
 import { useUpdateUser } from '@/queries/user.queries';
 import { toast } from 'sonner';
 import PasswordDetails from './PasswordDetails';

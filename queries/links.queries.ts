@@ -17,6 +17,7 @@ interface UseCreateLinkProps {
 		{
 			title: string;
 			url: string;
+			categoryId: number;
 		},
 		any,
 		undefined
@@ -50,7 +51,11 @@ export const useCreateLink = ({
 									...category,
 									links: [
 										...category.links,
-										{ ...data, id: 9999 },
+										{
+											title: data.title,
+											url: data.url,
+											id: 9999,
+										},
 									],
 							  }
 							: category
@@ -60,16 +65,20 @@ export const useCreateLink = ({
 			return previousCategories;
 		},
 		onSuccess: (apiResponse) => {
+			console.log(apiResponse);
 			browserQueryClient?.setQueryData(
 				['categories'],
 				(categories: CategoryWithLinksType[]) =>
 					categories.map((category) =>
-						category.id === apiResponse.categoryId
+						category.id === apiResponse?.data?.categoryId
 							? {
 									...category,
 									links: category.links.map((link) =>
 										link.id === 9999
-											? { ...link, id: apiResponse.id }
+											? {
+													...link,
+													id: apiResponse?.data?.id,
+											  }
 											: link
 									),
 							  }
@@ -94,7 +103,7 @@ export const useCreateLink = ({
 export const useDeleteLink = () =>
 	useMutation({
 		mutationFn: deleteLink,
-		onMutate: async (linkId) => {
+		onMutate: async (id) => {
 			await browserQueryClient?.cancelQueries({
 				queryKey: ['categories'],
 			});
@@ -104,7 +113,7 @@ export const useDeleteLink = () =>
 			if (!previousCategories || !browserQueryClient) return;
 
 			const oldCategory = previousCategories.find((category) =>
-				category.links.some((link) => link.id === linkId)
+				category.links.some((link) => link.id === id)
 			);
 
 			if (!oldCategory) return;
@@ -117,7 +126,7 @@ export const useDeleteLink = () =>
 							? {
 									...category,
 									links: category.links.filter(
-										(link) => link.id !== linkId
+										(link) => link.id !== id
 									),
 							  }
 							: category

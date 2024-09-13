@@ -15,7 +15,7 @@ import {
 } from './ui/form';
 import { Button } from './ui/button';
 import { useCreateLink } from '@/queries/links.queries';
-import { createLinkSchema, urlSchema } from '@/schemas/index.schemas';
+import { createLinkSchema, urlSchema } from '@/schemas/links.schemas';
 import { CreateLinkType } from '@/lib/types';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
 import Image from 'next/image';
@@ -29,6 +29,7 @@ export default function CreateLinkButton({
 	const form = useForm<CreateLinkType>({
 		resolver: zodResolver(createLinkSchema),
 		defaultValues: {
+			categoryId,
 			title: '',
 			url: '',
 		},

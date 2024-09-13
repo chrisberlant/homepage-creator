@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useLogin } from '@/queries/auth.queries';
-import { credentialsSchema } from '@/schemas/index.schemas';
+import { credentialsSchema } from '@/schemas/auth.schemas.ts';
 import { credentialsType } from '@/lib/types';
 
 export default function LoginForm() {

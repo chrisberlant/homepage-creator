@@ -11,7 +11,7 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { GlobeIcon, PenIcon } from 'lucide-react';
+import { PenIcon } from 'lucide-react';
 import { Input } from './ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -26,11 +26,11 @@ import {
 import { useContext, useState } from 'react';
 import { useUpdateLink } from '@/queries/links.queries';
 import Image from 'next/image';
-import { updateLinkType } from '../lib/types';
-import { updateLinkSchema, urlSchema } from '../schemas/index.schemas';
+import { updateLinkType } from '@/lib/types';
 import FaviconNotFound from './FaviconNotFound';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
 import { Button } from './ui/button';
+import { updateLinkSchema, urlSchema } from '@/schemas/links.schemas';
 
 interface LinkCardEditButtonProps {
 	defaultTitle: string;
@@ -46,10 +46,12 @@ export default function LinkCardEditButton({
 	const form = useForm<updateLinkType>({
 		resolver: zodResolver(updateLinkSchema),
 		defaultValues: {
+			id,
 			title: defaultTitle,
 			url: defaultUrl,
 		},
 	});
+
 	const { mutate: updateLink } = useUpdateLink();
 	const [open, setOpen] = useState(false);
 	const url = form.getValues('url');
@@ -71,12 +73,7 @@ export default function LinkCardEditButton({
 				<Form {...form}>
 					<form
 						onSubmit={form.handleSubmit(
-							(data) =>
-								updateLink({
-									id,
-									title: data.title,
-									url: data.url,
-								}),
+							(data) => updateLink(data),
 							// If any error in the data
 							() => setOpen(true)
 						)}
@@ -98,7 +95,6 @@ export default function LinkCardEditButton({
 								</FormItem>
 							)}
 						/>
-
 						<FormField
 							control={form.control}
 							name='url'

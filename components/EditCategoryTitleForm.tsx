@@ -6,7 +6,7 @@ import { Form, FormField, FormItem, FormControl, FormMessage } from './ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { CreateCategoryType } from '@/lib/types';
-import { createCategorySchema } from '@/schemas/index.schemas';
+import { createCategorySchema } from '@/schemas/categories.schemas';
 import { useUpdateCategory } from '../queries/categories.queries';
 import { Input } from './ui/input';
 import { useContext, useEffect, useRef } from 'react';

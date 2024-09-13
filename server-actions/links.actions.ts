@@ -2,117 +2,209 @@
 
 import prisma from '@/lib/prisma';
 import { getSession } from './auth.actions';
+import { authActionClient } from './safe-actions';
+import {
+	createLinkSchema,
+	moveLinkSchema,
+	updateLinkSchema,
+} from '@/schemas/links.schemas';
+import { z } from 'zod';
 
-interface CreateLinkProps {
-	title: string;
-	url: string;
-	categoryId: number;
-}
+export const createLink = authActionClient
+	.schema(createLinkSchema)
+	.action(async ({ parsedInput, ctx }) => {
+		const { title, url, categoryId } = parsedInput;
+		const { userId } = ctx;
 
-export async function createLink({ title, url, categoryId }: CreateLinkProps) {
-	const session = await getSession();
-	if (!session) throw new Error('Session not found or invalid');
+		try {
+			return await prisma.$transaction(async (prisma) => {
+				const lastLinkInCategory = await prisma.link.findFirst({
+					where: {
+						categoryId,
+						ownerId: userId,
+					},
+					orderBy: {
+						index: 'desc',
+					},
+				});
 
-	try {
-		return await prisma.$transaction(async (prisma) => {
-			const lastLinkInCategory = await prisma.link.findFirst({
-				where: {
-					ownerId: session.user.id,
-					categoryId,
-				},
-				orderBy: {
-					index: 'desc',
-				},
+				const newIndex =
+					lastLinkInCategory !== null
+						? lastLinkInCategory.index + 1
+						: 0;
+
+				const createdLink = await prisma.link.create({
+					data: {
+						title,
+						url,
+						index: newIndex,
+						categoryId,
+						ownerId: userId,
+					},
+				});
+				const { ownerId, index, ...infos } = createdLink;
+				return infos;
 			});
+		} catch (error) {
+			throw new Error('Cannot create link');
+		}
+	});
 
-			const newIndex =
-				lastLinkInCategory !== null ? lastLinkInCategory.index + 1 : 0;
+export const updateLink = authActionClient
+	.schema(updateLinkSchema)
+	.action(async ({ parsedInput, ctx }) => {
+		const { id, title, url } = parsedInput;
+		const { userId } = ctx;
 
-			const createdLink = await prisma.link.create({
+		try {
+			return await prisma.link.update({
+				where: {
+					id,
+					ownerId: userId,
+				},
 				data: {
 					title,
 					url,
-					index: newIndex,
-					categoryId,
-					ownerId: session.user.id,
 				},
 			});
-			const { ownerId, ...infos } = createdLink;
-			return infos;
-		});
-	} catch (error) {
-		throw new Error('Cannot create link');
-	}
-}
+		} catch (error) {
+			throw new Error('Cannot update link');
+		}
+	});
 
-export async function updateLink({
-	id,
-	title,
-	url,
-}: {
-	id: number;
-	title: string;
-	url: string;
-}) {
-	const session = await getSession();
-	if (!session) throw new Error('Session not found or invalid');
+export const moveLink = authActionClient
+	.schema(moveLinkSchema)
+	.action(async ({ parsedInput, ctx }) => {
+		try {
+			const { id, newIndex, newCategoryId } = parsedInput;
+			const { userId } = ctx;
 
-	try {
-		return await prisma.link.update({
-			where: {
-				id,
-				ownerId: session.user.id,
-			},
-			data: {
-				title,
-				url,
-			},
-		});
-	} catch (error) {
-		throw new Error('Cannot update link');
-	}
-}
+			return await prisma.$transaction(async (prisma) => {
+				const link = await prisma.link.findUnique({
+					where: {
+						id,
+						ownerId: userId,
+					},
+				});
+				if (!link) throw new Error('Cannot find link');
 
-export async function moveLink({
-	id,
-	newIndex,
-	newCategoryId,
-}: {
-	id: number;
-	newIndex?: number | undefined;
-	newCategoryId: number;
-}) {
-	try {
-		const session = await getSession();
-		if (!session) throw new Error('Session not found or invalid');
+				const { index: currentIndex, categoryId: currentCategoryId } =
+					link;
+				let newIndexPosition = 0;
 
-		return await prisma.$transaction(async (prisma) => {
-			const link = await prisma.link.findUnique({
-				where: {
-					id,
-					ownerId: session.user.id,
-				},
-			});
-			if (!link) throw new Error('Cannot find link');
+				if (
+					newIndex === currentIndex &&
+					currentCategoryId === newCategoryId
+				)
+					throw new Error(
+						'The link is already at the specified location'
+					);
 
-			const { index: currentIndex, categoryId: currentCategoryId } = link;
-			let newIndexPosition = 0;
+				// If moved in the same category
+				if (currentCategoryId === newCategoryId) {
+					// If no index specified, put it at the end of the list
+					if (newIndex === undefined) {
+						const highestIndex = await prisma.link.findFirst({
+							where: {
+								categoryId: newCategoryId,
+								ownerId: userId,
+							},
+							orderBy: {
+								index: 'desc',
+							},
+						});
 
-			if (
-				newIndex === currentIndex &&
-				currentCategoryId === newCategoryId
-			)
-				throw new Error(
-					'The link is already at the specified location'
-				);
+						return await prisma.link.update({
+							where: {
+								id,
+								ownerId: userId,
+							},
+							data: {
+								index:
+									highestIndex !== null
+										? highestIndex?.index + 1
+										: 0,
+							},
+						});
+					}
 
-			// If moved in the same category
-			if (currentCategoryId === newCategoryId) {
-				// If no index specified, put it at the end of the list
+					if (newIndex < currentIndex) {
+						// If new index is smaller than the current one
+						newIndexPosition = newIndex <= -1 ? 0 : newIndex;
+
+						await prisma.link.updateMany({
+							where: {
+								ownerId: userId,
+								id: {
+									not: id,
+								},
+								index: {
+									gte: newIndexPosition,
+									lt: currentIndex,
+								},
+								categoryId: currentCategoryId,
+							},
+							data: {
+								index: {
+									increment: 1,
+								},
+							},
+						});
+					} else {
+						// If new index is bigger than the current one
+						const highestIndex = await prisma.link.findFirst({
+							where: {
+								ownerId: userId,
+								categoryId: currentCategoryId,
+							},
+							orderBy: {
+								index: 'desc',
+							},
+						});
+
+						newIndexPosition =
+							highestIndex && newIndex > highestIndex.index
+								? highestIndex.index
+								: newIndex;
+
+						await prisma.link.updateMany({
+							where: {
+								id: {
+									not: id,
+								},
+								ownerId: userId,
+								index: {
+									lte: newIndexPosition,
+									gt: currentIndex,
+								},
+								categoryId: currentCategoryId,
+							},
+							data: {
+								index: {
+									decrement: 1,
+								},
+							},
+						});
+					}
+
+					return await prisma.link.update({
+						where: {
+							id,
+							ownerId: userId,
+						},
+						data: {
+							index: newIndexPosition,
+							categoryId: newCategoryId,
+						},
+					});
+				}
+
+				// If moved in another category
 				if (newIndex === undefined) {
+					// If no index specified, put it at the end of the list
 					const highestIndex = await prisma.link.findFirst({
 						where: {
-							ownerId: session.user.id,
+							ownerId: userId,
 							categoryId: newCategoryId,
 						},
 						orderBy: {
@@ -123,211 +215,117 @@ export async function moveLink({
 					return await prisma.link.update({
 						where: {
 							id,
-							ownerId: session.user.id,
+							ownerId: userId,
 						},
 						data: {
+							categoryId: newCategoryId,
 							index:
 								highestIndex !== null
-									? highestIndex?.index + 1
+									? highestIndex.index + 1
 									: 0,
 						},
 					});
 				}
 
-				if (newIndex < currentIndex) {
-					// If new index is smaller than the current one
-					newIndexPosition = newIndex <= -1 ? 0 : newIndex;
-
-					await prisma.link.updateMany({
-						where: {
-							ownerId: session.user.id,
-							id: {
-								not: id,
-							},
-							index: {
-								gte: newIndexPosition,
-								lt: currentIndex,
-							},
-							categoryId: currentCategoryId,
-						},
-						data: {
-							index: {
-								increment: 1,
-							},
-						},
-					});
-				} else {
-					// If new index is bigger than the current one
-					const highestIndex = await prisma.link.findFirst({
-						where: {
-							ownerId: session.user.id,
-							categoryId: currentCategoryId,
-						},
-						orderBy: {
-							index: 'desc',
-						},
-					});
-
-					newIndexPosition =
-						highestIndex && newIndex > highestIndex.index
-							? highestIndex.index
-							: newIndex;
-
-					await prisma.link.updateMany({
-						where: {
-							id: {
-								not: id,
-							},
-							ownerId: session.user.id,
-							index: {
-								lte: newIndexPosition,
-								gt: currentIndex,
-							},
-							categoryId: currentCategoryId,
-						},
-						data: {
-							index: {
-								decrement: 1,
-							},
-						},
-					});
-				}
-
-				return await prisma.link.update({
+				// If index is specified
+				await prisma.link.updateMany({
 					where: {
-						id,
-						ownerId: session.user.id,
+						index: {
+							gt: currentIndex,
+						},
+						categoryId: currentCategoryId,
+						ownerId: userId,
 					},
 					data: {
-						index: newIndexPosition,
-						categoryId: newCategoryId,
+						index: {
+							decrement: 1,
+						},
 					},
 				});
-			}
 
-			// If moved in another category
-			if (newIndex === undefined) {
-				// If no index specified, put it at the end of the list
 				const highestIndex = await prisma.link.findFirst({
 					where: {
-						ownerId: session.user.id,
 						categoryId: newCategoryId,
+						ownerId: userId,
 					},
 					orderBy: {
 						index: 'desc',
 					},
 				});
 
+				newIndexPosition =
+					highestIndex && newIndex > highestIndex.index + 1
+						? highestIndex.index + 1
+						: newIndex;
+
+				await prisma.link.updateMany({
+					where: {
+						id: {
+							not: id,
+						},
+						ownerId: userId,
+						index: {
+							gte: newIndexPosition,
+						},
+						categoryId: newCategoryId,
+					},
+					data: {
+						index: {
+							increment: 1,
+						},
+					},
+				});
+
 				return await prisma.link.update({
 					where: {
 						id,
-						ownerId: session.user.id,
+						ownerId: userId,
 					},
 					data: {
 						categoryId: newCategoryId,
-						index:
-							highestIndex !== null ? highestIndex.index + 1 : 0,
+						index: newIndexPosition,
 					},
 				});
-			}
-
-			// If index is specified
-			await prisma.link.updateMany({
-				where: {
-					index: {
-						gt: currentIndex,
-					},
-					categoryId: currentCategoryId,
-					ownerId: session.user.id,
-				},
-				data: {
-					index: {
-						decrement: 1,
-					},
-				},
 			});
+		} catch (error) {
+			throw new Error('Cannot move link');
+		}
+	});
 
-			const highestIndex = await prisma.link.findFirst({
-				where: {
-					ownerId: session.user.id,
-					categoryId: newCategoryId,
-				},
-				orderBy: {
-					index: 'desc',
-				},
+export const deleteLink = authActionClient
+	.schema(z.number())
+	.action(async ({ parsedInput, ctx }) => {
+		const id = parsedInput;
+		const { userId } = ctx;
+
+		try {
+			return await prisma.$transaction(async (prisma) => {
+				const link = await prisma.link.delete({
+					where: {
+						id,
+						ownerId: userId,
+					},
+				});
+
+				await prisma.link.updateMany({
+					where: {
+						id: {
+							not: id,
+						},
+						ownerId: userId,
+						index: {
+							gt: link.index,
+						},
+						categoryId: link.categoryId,
+					},
+					data: {
+						index: {
+							decrement: 1,
+						},
+					},
+				});
 			});
-
-			newIndexPosition =
-				highestIndex && newIndex > highestIndex.index + 1
-					? highestIndex.index + 1
-					: newIndex;
-
-			await prisma.link.updateMany({
-				where: {
-					id: {
-						not: id,
-					},
-					ownerId: session.user.id,
-					index: {
-						gte: newIndexPosition,
-					},
-					categoryId: newCategoryId,
-				},
-				data: {
-					index: {
-						increment: 1,
-					},
-				},
-			});
-
-			return await prisma.link.update({
-				where: {
-					id,
-					ownerId: session.user.id,
-				},
-				data: {
-					categoryId: newCategoryId,
-					index: newIndexPosition,
-				},
-			});
-		});
-	} catch (error) {
-		throw new Error('Cannot move link');
-	}
-}
-
-export async function deleteLink(id: number) {
-	const session = await getSession();
-	if (!session) throw new Error('Session not found or invalid');
-
-	try {
-		return await prisma.$transaction(async (prisma) => {
-			const link = await prisma.link.delete({
-				where: {
-					id,
-					ownerId: session.user.id,
-				},
-			});
-
-			await prisma.link.updateMany({
-				where: {
-					ownerId: session.user.id,
-					id: {
-						not: id,
-					},
-					index: {
-						gt: link.index,
-					},
-					categoryId: link.categoryId,
-				},
-				data: {
-					index: {
-						decrement: 1,
-					},
-				},
-			});
-		});
-	} catch (error) {
-		throw new Error('Cannot delete link');
-	}
-}
+		} catch (error) {
+			throw new Error('Cannot delete link');
+		}
+	});

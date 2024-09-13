@@ -1,12 +1,11 @@
 import { z } from 'zod';
 import {
-	createCategorySchema,
-	createLinkSchema,
 	credentialsSchema,
-	updateLinkSchema,
-	updatePasswordSchema,
 	updateUserSchema,
-} from '@/schemas/index.schemas';
+	updatePasswordSchema,
+} from '@/schemas/auth.schemas.ts';
+import { createCategorySchema } from '../schemas/categories.schemas';
+import { createLinkSchema, updateLinkSchema } from '../schemas/links.schemas';
 
 export type SessionType = {
 	user: { id: number; name: string };

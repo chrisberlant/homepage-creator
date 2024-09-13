@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { useRegister } from '@/queries/auth.queries';
-import { registerSchema } from '../schemas/index.schemas';
+import { registerSchema } from '../schemas/auth.schemas.ts';
 
 export type registerType = z.infer<typeof registerSchema>;
 

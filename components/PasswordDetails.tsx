@@ -16,8 +16,8 @@ import { KeyIcon, UserIcon } from 'lucide-react';
 import { Dispatch, SetStateAction, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { updatePasswordSchema } from '@/schemas/auth.schemas.ts';
 import { useUpdatePassword } from '@/queries/user.queries';
-import { updatePasswordSchema } from '@/schemas/index.schemas';
 import { Button } from './ui/button';
 import {
 	Form,

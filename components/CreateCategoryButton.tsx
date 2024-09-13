@@ -26,8 +26,8 @@ import {
 	AlertDialogHeader,
 	AlertDialogFooter,
 } from '@/components/ui/alert-dialog';
-import { createCategorySchema } from '../schemas/index.schemas';
 import { CreateCategoryType } from '@/lib/types';
+import { createCategorySchema } from '@/schemas/categories.schemas';
 
 export default function CreateCategoryButton() {
 	const { editingMode } = useContext(EditingModeContext);
