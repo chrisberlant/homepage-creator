@@ -1,7 +1,16 @@
 import { SignJWT, jwtVerify } from 'jose';
+import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { SessionType } from './types';
 
 export const secretKey = new TextEncoder().encode(process.env.SECRET_KEY);
+
+export async function getSession() {
+	const session = cookies().get('session')?.value;
+	if (!session) return null;
+
+	return (await decrypt(session)) as SessionType;
+}
 
 export async function encrypt(payload: any) {
 	return await new SignJWT(payload)

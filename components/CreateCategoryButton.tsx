@@ -50,7 +50,7 @@ export default function CreateCategoryButton() {
 					<Form {...form}>
 						<form
 							onSubmit={form.handleSubmit(
-								(data) => createCategory(data.title),
+								(data) => createCategory({ title: data.title }),
 								() => setOpen(true)
 							)}
 						>

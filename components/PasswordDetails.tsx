@@ -42,7 +42,7 @@ export default function PasswordDetails({
 			newPassword: '',
 		},
 	});
-	const { mutate: updatePassword } = useUpdatePassword();
+	const { mutate: updatePassword } = useUpdatePassword(form);
 	const [open, setOpen] = useState(false);
 
 	return (

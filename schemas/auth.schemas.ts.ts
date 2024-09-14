@@ -1,22 +1,33 @@
 import { z } from 'zod';
 
+const usernameSchema = z
+	.string({ required_error: 'Username is required' })
+	.min(2, {
+		message: 'Username must be at least 2 characters.',
+	});
+
+const passwordSchema = z
+	.string({ required_error: 'Password is required' })
+	.min(8, {
+		message: 'Password must be at least 8 characters.',
+	})
+	.regex(
+		/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[$&+,:;=?@#|'<>.^*()%!_-])/,
+		'Password must contain an uppercase letter, a lowercase letter, a number, and a special character'
+	);
+
+export const loginSchema = z.strictObject({
+	username: usernameSchema,
+	password: passwordSchema,
+});
+
 export const registerSchema = z
 	.strictObject({
-		username: z.string({ required_error: 'Username is required' }).min(2, {
-			message: 'Username must be at least 2 characters.',
-		}),
+		username: usernameSchema,
 		email: z
 			.string({ required_error: 'Username is required' })
 			.email('Invalid email address'),
-		password: z
-			.string({ required_error: 'Password is required' })
-			.min(8, {
-				message: 'Password must be at least 8 characters.',
-			})
-			.regex(
-				/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[$&+,:;=?@#|'<>.^*()%!_-])/,
-				'Password must contain an uppercase letter, a lowercase letter, a number, and a special character'
-			),
+		password: passwordSchema,
 		confirmPassword: z
 			.string()
 			.min(8, {
@@ -32,36 +43,14 @@ export const registerSchema = z
 		path: ['confirmPassword'],
 	});
 
-export const credentialsSchema = z.strictObject({
-	username: z.string({ required_error: 'Username is required' }).min(2, {
-		message: 'Username must be at least 2 characters.',
-	}),
-	password: z.string({ required_error: 'Password is required' }).min(8, {
-		message: 'Password must be at least 8 characters.',
-	}),
-});
-
 export const updateUserSchema = z.strictObject({
-	username: z
-		.string()
-		.min(2, {
-			message: 'Username must be at least 2 characters.',
-		})
-		.optional(),
+	username: usernameSchema.optional(),
 	email: z.string().email('Invalid email address').optional(),
 });
 
 export const updatePasswordSchema = z
 	.strictObject({
-		password: z
-			.string({ required_error: 'Password is required' })
-			.min(8, {
-				message: 'Password must be at least 8 characters.',
-			})
-			.regex(
-				/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[$&+,:;=?@#|'<>.^*()%!_-])/,
-				'Password must contain an uppercase letter, a lowercase letter, a number, and a special character'
-			),
+		password: passwordSchema,
 		newPassword: z
 			.string({ required_error: 'New password is required' })
 			.min(8, {

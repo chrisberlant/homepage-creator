@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import {
-	credentialsSchema,
+	loginSchema,
 	updateUserSchema,
 	updatePasswordSchema,
 } from '@/schemas/auth.schemas.ts';
-import { createCategorySchema } from '../schemas/categories.schemas';
+import { createCategorySchema } from '@/schemas/categories.schemas';
 import { createLinkSchema, updateLinkSchema } from '../schemas/links.schemas';
 
 export type SessionType = {
@@ -14,7 +14,7 @@ export type SessionType = {
 	exp: number;
 };
 
-export type credentialsType = z.infer<typeof credentialsSchema>;
+export type loginType = z.infer<typeof loginSchema>;
 
 export type LinkType = {
 	id: number;

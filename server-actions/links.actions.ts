@@ -1,7 +1,6 @@
 'use server';
 
 import prisma from '@/lib/prisma';
-import { getSession } from './auth.actions';
 import { authActionClient } from './safe-actions';
 import {
 	createLinkSchema,
@@ -14,14 +13,14 @@ export const createLink = authActionClient
 	.schema(createLinkSchema)
 	.action(async ({ parsedInput, ctx }) => {
 		const { title, url, categoryId } = parsedInput;
-		const { userId } = ctx;
+		const { userId: ownerId } = ctx;
 
 		try {
 			return await prisma.$transaction(async (prisma) => {
 				const lastLinkInCategory = await prisma.link.findFirst({
 					where: {
 						categoryId,
-						ownerId: userId,
+						ownerId,
 					},
 					orderBy: {
 						index: 'desc',
@@ -39,10 +38,10 @@ export const createLink = authActionClient
 						url,
 						index: newIndex,
 						categoryId,
-						ownerId: userId,
+						ownerId,
 					},
 				});
-				const { ownerId, index, ...infos } = createdLink;
+				const { index, ownerId: owner, ...infos } = createdLink;
 				return infos;
 			});
 		} catch (error) {
@@ -296,14 +295,14 @@ export const deleteLink = authActionClient
 	.schema(z.number())
 	.action(async ({ parsedInput, ctx }) => {
 		const id = parsedInput;
-		const { userId } = ctx;
+		const { userId: ownerId } = ctx;
 
 		try {
 			return await prisma.$transaction(async (prisma) => {
 				const link = await prisma.link.delete({
 					where: {
 						id,
-						ownerId: userId,
+						ownerId,
 					},
 				});
 
@@ -312,7 +311,7 @@ export const deleteLink = authActionClient
 						id: {
 							not: id,
 						},
-						ownerId: userId,
+						ownerId,
 						index: {
 							gt: link.index,
 						},

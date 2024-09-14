@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { browserQueryClient } from '@/components/providers/QueryClientProvider';
 import { UserType } from '@/lib/types';
 import { updatePassword, updateUser } from '@/server-actions/user.actions';
+import { UseFormReturn } from 'react-hook-form';
 
 // Update the currentuser
 export const useUpdateUser = () =>
@@ -35,15 +36,29 @@ export const useUpdateUser = () =>
 	});
 
 // Update the password of the current user
-export const useUpdatePassword = () =>
+export const useUpdatePassword = (
+	form: UseFormReturn<
+		{
+			password: string;
+			newPassword: string;
+			confirmPassword: string;
+		},
+		any,
+		undefined
+	>
+) =>
 	useMutation({
 		mutationFn: updatePassword,
 		onMutate: async () => {
+			console.log('password update');
 			await browserQueryClient?.cancelQueries({
 				queryKey: ['user'],
 			});
 		},
-		onSuccess: () => toast.success('Password successfully updated'),
+		onSuccess: () => {
+			toast.success('Password successfully updated');
+			form.reset();
+		},
 		onError: (error, _, previousUser) => {
 			if (error.message === 'No data modified')
 				return toast.info(error.message);

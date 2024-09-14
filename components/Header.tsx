@@ -3,10 +3,11 @@ import {
 	HydrationBoundary,
 	QueryClient,
 } from '@tanstack/react-query';
-import { getAuth, getSession } from '@/server-actions/auth.actions';
 import LogoutButton from './LogoutButton';
 import AccountDetails from './AccountDetails';
 import ThemeToggler from './ThemeToggler';
+import { getAuth } from '@/server-actions/auth.actions';
+import { getSession } from '@/lib/jwt';
 
 export default async function Header() {
 	const session = await getSession();

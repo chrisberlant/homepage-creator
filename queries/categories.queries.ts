@@ -34,7 +34,7 @@ export const useCreateCategory = (
 ) =>
 	useMutation({
 		mutationFn: createCategory,
-		onMutate: async (infos) => {
+		onMutate: async ({ title }) => {
 			await browserQueryClient?.cancelQueries({
 				queryKey: ['categories'],
 			});
@@ -47,21 +47,22 @@ export const useCreateCategory = (
 				['categories'],
 				(categories: CategoryType[]) => [
 					...categories,
-					{ title: infos, id: 9999, links: [] },
+					{ title, id: 9999, links: [] },
 				]
 			);
 
 			return previousCategories;
 		},
-		onSuccess: (apiResponse: CategoryType) => {
+		onSuccess: (apiResponse) => {
+			console.log(apiResponse);
 			browserQueryClient?.setQueryData(
 				['categories'],
 				(categories: CategoryType[]) =>
 					categories.map((category) =>
 						category.id === 9999
 							? {
-									...apiResponse,
-									links: [],
+									...category,
+									id: apiResponse?.data?.id,
 							  }
 							: category
 					)

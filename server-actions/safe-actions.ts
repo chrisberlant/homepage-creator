@@ -1,9 +1,9 @@
 import { createSafeActionClient } from 'next-safe-action';
-import { getSession } from './auth.actions';
+import { getSession } from '@/lib/jwt';
 
 class ActionError extends Error {}
 
-const actionClient = createSafeActionClient({
+export const actionClient = createSafeActionClient({
 	handleServerError(error) {
 		console.error('Action error:', error.message);
 		throw error;

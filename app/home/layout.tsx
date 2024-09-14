@@ -1,6 +1,5 @@
 import EditingModeContextProvider from '@/components/providers/EditingModeContextProvider';
 import { redirect } from 'next/navigation';
-import { getSession } from '@/server-actions/auth.actions';
 import CreateCategoryButton from '@/components/CreateCategoryButton';
 import EditingModeButton from '@/components/EditingModeButton';
 import {
@@ -9,6 +8,7 @@ import {
 	QueryClient,
 } from '@tanstack/react-query';
 import fetchApiFromServer from '@/utils/fetchApiFromServer';
+import { getSession } from '@/lib/jwt';
 
 export default async function Layout({
 	children,

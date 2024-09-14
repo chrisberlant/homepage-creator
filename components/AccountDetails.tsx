@@ -35,8 +35,8 @@ export default function AccountDetails() {
 	const form = useForm({
 		resolver: zodResolver(updateUserSchema),
 		defaultValues: {
-			username: user?.username,
-			email: user?.email,
+			username: user?.data?.username,
+			email: user?.data?.email,
 		},
 	});
 	const { mutate: updateUser } = useUpdateUser();
@@ -47,7 +47,7 @@ export default function AccountDetails() {
 			<AlertDialog open={open} onOpenChange={setOpen}>
 				<AlertDialogTrigger asChild>
 					<Button variant='ghost' className='mr-4'>
-						{user.username}
+						{user.data?.username}
 					</Button>
 				</AlertDialogTrigger>
 				<AlertDialogContent>

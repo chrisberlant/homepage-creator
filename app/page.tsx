@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
 import LoginForm from '@/components/LoginForm';
-import { getSession } from '@/server-actions/auth.actions';
 import { buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
+import { getSession } from '../lib/jwt';
 
 export default async function Login() {
 	const session = await getSession();

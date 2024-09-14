@@ -13,12 +13,12 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useLogin } from '@/queries/auth.queries';
-import { credentialsSchema } from '@/schemas/auth.schemas.ts';
-import { credentialsType } from '@/lib/types';
+import { loginSchema } from '@/schemas/auth.schemas.ts';
+import { loginType } from '@/lib/types';
 
 export default function LoginForm() {
-	const form = useForm<credentialsType>({
-		resolver: zodResolver(credentialsSchema),
+	const form = useForm<loginType>({
+		resolver: zodResolver(loginSchema),
 		defaultValues: {
 			username: '',
 			password: '',
