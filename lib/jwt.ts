@@ -49,11 +49,7 @@ export async function updateSession(request: NextRequest) {
 		return res;
 	} catch (error) {
 		const res = NextResponse.redirect(new URL('/', request.url));
-		res.cookies.set({
-			name: 'session',
-			value: '',
-			expires: new Date(0),
-		});
+		res.cookies.delete('session');
 
 		return res;
 	}

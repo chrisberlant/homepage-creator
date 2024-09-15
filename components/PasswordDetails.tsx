@@ -12,8 +12,8 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { KeyIcon, UserIcon } from 'lucide-react';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { UserIcon } from 'lucide-react';
+import { Dispatch, SetStateAction } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { updatePasswordSchema } from '@/schemas/auth.schemas.ts';
@@ -31,8 +31,12 @@ import { Input } from './ui/input';
 
 export default function PasswordDetails({
 	setOpenAccountModal,
+	openPasswordModal,
+	setOpenPasswordModal,
 }: {
 	setOpenAccountModal: Dispatch<SetStateAction<boolean>>;
+	openPasswordModal: boolean;
+	setOpenPasswordModal: Dispatch<SetStateAction<boolean>>;
 }) {
 	const form = useForm({
 		resolver: zodResolver(updatePasswordSchema),
@@ -43,23 +47,19 @@ export default function PasswordDetails({
 		},
 	});
 	const { mutate: updatePassword } = useUpdatePassword(form);
-	const [open, setOpen] = useState(false);
 
 	return (
-		<AlertDialog open={open} onOpenChange={setOpen}>
-			<AlertDialogTrigger asChild>
-				<Button variant='ghost' className='mr-auto'>
-					<KeyIcon className='mr-2 h-4 w-4' />
-					Change password
-				</Button>
-			</AlertDialogTrigger>
+		<AlertDialog
+			open={openPasswordModal}
+			onOpenChange={setOpenPasswordModal}
+		>
 			<AlertDialogContent>
 				<Form {...form}>
 					<form
 						onSubmit={form.handleSubmit(
 							(data) => updatePassword(data),
 							// If any error in the data
-							() => setOpen(true)
+							() => setOpenPasswordModal(true)
 						)}
 					>
 						<AlertDialogHeader>
@@ -71,7 +71,7 @@ export default function PasswordDetails({
 							name='password'
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Password</FormLabel>
+									<FormLabel>Current password</FormLabel>
 									<FormControl>
 										<Input type='password' {...field} />
 									</FormControl>
@@ -114,27 +114,27 @@ export default function PasswordDetails({
 								className='mr-auto'
 								onClick={() => {
 									if (form.formState.isDirty)
-										toast.warning(
-											'Changes have not been saved'
-										);
+										toast.warning('Changes were not saved');
 									form.reset();
-									setOpenAccountModal(false);
 								}}
 							>
 								Cancel
 							</AlertDialogCancel>
-							<Button
-								variant='ghost'
-								type='button'
+							<AlertDialogTrigger
 								className='mr-auto'
+								type='reset'
 								onClick={() => {
-									setOpen(false);
 									setOpenAccountModal(true);
+									setOpenPasswordModal(false);
+									form.reset();
 								}}
+								asChild
 							>
-								<UserIcon className='mr-2 h-4 w-4' />
-								Go back to Account details
-							</Button>
+								<Button variant='ghost'>
+									<UserIcon className='mr-2 h-4 w-4' />
+									Go back to Account details
+								</Button>
+							</AlertDialogTrigger>
 							<AlertDialogAction type='submit'>
 								Update password
 							</AlertDialogAction>

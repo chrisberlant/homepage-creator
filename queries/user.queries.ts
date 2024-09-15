@@ -50,7 +50,6 @@ export const useUpdatePassword = (
 	useMutation({
 		mutationFn: updatePassword,
 		onMutate: async () => {
-			console.log('password update');
 			await browserQueryClient?.cancelQueries({
 				queryKey: ['user'],
 			});
