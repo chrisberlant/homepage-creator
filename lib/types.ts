@@ -31,6 +31,7 @@ export type CreateLinkType = z.infer<typeof createLinkSchema>;
 export type CategoryType = {
 	id: number;
 	title: string;
+	column: number;
 };
 
 export type CategoryWithLinksType = CategoryType & {

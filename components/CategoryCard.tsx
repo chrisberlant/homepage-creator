@@ -16,18 +16,20 @@ import {
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useDeleteCategory } from '@/queries/categories.queries';
-import { CategoryWithLinksType } from '@/lib/types';
+import { LinkType } from '@/lib/types';
 import { CSS } from '@dnd-kit/utilities';
 import { DraggingCategoryContext } from './providers/DndContextProvider';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
 import EditCategoryTitleForm from './EditCategoryTitleForm';
 import { Button } from './ui/button';
 
-export default function CategoryCard({
-	id,
-	title,
-	links,
-}: CategoryWithLinksType) {
+interface CategoryCardProps {
+	id: number;
+	title: string;
+	links: LinkType[];
+}
+
+export default function CategoryCard({ id, title, links }: CategoryCardProps) {
 	const { editingMode } = useContext(EditingModeContext);
 	const draggingCategory = useContext(DraggingCategoryContext);
 	const { disabledDragging } = useContext(DisabledDraggingContext);
@@ -82,7 +84,7 @@ export default function CategoryCard({
 					style={style}
 					{...listeners}
 					{...attributes}
-					className='border-2 shadow-md dark:shadow-none bg-card py-3 px-5 m-4 w-1/4 rounded-2xl relative'
+					className='border-2 shadow-md dark:shadow-none bg-card py-3 px-5 rounded-2xl relative'
 				>
 					<h2 className='font-bold text-center flex-1'>{title}</h2>
 				</div>
@@ -92,7 +94,7 @@ export default function CategoryCard({
 					style={style}
 					{...listeners}
 					{...attributes}
-					className={`border-2 shadow-md dark:shadow-none bg-card pt-3 pb-3 px-5 m-4 w-1/4 rounded-2xl relative ${
+					className={`border-2 shadow-md dark:shadow-none bg-card pt-3 pb-3 px-5 rounded-2xl relative ${
 						editingMode ? 'cursor-move pt-1' : 'cursor-default'
 					}`}
 				>

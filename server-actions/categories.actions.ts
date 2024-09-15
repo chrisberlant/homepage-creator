@@ -12,7 +12,7 @@ import { z } from 'zod';
 export const createCategory = authActionClient
 	.schema(createCategorySchema)
 	.action(async ({ parsedInput, ctx }) => {
-		const { title } = parsedInput;
+		const { title, column } = parsedInput;
 		const { userId: ownerId } = ctx;
 
 		try {
@@ -20,6 +20,7 @@ export const createCategory = authActionClient
 				const lastCategory = await prisma.category.findFirst({
 					where: {
 						ownerId,
+						column,
 					},
 					orderBy: {
 						index: 'desc',
@@ -33,6 +34,7 @@ export const createCategory = authActionClient
 					data: {
 						title,
 						index: newIndex,
+						column,
 						ownerId,
 					},
 				});

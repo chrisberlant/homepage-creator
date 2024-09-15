@@ -3,7 +3,7 @@ import { updateSession } from './lib/jwt';
 
 export async function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
-	const unprotectedRoutes = ['/', '/login', 'register'];
+	const unprotectedRoutes = ['/', '/login', '/register'];
 	console.log('Route Middleware', pathname);
 
 	if (!unprotectedRoutes.includes(pathname)) {

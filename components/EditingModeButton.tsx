@@ -9,7 +9,7 @@ export default function EditingModeButton() {
 	const { editingMode, toggleEditingMode } = useContext(EditingModeContext);
 
 	return (
-		<Button onClick={toggleEditingMode}>
+		<Button onClick={toggleEditingMode} className='mb-4'>
 			{editingMode ? (
 				<>
 					<PenOffIcon className='mr-2' />

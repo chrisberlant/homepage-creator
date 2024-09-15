@@ -6,14 +6,15 @@ const categoryTitleSchema = z.string().min(1, {
 
 export const createCategorySchema = z.object({
 	title: categoryTitleSchema,
+	column: z.number().int().min(0).max(3),
 });
 
 export const updateCategorySchema = z.strictObject({
-	id: z.number(),
+	id: z.number().int().min(0),
 	title: categoryTitleSchema,
 });
 
 export const moveCategorySchema = z.strictObject({
-	id: z.number(),
-	newIndex: z.number(),
+	id: z.number().int(),
+	newIndex: z.number().int().min(0),
 });

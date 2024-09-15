@@ -44,7 +44,7 @@ export const getAuth = authActionClient.action(async ({ ctx }) => {
 			id: userId,
 		},
 	});
-	if (!user) throw new Error('Session not found or invalid');
+	if (!user) throw new Error('User not found or invalid');
 
 	const { username, email } = user;
 	return { username, email };

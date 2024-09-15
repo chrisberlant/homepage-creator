@@ -1,6 +1,5 @@
 import EditingModeContextProvider from '@/components/providers/EditingModeContextProvider';
 import { redirect } from 'next/navigation';
-import CreateCategoryButton from '@/components/CreateCategoryButton';
 import EditingModeButton from '@/components/EditingModeButton';
 import {
 	dehydrate,
@@ -27,10 +26,7 @@ export default async function Layout({
 	return (
 		<HydrationBoundary state={dehydrate(queryClient)}>
 			<EditingModeContextProvider>
-				<div className='flex justify-between mb-4'>
-					<EditingModeButton />
-					<CreateCategoryButton />
-				</div>
+				<EditingModeButton />
 				{children}
 			</EditingModeContextProvider>
 		</HydrationBoundary>

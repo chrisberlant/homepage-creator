@@ -29,11 +29,16 @@ import {
 import { CreateCategoryType } from '@/lib/types';
 import { createCategorySchema } from '@/schemas/categories.schemas';
 
-export default function CreateCategoryButton() {
+export default function CreateCategoryButton({
+	columnId,
+}: {
+	columnId: number;
+}) {
 	const { editingMode } = useContext(EditingModeContext);
 	const form = useForm<CreateCategoryType>({
 		resolver: zodResolver(createCategorySchema),
 		defaultValues: {
+			column: columnId,
 			title: '',
 		},
 	});
@@ -44,13 +49,17 @@ export default function CreateCategoryButton() {
 		editingMode && (
 			<AlertDialog open={open} onOpenChange={setOpen}>
 				<AlertDialogTrigger asChild>
-					<Button>Create a new category</Button>
+					<Button className='ml-4 mt-4'>Create a new category</Button>
 				</AlertDialogTrigger>
 				<AlertDialogContent>
 					<Form {...form}>
 						<form
 							onSubmit={form.handleSubmit(
-								(data) => createCategory({ title: data.title }),
+								(data) =>
+									createCategory({
+										title: data.title,
+										column: data.column,
+									}),
 								() => setOpen(true)
 							)}
 						>

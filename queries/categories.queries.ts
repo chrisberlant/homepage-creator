@@ -27,6 +27,7 @@ export const useCreateCategory = (
 	form: UseFormReturn<
 		{
 			title: string;
+			column: number;
 		},
 		any,
 		undefined

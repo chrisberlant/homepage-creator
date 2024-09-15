@@ -15,11 +15,11 @@ export const createLinkSchema = z.object({
 	url: z.string().min(1, {
 		message: 'URL must be at least 1 character.',
 	}),
-	categoryId: z.number(),
+	categoryId: z.number().int().min(0),
 });
 
 export const updateLinkSchema = z.strictObject({
-	id: z.number(),
+	id: z.number().int().min(0),
 	title: z
 		.string()
 		.min(1, {
@@ -30,7 +30,7 @@ export const updateLinkSchema = z.strictObject({
 });
 
 export const moveLinkSchema = z.strictObject({
-	id: z.number(),
-	newIndex: z.number().optional(),
-	newCategoryId: z.number(),
+	id: z.number().int().min(0),
+	newIndex: z.number().int().min(0).optional(),
+	newCategoryId: z.number().int().min(0),
 });
