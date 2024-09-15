@@ -10,7 +10,7 @@ export default function Column({
 	id: number;
 }) {
 	return (
-		<div className='flex-1 p-2'>
+		<div className='flex-1 flex flex-col gap-4 p-2'>
 			{categories.map((category) => (
 				<CategoryCard
 					key={category.id}

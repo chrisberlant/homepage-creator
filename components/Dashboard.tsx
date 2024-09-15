@@ -9,8 +9,6 @@ export default function Dashboard() {
 	const firstColumnCategories = categories?.filter(
 		(category) => category.column === 0
 	);
-	console.log(categories);
-	console.log(firstColumnCategories);
 	const secondColumnCategories = categories?.filter(
 		(category) => category.column === 1
 	);

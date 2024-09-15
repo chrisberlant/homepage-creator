@@ -49,7 +49,9 @@ export default function CreateCategoryButton({
 		editingMode && (
 			<AlertDialog open={open} onOpenChange={setOpen}>
 				<AlertDialogTrigger asChild>
-					<Button className='ml-4 mt-4'>Create a new category</Button>
+					<Button className='mt-2 self-center'>
+						Create a new category
+					</Button>
 				</AlertDialogTrigger>
 				<AlertDialogContent>
 					<Form {...form}>
