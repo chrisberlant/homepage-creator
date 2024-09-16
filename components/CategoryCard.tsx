@@ -26,10 +26,16 @@ import { Button } from './ui/button';
 interface CategoryCardProps {
 	id: number;
 	title: string;
+	columnId: number;
 	links: LinkType[];
 }
 
-export default function CategoryCard({ id, title, links }: CategoryCardProps) {
+export default function CategoryCard({
+	id,
+	title,
+	columnId,
+	links,
+}: CategoryCardProps) {
 	const { editingMode } = useContext(EditingModeContext);
 	const draggingCategory = useContext(DraggingCategoryContext);
 	const { disabledDragging } = useContext(DisabledDraggingContext);
@@ -47,6 +53,9 @@ export default function CategoryCard({ id, title, links }: CategoryCardProps) {
 		isDragging,
 	} = useSortable({
 		id: `container-${id}`,
+		data: {
+			columnId,
+		},
 		disabled: disabledDragging,
 	});
 	const style = {

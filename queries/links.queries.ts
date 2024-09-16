@@ -284,8 +284,8 @@ export const useMoveLink = () =>
 		},
 	});
 
-// Update the elements when category is changing
-export async function updateCache({
+// Update the elements when moving a link from a category to another
+export async function updateLinksPosition({
 	id,
 	newCategoryId,
 }: {
@@ -322,6 +322,37 @@ export async function updateCache({
 					return {
 						...category,
 						links: category.links.filter((link) => link.id !== id),
+					};
+				return category;
+			})
+	);
+}
+
+// Update the elements when moving a category from a column to another
+export async function updateCategoriesPosition({
+	id,
+	newColumnId,
+}: {
+	id: number;
+	newColumnId: number;
+}) {
+	if (!browserQueryClient) return;
+
+	await browserQueryClient.cancelQueries({
+		queryKey: ['categories'],
+	});
+	const previousCategories: CategoryWithLinksType[] | undefined =
+		browserQueryClient.getQueryData(['categories']);
+	if (!previousCategories || !browserQueryClient) return;
+
+	browserQueryClient.setQueryData(
+		['categories'],
+		(categories: CategoryWithLinksType[]) =>
+			categories.map((category) => {
+				if (category.id === id)
+					return {
+						...category,
+						column: newColumnId,
 					};
 				return category;
 			})

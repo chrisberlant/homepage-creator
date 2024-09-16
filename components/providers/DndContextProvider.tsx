@@ -13,7 +13,11 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import LinkCardOverlay from '../LinkCardOverlay';
 import { CategoryType } from '@/lib/types';
 import { browserQueryClient } from './QueryClientProvider';
-import { updateCache, useMoveLink } from '@/queries/links.queries';
+import {
+	updateCategoriesPosition,
+	updateLinksPosition,
+	useMoveLink,
+} from '@/queries/links.queries';
 import { useMoveCategory } from '@/queries/categories.queries';
 import CategoryCardOverlay from '../CategoryCardOverlay';
 
@@ -38,11 +42,13 @@ export default function DndContextProvider({
 	const { mutate: moveLink } = useMoveLink();
 	const { mutate: moveCategory } = useMoveCategory();
 
-	const [activeLinkId, setActiveLinkId] = useState<number | null>(null);
-	const [activeCategoryId, setActiveCategoryId] = useState<number | null>(
-		null
-	);
-	const [draggingCategory, setDraggingCategory] = useState(false);
+	const [activeDragged, setActiveDragged] = useState<{
+		id: null | number;
+		type: null | 'link' | 'category';
+	}>({
+		id: null,
+		type: null,
+	});
 
 	const currentCategories = useRef<CategoryType[]>();
 	const currentLinkInfos = useRef<{ index: number; categoryId: number }>();
@@ -53,34 +59,59 @@ export default function DndContextProvider({
 			'categories',
 		]);
 
+		// If dragging a category
 		if (
 			typeof draggedElementId === 'string' &&
 			draggedElementId.startsWith('container')
 		) {
-			setActiveCategoryId(Number(draggedElementId.split('-')[1]));
-			return setDraggingCategory(true);
+			return setActiveDragged({
+				id: Number(draggedElementId.split('-')[1]),
+				type: 'category',
+			});
 		}
-
-		setActiveLinkId(draggedElementId);
+		// If dragging a link
+		setActiveDragged({
+			id: draggedElementId,
+			type: 'link',
+		});
 		currentLinkInfos.current = {
 			index: event.active.data.current.sortable.index,
 			categoryId: event.active.data.current.categoryId,
 		};
 	}
 
-	// Used to reorder links when changing categories
+	// Used to reorder links when changing categories or columns
 	function handleDragOver(event: any) {
 		const { over, active } = event;
 		if (!over) return;
-
+		console.log(event);
 		const draggedElementId = active.id;
+
+		// If dragging a category
+		if (
+			typeof draggedElementId === 'string' &&
+			draggedElementId.startsWith('container')
+		) {
+			const formattedDraggedElementId = Number(
+				draggedElementId.split('-')[1]
+			);
+			const newColumnId: number =
+				over.data.current?.columnId ?? Number(over.id.split('-')[1]);
+
+			return updateCategoriesPosition({
+				id: formattedDraggedElementId,
+				newColumnId,
+			});
+		}
+
 		const newCategoryId: number =
 			over.data.current?.categoryId ?? Number(over.id.split('-')[1]);
 		const currentCategoryId = active.data?.current?.categoryId;
-		if (newCategoryId === currentCategoryId) return;
+		if (newCategoryId === currentCategoryId)
+			return console.log('same', newCategoryId);
 
 		// Update the cache only if link was moved to another category
-		updateCache({
+		updateLinksPosition({
 			id: draggedElementId,
 			newCategoryId,
 		});
@@ -90,9 +121,7 @@ export default function DndContextProvider({
 		const { active, over } = event;
 		if (!over) return;
 
-		setActiveLinkId(null);
-		setActiveCategoryId(null);
-		if (draggingCategory) setDraggingCategory(false);
+		setActiveDragged({ id: null, type: null });
 
 		const draggedElementId = active.id;
 		const currentIndex = active.data.current.sortable.index;
@@ -137,10 +166,7 @@ export default function DndContextProvider({
 	}
 
 	function handleDragCancel() {
-		setActiveLinkId(null);
-		setActiveCategoryId(null);
-		if (draggingCategory) setDraggingCategory(false);
-
+		setActiveDragged({ id: null, type: null });
 		browserQueryClient?.setQueryData(
 			['categories'],
 			currentCategories.current
@@ -157,12 +183,16 @@ export default function DndContextProvider({
 			sensors={sensors}
 		>
 			<DragOverlay>
-				{activeLinkId ? <LinkCardOverlay id={activeLinkId} /> : null}
-				{activeCategoryId ? (
-					<CategoryCardOverlay id={activeCategoryId} />
+				{activeDragged.id && activeDragged.type === 'link' ? (
+					<LinkCardOverlay id={activeDragged.id} />
+				) : null}
+				{activeDragged.id && activeDragged.type === 'category' ? (
+					<CategoryCardOverlay id={activeDragged.id} />
 				) : null}
 			</DragOverlay>
-			<DraggingCategoryContext.Provider value={draggingCategory}>
+			<DraggingCategoryContext.Provider
+				value={activeDragged.type === 'category'}
+			>
 				{children}
 			</DraggingCategoryContext.Provider>
 		</DndContext>
