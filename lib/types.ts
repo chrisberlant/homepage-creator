@@ -4,8 +4,15 @@ import {
 	updateUserSchema,
 	updatePasswordSchema,
 } from '@/schemas/auth.schemas.ts';
-import { createCategorySchema } from '@/schemas/categories.schemas';
-import { createLinkSchema, updateLinkSchema } from '../schemas/links.schemas';
+import {
+	createCategorySchema,
+	moveCategorySchema,
+} from '@/schemas/categories.schemas';
+import {
+	createLinkSchema,
+	moveLinkSchema,
+	updateLinkSchema,
+} from '../schemas/links.schemas';
 
 export type SessionType = {
 	user: { id: number; name: string };
@@ -40,6 +47,8 @@ export type CategoryWithLinksType = CategoryType & {
 
 export type updateLinkType = z.infer<typeof updateLinkSchema>;
 
+export type MoveLinkType = z.infer<typeof moveLinkSchema>;
+
 export type UserType = {
 	username: string;
 	email: string;
@@ -50,3 +59,5 @@ export type UpdateUserType = z.infer<typeof updateUserSchema>;
 export type UpdatePasswordType = z.infer<typeof updatePasswordSchema>;
 
 export type CreateCategoryType = z.infer<typeof createCategorySchema>;
+
+export type MoveCategoryType = z.infer<typeof moveCategorySchema>;

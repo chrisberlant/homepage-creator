@@ -51,7 +51,8 @@ export default function DndContextProvider({
 	});
 
 	const currentCategories = useRef<CategoryType[]>();
-	const currentLinkInfos = useRef<{ index: number; categoryId: number }>();
+	const draggedLinkInfos = useRef<{ index: number; categoryId: number }>();
+	const draggedCategoryInfos = useRef<{ index: number; columnId: number }>();
 
 	function handleDragStart(event: any) {
 		const draggedElementId = event.active.id;
@@ -62,11 +63,15 @@ export default function DndContextProvider({
 		// If dragging a category
 		if (
 			typeof draggedElementId === 'string' &&
-			draggedElementId.startsWith('container')
+			draggedElementId.startsWith('category')
 		) {
-			return setActiveDragged({
+			setActiveDragged({
 				id: Number(draggedElementId.split('-')[1]),
 				type: 'category',
+			});
+			return (draggedCategoryInfos.current = {
+				index: event.active.data.current.sortable.index,
+				columnId: event.active.data.current.columnId,
 			});
 		}
 		// If dragging a link
@@ -74,7 +79,7 @@ export default function DndContextProvider({
 			id: draggedElementId,
 			type: 'link',
 		});
-		currentLinkInfos.current = {
+		draggedLinkInfos.current = {
 			index: event.active.data.current.sortable.index,
 			categoryId: event.active.data.current.categoryId,
 		};
@@ -84,19 +89,21 @@ export default function DndContextProvider({
 	function handleDragOver(event: any) {
 		const { over, active } = event;
 		if (!over) return;
-		console.log(event);
+
 		const draggedElementId = active.id;
 
 		// If dragging a category
 		if (
 			typeof draggedElementId === 'string' &&
-			draggedElementId.startsWith('container')
+			draggedElementId.startsWith('category')
 		) {
 			const formattedDraggedElementId = Number(
 				draggedElementId.split('-')[1]
 			);
 			const newColumnId: number =
 				over.data.current?.columnId ?? Number(over.id.split('-')[1]);
+			const currentColumnId = active.data?.current?.columnId;
+			if (newColumnId === currentColumnId) return;
 
 			return updateCategoriesPosition({
 				id: formattedDraggedElementId,
@@ -104,11 +111,11 @@ export default function DndContextProvider({
 			});
 		}
 
+		// If dragging a link
 		const newCategoryId: number =
 			over.data.current?.categoryId ?? Number(over.id.split('-')[1]);
 		const currentCategoryId = active.data?.current?.categoryId;
-		if (newCategoryId === currentCategoryId)
-			return console.log('same', newCategoryId);
+		if (newCategoryId === currentCategoryId) return;
 
 		// Update the cache only if link was moved to another category
 		updateLinksPosition({
@@ -126,19 +133,30 @@ export default function DndContextProvider({
 		const draggedElementId = active.id;
 		const currentIndex = active.data.current.sortable.index;
 
-		// If a category container is moving
+		// If a category is moving
 		if (
 			typeof draggedElementId === 'string' &&
-			draggedElementId.startsWith('container') &&
+			draggedElementId.startsWith('category') &&
 			typeof over.id === 'string' &&
-			over.id.startsWith('container')
+			over.id.startsWith('category')
 		) {
-			if (draggedElementId === over.id) return;
+			const newColumnId = over?.data.current?.columnId;
 
-			const newIndex = over.data.current.sortable.index;
+			if (
+				draggedElementId === over.id &&
+				newColumnId === draggedCategoryInfos.current?.columnId
+			)
+				return;
+
+			const newIndex =
+				over.data.current?.sortable?.index === -1
+					? undefined
+					: over.data.current?.sortable?.index;
 			return moveCategory({
 				id: Number(draggedElementId.split('-')[1]),
 				currentIndex,
+				currentColumn: draggedCategoryInfos.current!.columnId,
+				newColumn: newColumnId,
 				newIndex,
 			});
 		}
@@ -148,7 +166,7 @@ export default function DndContextProvider({
 			over?.data.current?.categoryId ?? Number(over?.id.split('-')[1]);
 		if (
 			draggedElementId === over.id &&
-			newCategoryId === currentLinkInfos.current?.categoryId
+			newCategoryId === draggedLinkInfos.current?.categoryId
 		)
 			return;
 
@@ -157,7 +175,7 @@ export default function DndContextProvider({
 				? undefined
 				: over.data.current?.sortable?.index;
 
-		moveLink({
+		return moveLink({
 			id: draggedElementId,
 			currentIndex,
 			newIndex,

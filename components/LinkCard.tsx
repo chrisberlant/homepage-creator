@@ -11,7 +11,6 @@ import { LinkWithCategoryType } from '@/lib/types';
 import Image from 'next/image';
 import FaviconNotFound from './FaviconNotFound';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
-import { Button } from './ui/button';
 
 export default function LinkCard({
 	id,

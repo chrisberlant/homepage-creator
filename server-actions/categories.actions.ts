@@ -68,7 +68,7 @@ export const updateCategory = authActionClient
 export const moveCategory = authActionClient
 	.schema(moveCategorySchema)
 	.action(async ({ parsedInput, ctx }) => {
-		const { id, newIndex } = parsedInput;
+		const { id, newIndex, newColumn } = parsedInput;
 		const { userId: ownerId } = ctx;
 
 		try {
@@ -81,19 +81,160 @@ export const moveCategory = authActionClient
 				});
 				if (!category) throw new Error('Cannot find category');
 
-				const { index: currentIndex } = category;
-				let newIndexPosition = 0;
+				const { index: currentIndex, column: currentColumn } = category;
 
-				if (newIndex === currentIndex)
+				if (newIndex === currentIndex && newColumn === currentColumn)
 					throw new Error(
 						'The category is already at the specified location'
 					);
 
+				// If changing column
+				if (newColumn !== currentColumn) {
+					// If no index specified, put it at the end of the column
+					if (newIndex === undefined) {
+						const highestIndex = await prisma.category.findFirst({
+							where: {
+								ownerId,
+								column: currentColumn,
+							},
+							orderBy: {
+								index: 'desc',
+							},
+						});
+
+						await prisma.category.updateMany({
+							where: {
+								ownerId,
+								column: currentColumn,
+								id: {
+									not: id,
+								},
+								index: {
+									gt: currentIndex,
+								},
+							},
+							data: {
+								index: {
+									decrement: 1,
+								},
+							},
+						});
+
+						return await prisma.category.update({
+							where: {
+								id,
+								ownerId,
+								column: newColumn,
+							},
+							data: {
+								index:
+									highestIndex !== null
+										? highestIndex?.index + 1
+										: 0,
+							},
+						});
+					}
+
+					// If index is specified
+					await prisma.category.updateMany({
+						where: {
+							ownerId,
+							column: currentColumn,
+							id: {
+								not: id,
+							},
+							index: {
+								gt: currentIndex,
+							},
+						},
+						data: {
+							index: {
+								decrement: 1,
+							},
+						},
+					});
+
+					await prisma.category.updateMany({
+						where: {
+							ownerId,
+							column: newColumn,
+							id: {
+								not: id,
+							},
+							index: {
+								gte: newIndex,
+							},
+						},
+						data: {
+							index: {
+								increment: 1,
+							},
+						},
+					});
+
+					return await prisma.category.update({
+						where: {
+							id,
+							ownerId,
+						},
+						data: {
+							index: newIndex,
+							column: newColumn,
+						},
+					});
+				}
+
+				// If column is the same
+				// If no index specified, put it at the end of the current column
+				if (newIndex === undefined) {
+					const highestIndex = await prisma.category.findFirst({
+						where: {
+							column: currentColumn,
+						},
+						orderBy: {
+							index: 'desc',
+						},
+					});
+					const newIndexPosition =
+						highestIndex !== null ? highestIndex?.index + 1 : 0;
+
+					if (newIndexPosition > 0)
+						await prisma.category.updateMany({
+							where: {
+								ownerId,
+								column: currentColumn,
+								index: {
+									gt: currentIndex,
+								},
+							},
+							data: {
+								index: {
+									decrement: 1,
+								},
+							},
+						});
+
+					return await prisma.category.update({
+						where: {
+							id,
+							ownerId,
+						},
+						data: {
+							index:
+								highestIndex !== null
+									? highestIndex?.index + 1
+									: 0,
+						},
+					});
+				}
+
+				// If index is specified
 				if (newIndex < currentIndex) {
 					// If new index is smaller than the current one
 					await prisma.category.updateMany({
 						where: {
 							ownerId,
+							column: currentColumn,
 							id: {
 								not: id,
 							},
@@ -113,22 +254,24 @@ export const moveCategory = authActionClient
 					const highestIndex = await prisma.category.findFirst({
 						where: {
 							ownerId,
+							column: currentColumn,
 						},
 						orderBy: {
 							index: 'desc',
 						},
 					});
-					newIndexPosition =
+					const newIndexPosition =
 						highestIndex && newIndex > highestIndex.index
 							? highestIndex.index
 							: newIndex;
 
 					await prisma.category.updateMany({
 						where: {
+							ownerId,
+							column: currentColumn,
 							id: {
 								not: id,
 							},
-							ownerId,
 							index: {
 								lte: newIndexPosition,
 								gt: currentIndex,
@@ -148,7 +291,7 @@ export const moveCategory = authActionClient
 						ownerId,
 					},
 					data: {
-						index: newIndexPosition,
+						index: newIndex,
 					},
 				});
 			});

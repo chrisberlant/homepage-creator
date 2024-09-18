@@ -1,6 +1,5 @@
 'use client';
 
-import { SortableContext } from '@dnd-kit/sortable';
 import { useGetCategories } from '@/queries/categories.queries';
 import Column from './Column';
 
@@ -33,18 +32,12 @@ export default function Dashboard() {
 			{isLoading && <div>Loading...</div>}
 
 			{allData && (
-				<SortableContext
-					items={categories.map(
-						(category) => `container-${category.id}`
-					)}
-				>
-					<section className='flex justify-around gap-1'>
-						<Column id={0} categories={firstColumnCategories} />
-						<Column id={1} categories={secondColumnCategories} />
-						<Column id={2} categories={thirdColumnCategories} />
-						<Column id={3} categories={fourthColumnCategories} />
-					</section>
-				</SortableContext>
+				<section className='flex justify-around gap-1'>
+					<Column id={0} categories={firstColumnCategories} />
+					<Column id={1} categories={secondColumnCategories} />
+					<Column id={2} categories={thirdColumnCategories} />
+					<Column id={3} categories={fourthColumnCategories} />
+				</section>
 			)}
 		</>
 	);

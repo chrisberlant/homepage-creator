@@ -52,7 +52,7 @@ export default function CategoryCard({
 		transition,
 		isDragging,
 	} = useSortable({
-		id: `container-${id}`,
+		id: `category-${id}`,
 		data: {
 			columnId,
 		},

@@ -101,7 +101,7 @@ export const moveLink = authActionClient
 
 				// If moved in the same category
 				if (currentCategoryId === newCategoryId) {
-					// If no index specified, put it at the end of the list
+					// If no index specified, put it at the end of the category
 					if (newIndex === undefined) {
 						const highestIndex = await prisma.link.findFirst({
 							where: {

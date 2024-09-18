@@ -1,7 +1,7 @@
 import { CategoryWithLinksType } from '@/lib/types';
 import CategoryCard from './CategoryCard';
 import CreateCategoryButton from './CreateCategoryButton';
-import { useDroppable } from '@dnd-kit/core';
+import { SortableContext, useSortable } from '@dnd-kit/sortable';
 
 export default function Column({
 	categories,
@@ -10,25 +10,29 @@ export default function Column({
 	categories: CategoryWithLinksType[];
 	id: number;
 }) {
-	const { setNodeRef } = useDroppable({
+	const { setNodeRef } = useSortable({
 		id: `column-${id}`,
 	});
 
 	return (
-		<div
-			ref={setNodeRef}
-			className='flex-1 flex flex-col gap-4 p-2 border-2'
+		<SortableContext
+			items={categories.map((category) => `category-${category.id}`)}
 		>
-			{categories.map((category) => (
-				<CategoryCard
-					key={category.id}
-					id={category.id}
-					title={category.title}
-					columnId={id}
-					links={category.links}
-				/>
-			))}
-			<CreateCategoryButton columnId={id} />
-		</div>
+			<div
+				ref={setNodeRef}
+				className='flex-1 flex flex-col gap-4 p-2 border-2'
+			>
+				{categories.map((category) => (
+					<CategoryCard
+						key={category.id}
+						id={category.id}
+						title={category.title}
+						columnId={id}
+						links={category.links}
+					/>
+				))}
+				<CreateCategoryButton columnId={id} />
+			</div>
+		</SortableContext>
 	);
 }

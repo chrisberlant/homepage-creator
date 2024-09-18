@@ -16,5 +16,6 @@ export const updateCategorySchema = z.strictObject({
 
 export const moveCategorySchema = z.strictObject({
 	id: z.number().int(),
-	newIndex: z.number().int().min(0),
+	newIndex: z.number().int().min(0).optional(),
+	newColumn: z.number().int().min(0),
 });

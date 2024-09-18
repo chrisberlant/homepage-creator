@@ -6,7 +6,7 @@ import {
 	updateLink,
 } from '@/server-actions/links.actions';
 import { browserQueryClient } from '@/components/providers/QueryClientProvider';
-import { CategoryWithLinksType } from '@/lib/types';
+import { CategoryWithLinksType, MoveLinkType } from '@/lib/types';
 import { toast } from 'sonner';
 import { UseFormReturn } from 'react-hook-form';
 import { Dispatch, SetStateAction } from 'react';
@@ -207,14 +207,12 @@ export const useUpdateLink = () =>
 // Change index of a link
 export const useMoveLink = () =>
 	useMutation({
-		mutationFn: ({ id, newIndex, newCategoryId }) =>
-			moveLink({ id, newIndex, newCategoryId }),
-		onMutate: async (updatedLink: {
-			id: number;
-			currentIndex: number;
-			newIndex: number;
-			newCategoryId: number;
-		}) => {
+		mutationFn: moveLink,
+		onMutate: async (
+			updatedLink: MoveLinkType & {
+				currentIndex: number;
+			}
+		) => {
 			await browserQueryClient?.cancelQueries({
 				queryKey: ['categories'],
 			});
@@ -344,7 +342,7 @@ export async function updateCategoriesPosition({
 	const previousCategories: CategoryWithLinksType[] | undefined =
 		browserQueryClient.getQueryData(['categories']);
 	if (!previousCategories || !browserQueryClient) return;
-
+	console.log(previousCategories);
 	browserQueryClient.setQueryData(
 		['categories'],
 		(categories: CategoryWithLinksType[]) =>

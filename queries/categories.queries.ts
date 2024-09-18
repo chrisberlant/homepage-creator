@@ -1,4 +1,8 @@
-import { CategoryType, CategoryWithLinksType } from '@/lib/types';
+import {
+	CategoryType,
+	CategoryWithLinksType,
+	MoveCategoryType,
+} from '@/lib/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import fetchApiFromClient from '@/utils/fetchApiFromClient';
 import {
@@ -140,11 +144,12 @@ export const useUpdateCategory = ({
 export const useMoveCategory = () =>
 	useMutation({
 		mutationFn: moveCategory,
-		onMutate: async (updatedCategory: {
-			id: number;
-			currentIndex: number;
-			newIndex: number;
-		}) => {
+		onMutate: async (
+			updatedCategory: MoveCategoryType & {
+				currentIndex: number;
+				currentColumn: number;
+			}
+		) => {
 			await browserQueryClient?.cancelQueries({
 				queryKey: ['categories'],
 			});
