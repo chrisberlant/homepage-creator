@@ -12,6 +12,9 @@ export default function Column({
 }) {
 	const { setNodeRef } = useSortable({
 		id: `column-${id}`,
+		data: {
+			type: 'column',
+		},
 	});
 
 	return (

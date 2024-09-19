@@ -225,9 +225,11 @@ export const useMoveLink = () =>
 			const currentCategory = previousCategories.find((category) =>
 				category.links.find((link) => link.id === id)
 			);
+
 			const linkInfos = currentCategory?.links.find(
 				(link) => link.id === id
 			);
+
 			if (!currentCategory || !linkInfos) return;
 
 			// If no index specified, put the link at the end of the list
@@ -249,6 +251,7 @@ export const useMoveLink = () =>
 								: category
 						)
 				);
+				console.log(browserQueryClient.getQueryData(['categories']));
 				// If index is defined
 			} else {
 				browserQueryClient.setQueryData(

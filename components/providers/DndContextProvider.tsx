@@ -55,34 +55,35 @@ export default function DndContextProvider({
 	const draggedCategoryInfos = useRef<{ index: number; columnId: number }>();
 
 	function handleDragStart(event: any) {
-		const draggedElementId = event.active.id;
+		const { active } = event;
+		const draggedElementId = active.id;
+
 		currentCategories.current = browserQueryClient?.getQueryData([
 			'categories',
 		]);
 
 		// If dragging a category
-		if (
-			typeof draggedElementId === 'string' &&
-			draggedElementId.startsWith('category')
-		) {
+		if (active.data.current.type === 'category') {
 			setActiveDragged({
 				id: Number(draggedElementId.split('-')[1]),
-				type: 'category',
+				type: active.data.current.type,
 			});
 			return (draggedCategoryInfos.current = {
-				index: event.active.data.current.sortable.index,
-				columnId: event.active.data.current.columnId,
+				index: active.data.current.sortable.index,
+				columnId: active.data.current.columnId,
 			});
 		}
 		// If dragging a link
-		setActiveDragged({
-			id: draggedElementId,
-			type: 'link',
-		});
-		draggedLinkInfos.current = {
-			index: event.active.data.current.sortable.index,
-			categoryId: event.active.data.current.categoryId,
-		};
+		if (active.data.current.type === 'link') {
+			setActiveDragged({
+				id: draggedElementId,
+				type: active.data.current.type,
+			});
+			return (draggedLinkInfos.current = {
+				index: active.data.current.sortable.index,
+				categoryId: active.data.current.categoryId,
+			});
+		}
 	}
 
 	// Used to reorder links when changing categories or columns
@@ -90,97 +91,106 @@ export default function DndContextProvider({
 		const { over, active } = event;
 		if (!over) return;
 
-		const draggedElementId = active.id;
-
 		// If dragging a category
-		if (
-			typeof draggedElementId === 'string' &&
-			draggedElementId.startsWith('category')
-		) {
-			const formattedDraggedElementId = Number(
-				draggedElementId.split('-')[1]
-			);
+		if (activeDragged.id && activeDragged.type === 'category') {
 			const newColumnId: number =
 				over.data.current?.columnId ?? Number(over.id.split('-')[1]);
 			const currentColumnId = active.data?.current?.columnId;
 			if (newColumnId === currentColumnId) return;
 
 			return updateCategoriesPosition({
-				id: formattedDraggedElementId,
+				id: activeDragged.id,
 				newColumnId,
 			});
 		}
 
 		// If dragging a link
-		const newCategoryId: number =
-			over.data.current?.categoryId ?? Number(over.id.split('-')[1]);
-		const currentCategoryId = active.data?.current?.categoryId;
-		if (newCategoryId === currentCategoryId) return;
+		if (activeDragged.id && activeDragged.type === 'link') {
+			const newCategoryId: number =
+				over.data.current?.categoryId ?? Number(over.id.split('-')[1]);
+			const currentCategoryId: number = active.data?.current?.categoryId;
 
-		// Update the cache only if link was moved to another category
-		updateLinksPosition({
-			id: draggedElementId,
-			newCategoryId,
-		});
+			if (
+				newCategoryId === currentCategoryId ||
+				over.data.current.type === 'column'
+			)
+				return;
+
+			// Update the cache only if link was moved to another category
+			return updateLinksPosition({
+				id: activeDragged.id,
+				newCategoryId,
+			});
+		}
 	}
 
 	function handleDragEnd(event: any) {
-		const { active, over } = event;
+		const { over } = event;
 		if (!over) return;
-
-		setActiveDragged({ id: null, type: null });
-
-		const draggedElementId = active.id;
-		const currentIndex = active.data.current.sortable.index;
 
 		// If a category is moving
 		if (
-			typeof draggedElementId === 'string' &&
-			draggedElementId.startsWith('category') &&
+			activeDragged.id &&
+			activeDragged.type === 'category' &&
 			typeof over.id === 'string' &&
-			over.id.startsWith('category')
+			over.id.startsWith('category') &&
+			draggedCategoryInfos.current
 		) {
 			const newColumnId = over?.data.current?.columnId;
 
 			if (
-				draggedElementId === over.id &&
+				activeDragged.id === Number(over.id.split('-')[1]) &&
 				newColumnId === draggedCategoryInfos.current?.columnId
 			)
-				return;
+				return setActiveDragged({ id: null, type: null });
 
+			const currentIndex = draggedCategoryInfos.current.index;
 			const newIndex =
-				over.data.current?.sortable?.index === -1
+				over.data.current.type === 'column'
 					? undefined
 					: over.data.current?.sortable?.index;
-			return moveCategory({
-				id: Number(draggedElementId.split('-')[1]),
+			console.log(over.data.current.type);
+			console.log(newIndex);
+
+			moveCategory({
+				id: activeDragged.id,
 				currentIndex,
 				currentColumn: draggedCategoryInfos.current!.columnId,
 				newColumn: newColumnId,
 				newIndex,
 			});
+
+			return setActiveDragged({ id: null, type: null });
 		}
 
 		// If a link is moving
 		const newCategoryId =
 			over?.data.current?.categoryId ?? Number(over?.id.split('-')[1]);
+
 		if (
-			draggedElementId === over.id &&
+			activeDragged.id === over.id &&
 			newCategoryId === draggedLinkInfos.current?.categoryId
 		)
-			return;
+			return console.log('same');
 
-		const newIndex =
-			over.data.current?.sortable?.index === -1
-				? undefined
-				: over.data.current?.sortable?.index;
+		if (activeDragged.id && draggedLinkInfos.current) {
+			const currentIndex = draggedLinkInfos.current.index;
+			console.log(over);
+			// console.log(over.data.current?.sortable?.index);
+			const newIndex =
+				over.data.current.type === 'category'
+					? undefined
+					: over.data.current?.sortable?.index;
 
-		return moveLink({
-			id: draggedElementId,
-			currentIndex,
-			newIndex,
-			newCategoryId,
-		});
+			moveLink({
+				id: activeDragged.id,
+				currentIndex,
+				newIndex,
+				newCategoryId,
+			});
+
+			return setActiveDragged({ id: null, type: null });
+		}
 	}
 
 	function handleDragCancel() {

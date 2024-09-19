@@ -55,6 +55,7 @@ export default function CategoryCard({
 		id: `category-${id}`,
 		data: {
 			columnId,
+			type: 'category',
 		},
 		disabled: disabledDragging,
 	});

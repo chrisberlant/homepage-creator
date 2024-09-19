@@ -33,6 +33,7 @@ export default function LinkCard({
 		id,
 		data: {
 			categoryId,
+			type: 'link',
 		},
 		disabled: disabledDragging,
 	});
