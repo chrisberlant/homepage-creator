@@ -7,6 +7,7 @@ export async function middleware(request: NextRequest) {
 	console.log('Route Middleware', pathname);
 
 	if (!unprotectedRoutes.includes(pathname)) {
+		console.log('protected route');
 		return await updateSession(request);
 	}
 

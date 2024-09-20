@@ -8,17 +8,16 @@ import {
 	useSensor,
 	useSensors,
 } from '@dnd-kit/core';
-import { createContext, ReactNode, useRef, useState } from 'react';
+import { act, createContext, ReactNode, useRef, useState } from 'react';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import LinkCardOverlay from '../LinkCardOverlay';
 import { CategoryType } from '@/lib/types';
 import { browserQueryClient } from './QueryClientProvider';
+import { updateLinksPosition, useMoveLink } from '@/queries/links.queries';
 import {
 	updateCategoriesPosition,
-	updateLinksPosition,
-	useMoveLink,
-} from '@/queries/links.queries';
-import { useMoveCategory } from '@/queries/categories.queries';
+	useMoveCategory,
+} from '@/queries/categories.queries';
 import CategoryCardOverlay from '../CategoryCardOverlay';
 
 // Used to reduce categories cards when dragging one of them
@@ -43,45 +42,53 @@ export default function DndContextProvider({
 	const { mutate: moveCategory } = useMoveCategory();
 
 	const [activeDragged, setActiveDragged] = useState<{
-		id: null | number;
-		type: null | 'link' | 'category';
+		id: undefined | number;
+		type: undefined | 'link' | 'category';
+		index: undefined | number;
+		parentId: undefined | number;
 	}>({
-		id: null,
-		type: null,
+		id: undefined,
+		type: undefined,
+		index: undefined,
+		parentId: undefined,
 	});
 
+	const resetActiveDragged = () =>
+		setActiveDragged({
+			id: undefined,
+			type: undefined,
+			index: undefined,
+			parentId: undefined,
+		});
+
 	const currentCategories = useRef<CategoryType[]>();
-	const draggedLinkInfos = useRef<{ index: number; categoryId: number }>();
-	const draggedCategoryInfos = useRef<{ index: number; columnId: number }>();
 
 	function handleDragStart(event: any) {
 		const { active } = event;
 		const draggedElementId = active.id;
 
+		// Save the current state of the data
 		currentCategories.current = browserQueryClient?.getQueryData([
 			'categories',
 		]);
 
+		// Save the original data of the element being dragged
 		// If dragging a category
 		if (active.data.current.type === 'category') {
-			setActiveDragged({
+			return setActiveDragged({
 				id: Number(draggedElementId.split('-')[1]),
 				type: active.data.current.type,
-			});
-			return (draggedCategoryInfos.current = {
 				index: active.data.current.sortable.index,
-				columnId: active.data.current.columnId,
+				parentId: active.data.current.columnId,
 			});
 		}
 		// If dragging a link
 		if (active.data.current.type === 'link') {
-			setActiveDragged({
+			return setActiveDragged({
 				id: draggedElementId,
 				type: active.data.current.type,
-			});
-			return (draggedLinkInfos.current = {
 				index: active.data.current.sortable.index,
-				categoryId: active.data.current.categoryId,
+				parentId: active.data.current.categoryId,
 			});
 		}
 	}
@@ -92,7 +99,10 @@ export default function DndContextProvider({
 		if (!over) return;
 
 		// If dragging a category
-		if (activeDragged.id && activeDragged.type === 'category') {
+		if (
+			activeDragged.id !== undefined &&
+			activeDragged.type === 'category'
+		) {
 			const newColumnId: number =
 				over.data.current?.columnId ?? Number(over.id.split('-')[1]);
 			const currentColumnId = active.data?.current?.columnId;
@@ -105,10 +115,10 @@ export default function DndContextProvider({
 		}
 
 		// If dragging a link
-		if (activeDragged.id && activeDragged.type === 'link') {
+		if (activeDragged.id !== undefined && activeDragged.type === 'link') {
 			const newCategoryId: number =
 				over.data.current?.categoryId ?? Number(over.id.split('-')[1]);
-			const currentCategoryId: number = active.data?.current?.categoryId;
+			const currentCategoryId = activeDragged.parentId;
 
 			if (
 				newCategoryId === currentCategoryId ||
@@ -126,41 +136,35 @@ export default function DndContextProvider({
 
 	function handleDragEnd(event: any) {
 		const { over } = event;
-		if (!over) return;
+		if (!over) return resetActiveDragged();
 
 		// If a category is moving
 		if (
-			activeDragged.id &&
+			activeDragged.id !== undefined &&
 			activeDragged.type === 'category' &&
-			typeof over.id === 'string' &&
-			over.id.startsWith('category') &&
-			draggedCategoryInfos.current
+			(over.data.current.type === 'category' ||
+				over.data.current.type === 'column')
 		) {
-			const newColumnId = over?.data.current?.columnId;
-
+			const newColumn =
+				over?.data.current?.columnId ?? Number(over.id.split('-')[1]);
 			if (
 				activeDragged.id === Number(over.id.split('-')[1]) &&
-				newColumnId === draggedCategoryInfos.current?.columnId
+				newColumn === activeDragged.parentId
 			)
-				return setActiveDragged({ id: null, type: null });
+				return resetActiveDragged();
 
-			const currentIndex = draggedCategoryInfos.current.index;
 			const newIndex =
 				over.data.current.type === 'column'
 					? undefined
 					: over.data.current?.sortable?.index;
-			console.log(over.data.current.type);
-			console.log(newIndex);
 
 			moveCategory({
 				id: activeDragged.id,
-				currentIndex,
-				currentColumn: draggedCategoryInfos.current!.columnId,
-				newColumn: newColumnId,
 				newIndex,
+				newColumn,
 			});
 
-			return setActiveDragged({ id: null, type: null });
+			return resetActiveDragged();
 		}
 
 		// If a link is moving
@@ -169,14 +173,14 @@ export default function DndContextProvider({
 
 		if (
 			activeDragged.id === over.id &&
-			newCategoryId === draggedLinkInfos.current?.categoryId
+			newCategoryId === activeDragged.parentId
 		)
-			return console.log('same');
+			return;
 
-		if (activeDragged.id && draggedLinkInfos.current) {
-			const currentIndex = draggedLinkInfos.current.index;
-			console.log(over);
-			// console.log(over.data.current?.sortable?.index);
+		if (
+			activeDragged.id !== undefined &&
+			activeDragged.index !== undefined
+		) {
 			const newIndex =
 				over.data.current.type === 'category'
 					? undefined
@@ -184,18 +188,18 @@ export default function DndContextProvider({
 
 			moveLink({
 				id: activeDragged.id,
-				currentIndex,
+				currentIndex: activeDragged.index,
 				newIndex,
 				newCategoryId,
 			});
 
-			return setActiveDragged({ id: null, type: null });
+			return resetActiveDragged();
 		}
 	}
 
 	function handleDragCancel() {
-		setActiveDragged({ id: null, type: null });
-		browserQueryClient?.setQueryData(
+		resetActiveDragged();
+		return browserQueryClient?.setQueryData(
 			['categories'],
 			currentCategories.current
 		);

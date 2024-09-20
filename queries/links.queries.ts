@@ -328,34 +328,3 @@ export async function updateLinksPosition({
 			})
 	);
 }
-
-// Update the elements when moving a category from a column to another
-export async function updateCategoriesPosition({
-	id,
-	newColumnId,
-}: {
-	id: number;
-	newColumnId: number;
-}) {
-	if (!browserQueryClient) return;
-
-	await browserQueryClient.cancelQueries({
-		queryKey: ['categories'],
-	});
-	const previousCategories: CategoryWithLinksType[] | undefined =
-		browserQueryClient.getQueryData(['categories']);
-	if (!previousCategories || !browserQueryClient) return;
-	console.log(previousCategories);
-	browserQueryClient.setQueryData(
-		['categories'],
-		(categories: CategoryWithLinksType[]) =>
-			categories.map((category) => {
-				if (category.id === id)
-					return {
-						...category,
-						column: newColumnId,
-					};
-				return category;
-			})
-	);
-}

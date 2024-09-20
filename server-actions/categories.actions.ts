@@ -91,11 +91,12 @@ export const moveCategory = authActionClient
 				// If changing column
 				if (newColumn !== currentColumn) {
 					// If no index specified, put it at the end of the column
+					// TODO Fix
 					if (newIndex === undefined) {
 						const highestIndex = await prisma.category.findFirst({
 							where: {
 								ownerId,
-								column: currentColumn,
+								column: newColumn,
 							},
 							orderBy: {
 								index: 'desc',

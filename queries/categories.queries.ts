@@ -144,31 +144,13 @@ export const useUpdateCategory = ({
 export const useMoveCategory = () =>
 	useMutation({
 		mutationFn: moveCategory,
-		onMutate: async (
-			updatedCategory: MoveCategoryType & {
-				currentIndex: number;
-				currentColumn: number;
-			}
-		) => {
-			await browserQueryClient?.cancelQueries({
+		onMutate: async () => {
+			if (!browserQueryClient) return;
+			await browserQueryClient.cancelQueries({
 				queryKey: ['categories'],
 			});
 			const previousCategories: CategoryWithLinksType[] | undefined =
-				browserQueryClient?.getQueryData(['categories']);
-			if (!previousCategories || !browserQueryClient) return;
-
-			const { currentIndex, newIndex, id } = updatedCategory;
-
-			const currentCategory = previousCategories.find(
-				(category) => category.id === id
-			);
-			if (!currentCategory) return;
-
-			browserQueryClient.setQueryData(
-				['categories'],
-				(categories: CategoryWithLinksType[]) =>
-					arrayMove(categories, currentIndex, newIndex)
-			);
+				browserQueryClient.getQueryData(['categories']);
 
 			return previousCategories;
 		},
@@ -182,6 +164,37 @@ export const useMoveCategory = () =>
 			);
 		},
 	});
+
+// Update the elements when moving a category from a column to another
+export async function updateCategoriesPosition({
+	id,
+	newColumnId,
+}: {
+	id: number;
+	newColumnId: number;
+}) {
+	if (!browserQueryClient) return;
+
+	await browserQueryClient.cancelQueries({
+		queryKey: ['categories'],
+	});
+	const previousCategories: CategoryWithLinksType[] | undefined =
+		browserQueryClient.getQueryData(['categories']);
+	if (!previousCategories || !browserQueryClient) return;
+
+	browserQueryClient.setQueryData(
+		['categories'],
+		(categories: CategoryWithLinksType[]) =>
+			categories.map((category) => {
+				if (category.id === id)
+					return {
+						...category,
+						column: newColumnId,
+					};
+				return category;
+			})
+	);
+}
 
 // Delete a category
 export const useDeleteCategory = () =>
