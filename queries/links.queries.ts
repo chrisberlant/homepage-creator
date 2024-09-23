@@ -207,7 +207,8 @@ export const useUpdateLink = () =>
 // Change index of a link
 export const useMoveLink = () =>
 	useMutation({
-		mutationFn: moveLink,
+		mutationFn: ({ id, newCategoryId, newIndex }) =>
+			moveLink({ id, newCategoryId, newIndex }),
 		onMutate: async (
 			updatedLink: MoveLinkType & {
 				currentIndex: number;
@@ -251,7 +252,7 @@ export const useMoveLink = () =>
 								: category
 						)
 				);
-				console.log(browserQueryClient.getQueryData(['categories']));
+
 				// If index is defined
 			} else {
 				browserQueryClient.setQueryData(

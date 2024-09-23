@@ -73,56 +73,68 @@ export const moveCategory = authActionClient
 
 		try {
 			return await prisma.$transaction(async (prisma) => {
-				const category = await prisma.category.findUnique({
+				const link = await prisma.category.findUnique({
 					where: {
 						id,
 						userId,
 					},
+					select: {
+						index: true,
+						column: true,
+					},
 				});
-				if (!category) throw new Error('Cannot find category');
+				if (!link) throw new Error('Cannot find link');
 
-				const { index: currentIndex, column: currentColumn } = category;
+				const { index: currentIndex, column: currentColumn } = link;
 
 				if (newIndex === currentIndex && newColumn === currentColumn)
 					throw new Error(
 						'The category is already at the specified location'
 					);
 
-				// If moved in the same column
+				let newIndexPosition = newIndex;
+
+				// If moved in the same category
 				if (newColumn === currentColumn) {
-					// If no index specified, put it at the end of the current column
+					// If no index specified, put it at the end of the category
 					if (newIndex === undefined) {
 						const highestIndex = await prisma.category.findFirst({
 							where: {
-								id: {
-									not: id,
-								},
 								column: currentColumn,
 								userId,
 							},
 							orderBy: {
 								index: 'desc',
 							},
+							select: {
+								index: true,
+							},
 						});
 
-						const newIndexPosition =
-							highestIndex !== null ? highestIndex.index + 1 : 0;
-						// TODO Fix
-						if (newIndexPosition > 0)
-							await prisma.category.updateMany({
-								where: {
-									userId,
-									column: currentColumn,
-									index: {
-										gt: currentIndex,
-									},
+						if (highestIndex === null)
+							throw new Error(
+								'Cannot find categories in this column'
+							);
+
+						if (highestIndex.index === 0)
+							throw new Error(
+								'The link is already at the specified location'
+							);
+
+						await prisma.category.updateMany({
+							where: {
+								column: currentColumn,
+								userId,
+								index: {
+									gt: currentIndex,
 								},
-								data: {
-									index: {
-										decrement: 1,
-									},
+							},
+							data: {
+								index: {
+									decrement: 1,
 								},
-							});
+							},
+						});
 
 						return await prisma.category.update({
 							where: {
@@ -130,18 +142,17 @@ export const moveCategory = authActionClient
 								userId,
 							},
 							data: {
-								index: newIndexPosition,
+								index: highestIndex.index,
 							},
 						});
 					}
 
-					// If index is specified
 					if (newIndex < currentIndex) {
 						// If new index is smaller than the current one
 						await prisma.category.updateMany({
 							where: {
-								userId,
 								column: currentColumn,
+								userId,
 								id: {
 									not: id,
 								},
@@ -157,25 +168,28 @@ export const moveCategory = authActionClient
 							},
 						});
 					} else {
-						// If new index is bigger than the current one
+						// If newIndex > currentIndex
 						const highestIndex = await prisma.category.findFirst({
 							where: {
-								userId,
 								column: currentColumn,
+								userId,
 							},
 							orderBy: {
 								index: 'desc',
 							},
+							select: {
+								index: true,
+							},
 						});
-						const newIndexPosition =
-							highestIndex && newIndex > highestIndex.index
-								? highestIndex.index
-								: newIndex;
+
+						// New index can only be inferior or equal to highest current index
+						if (highestIndex && newIndex > highestIndex.index)
+							newIndexPosition = highestIndex.index;
 
 						await prisma.category.updateMany({
 							where: {
-								userId,
 								column: currentColumn,
+								userId,
 								id: {
 									not: id,
 								},
@@ -198,62 +212,16 @@ export const moveCategory = authActionClient
 							userId,
 						},
 						data: {
-							index: newIndex,
-						},
-					});
-				}
-
-				// If moved in another column
-
-				// If no index specified, put it at the end of the column
-				if (newIndex === undefined) {
-					const highestIndex = await prisma.category.findFirst({
-						where: {
-							userId,
-							column: newColumn,
-						},
-						orderBy: {
-							index: 'desc',
-						},
-					});
-
-					await prisma.category.updateMany({
-						where: {
-							userId,
-							column: currentColumn,
-							index: {
-								gt: currentIndex,
-							},
-						},
-						data: {
-							index: {
-								decrement: 1,
-							},
-						},
-					});
-					const newIndexPosition =
-						highestIndex !== null ? highestIndex?.index + 1 : 0;
-					// TODO Fix
-					return await prisma.category.update({
-						where: {
-							id,
-							userId,
-							column: newColumn,
-						},
-						data: {
 							index: newIndexPosition,
 						},
 					});
 				}
 
-				// If index is specified
+				// If moved in another category
 				await prisma.category.updateMany({
 					where: {
-						userId,
 						column: currentColumn,
-						id: {
-							not: id,
-						},
+						userId,
 						index: {
 							gt: currentIndex,
 						},
@@ -265,15 +233,51 @@ export const moveCategory = authActionClient
 					},
 				});
 
+				const highestIndex = await prisma.category.findFirst({
+					where: {
+						column: newColumn,
+						userId,
+					},
+					orderBy: {
+						index: 'desc',
+					},
+					select: {
+						index: true,
+					},
+				});
+
+				if (newIndex === undefined) {
+					// If no index specified, put it at the end of the list
+					return await prisma.category.update({
+						where: {
+							id,
+							column: newColumn,
+							userId,
+						},
+						data: {
+							index:
+								highestIndex !== null
+									? highestIndex.index + 1
+									: 0,
+						},
+					});
+				}
+
+				// If index is specified
+				newIndexPosition =
+					highestIndex && newIndex > highestIndex.index + 1
+						? highestIndex.index + 1
+						: newIndex;
+
 				await prisma.category.updateMany({
 					where: {
-						userId,
 						column: newColumn,
 						id: {
 							not: id,
 						},
+						userId,
 						index: {
-							gte: newIndex,
+							gte: newIndexPosition,
 						},
 					},
 					data: {
@@ -289,13 +293,13 @@ export const moveCategory = authActionClient
 						userId,
 					},
 					data: {
-						index: newIndex,
 						column: newColumn,
+						index: newIndexPosition,
 					},
 				});
 			});
 		} catch (error) {
-			throw new Error('Cannot move category');
+			throw new Error('Cannot move link');
 		}
 	});
 

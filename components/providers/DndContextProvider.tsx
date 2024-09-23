@@ -157,14 +157,20 @@ export default function DndContextProvider({
 				over.data.current.type === 'column'
 					? undefined
 					: over.data.current?.sortable?.index;
-			console.log(newIndex);
-			moveCategory({
-				id: activeDragged.id,
-				newIndex,
-				newColumn,
-			});
 
-			return resetActiveDragged();
+			if (
+				activeDragged.id !== undefined &&
+				activeDragged.index !== undefined
+			) {
+				moveCategory({
+					id: activeDragged.id,
+					currentIndex: activeDragged.index,
+					newIndex,
+					newColumn,
+				});
+
+				return resetActiveDragged();
+			}
 		}
 
 		// If a link is moving

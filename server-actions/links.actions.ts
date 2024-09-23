@@ -74,11 +74,10 @@ export const updateLink = authActionClient
 export const moveLink = authActionClient
 	.schema(moveLinkSchema)
 	.action(async ({ parsedInput, ctx }) => {
-		try {
-			console.log('moveLink server action', parsedInput);
-			const { id, newIndex, newCategoryId } = parsedInput;
-			const { userId } = ctx;
+		const { id, newIndex, newCategoryId } = parsedInput;
+		const { userId } = ctx;
 
+		try {
 			return await prisma.$transaction(async (prisma) => {
 				const link = await prisma.link.findUnique({
 					where: {

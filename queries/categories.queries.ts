@@ -143,14 +143,61 @@ export const useUpdateCategory = ({
 // Change index of a category
 export const useMoveCategory = () =>
 	useMutation({
-		mutationFn: moveCategory,
-		onMutate: async () => {
-			if (!browserQueryClient) return;
-			await browserQueryClient.cancelQueries({
+		mutationFn: ({ id, newColumn, newIndex }) =>
+			moveCategory({ id, newColumn, newIndex }),
+		onMutate: async (
+			updatedCategory: MoveCategoryType & {
+				currentIndex: number;
+			}
+		) => {
+			await browserQueryClient?.cancelQueries({
 				queryKey: ['categories'],
 			});
 			const previousCategories: CategoryWithLinksType[] | undefined =
-				browserQueryClient.getQueryData(['categories']);
+				browserQueryClient?.getQueryData(['categories']);
+			if (!previousCategories || !browserQueryClient) return;
+
+			const { currentIndex, newIndex, id } = updatedCategory;
+			// TODO
+			// If no index specified, put the category at the end of the column
+			if (newIndex === undefined) {
+				browserQueryClient.setQueryData(
+					['categories'],
+					(categories: CategoryWithLinksType[]) =>
+						categories.map((category) =>
+							category.id === currentCategory.id
+								? {
+										...category,
+										links: [
+											...category.links.filter(
+												(link) => link.id !== id
+											),
+											linkInfos,
+										],
+								  }
+								: category
+						)
+				);
+				console.log(browserQueryClient.getQueryData(['categories']));
+				// If index is defined
+			} else {
+				browserQueryClient.setQueryData(
+					['categories'],
+					(categories: CategoryWithLinksType[]) =>
+						categories.map((category) =>
+							category.id === currentCategory.id
+								? {
+										...category,
+										links: arrayMove(
+											category.links,
+											currentIndex,
+											newIndex
+										),
+								  }
+								: category
+						)
+				);
+			}
 
 			return previousCategories;
 		},
