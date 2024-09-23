@@ -223,7 +223,7 @@ export const useMoveLink = () =>
 			const { currentIndex, newIndex, id } = updatedLink;
 
 			const currentCategory = previousCategories.find((category) =>
-				category.links.find((link) => link.id === id)
+				category.links.some((link) => link.id === id)
 			);
 
 			const linkInfos = currentCategory?.links.find(

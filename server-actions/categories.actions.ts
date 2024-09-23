@@ -13,13 +13,13 @@ export const createCategory = authActionClient
 	.schema(createCategorySchema)
 	.action(async ({ parsedInput, ctx }) => {
 		const { title, column } = parsedInput;
-		const { userId: ownerId } = ctx;
+		const { userId } = ctx;
 
 		try {
 			return await prisma.$transaction(async (prisma) => {
 				const lastCategory = await prisma.category.findFirst({
 					where: {
-						ownerId,
+						userId,
 						column,
 					},
 					orderBy: {
@@ -35,7 +35,7 @@ export const createCategory = authActionClient
 						title,
 						index: newIndex,
 						column,
-						ownerId,
+						userId,
 					},
 				});
 			});
@@ -54,7 +54,7 @@ export const updateCategory = authActionClient
 			return await prisma.category.update({
 				where: {
 					id,
-					ownerId: userId,
+					userId,
 				},
 				data: {
 					title,
@@ -69,14 +69,14 @@ export const moveCategory = authActionClient
 	.schema(moveCategorySchema)
 	.action(async ({ parsedInput, ctx }) => {
 		const { id, newIndex, newColumn } = parsedInput;
-		const { userId: ownerId } = ctx;
+		const { userId } = ctx;
 
 		try {
 			return await prisma.$transaction(async (prisma) => {
 				const category = await prisma.category.findUnique({
 					where: {
 						id,
-						ownerId,
+						userId,
 					},
 				});
 				if (!category) throw new Error('Cannot find category');
@@ -88,123 +88,99 @@ export const moveCategory = authActionClient
 						'The category is already at the specified location'
 					);
 
-				// If changing column
-				if (newColumn !== currentColumn) {
-					// If no index specified, put it at the end of the column
-					// TODO Fix
+				// If moved in the same column
+				if (newColumn === currentColumn) {
+					// If no index specified, put it at the end of the current column
 					if (newIndex === undefined) {
 						const highestIndex = await prisma.category.findFirst({
 							where: {
-								ownerId,
-								column: newColumn,
+								id: {
+									not: id,
+								},
+								column: currentColumn,
+								userId,
 							},
 							orderBy: {
 								index: 'desc',
 							},
 						});
 
-						await prisma.category.updateMany({
-							where: {
-								ownerId,
-								column: currentColumn,
-								id: {
-									not: id,
+						const newIndexPosition =
+							highestIndex !== null ? highestIndex.index + 1 : 0;
+						// TODO Fix
+						if (newIndexPosition > 0)
+							await prisma.category.updateMany({
+								where: {
+									userId,
+									column: currentColumn,
+									index: {
+										gt: currentIndex,
+									},
 								},
-								index: {
-									gt: currentIndex,
+								data: {
+									index: {
+										decrement: 1,
+									},
 								},
-							},
-							data: {
-								index: {
-									decrement: 1,
-								},
-							},
-						});
+							});
 
 						return await prisma.category.update({
 							where: {
 								id,
-								ownerId,
-								column: newColumn,
+								userId,
 							},
 							data: {
-								index:
-									highestIndex !== null
-										? highestIndex?.index + 1
-										: 0,
+								index: newIndexPosition,
 							},
 						});
 					}
 
 					// If index is specified
-					await prisma.category.updateMany({
-						where: {
-							ownerId,
-							column: currentColumn,
-							id: {
-								not: id,
-							},
-							index: {
-								gt: currentIndex,
-							},
-						},
-						data: {
-							index: {
-								decrement: 1,
-							},
-						},
-					});
-
-					await prisma.category.updateMany({
-						where: {
-							ownerId,
-							column: newColumn,
-							id: {
-								not: id,
-							},
-							index: {
-								gte: newIndex,
-							},
-						},
-						data: {
-							index: {
-								increment: 1,
-							},
-						},
-					});
-
-					return await prisma.category.update({
-						where: {
-							id,
-							ownerId,
-						},
-						data: {
-							index: newIndex,
-							column: newColumn,
-						},
-					});
-				}
-
-				// If column is the same
-				// If no index specified, put it at the end of the current column
-				if (newIndex === undefined) {
-					const highestIndex = await prisma.category.findFirst({
-						where: {
-							column: currentColumn,
-						},
-						orderBy: {
-							index: 'desc',
-						},
-					});
-					const newIndexPosition =
-						highestIndex !== null ? highestIndex?.index + 1 : 0;
-
-					if (newIndexPosition > 0)
+					if (newIndex < currentIndex) {
+						// If new index is smaller than the current one
 						await prisma.category.updateMany({
 							where: {
-								ownerId,
+								userId,
 								column: currentColumn,
+								id: {
+									not: id,
+								},
 								index: {
+									gte: newIndex,
+									lt: currentIndex,
+								},
+							},
+							data: {
+								index: {
+									increment: 1,
+								},
+							},
+						});
+					} else {
+						// If new index is bigger than the current one
+						const highestIndex = await prisma.category.findFirst({
+							where: {
+								userId,
+								column: currentColumn,
+							},
+							orderBy: {
+								index: 'desc',
+							},
+						});
+						const newIndexPosition =
+							highestIndex && newIndex > highestIndex.index
+								? highestIndex.index
+								: newIndex;
+
+						await prisma.category.updateMany({
+							where: {
+								userId,
+								column: currentColumn,
+								id: {
+									not: id,
+								},
+								index: {
+									lte: newIndexPosition,
 									gt: currentIndex,
 								},
 							},
@@ -214,67 +190,38 @@ export const moveCategory = authActionClient
 								},
 							},
 						});
+					}
 
 					return await prisma.category.update({
 						where: {
 							id,
-							ownerId,
+							userId,
 						},
 						data: {
-							index:
-								highestIndex !== null
-									? highestIndex?.index + 1
-									: 0,
+							index: newIndex,
 						},
 					});
 				}
 
-				// If index is specified
-				if (newIndex < currentIndex) {
-					// If new index is smaller than the current one
-					await prisma.category.updateMany({
-						where: {
-							ownerId,
-							column: currentColumn,
-							id: {
-								not: id,
-							},
-							index: {
-								gte: newIndex,
-								lt: currentIndex,
-							},
-						},
-						data: {
-							index: {
-								increment: 1,
-							},
-						},
-					});
-				} else {
-					// If new index is bigger than the current one
+				// If moved in another column
+
+				// If no index specified, put it at the end of the column
+				if (newIndex === undefined) {
 					const highestIndex = await prisma.category.findFirst({
 						where: {
-							ownerId,
-							column: currentColumn,
+							userId,
+							column: newColumn,
 						},
 						orderBy: {
 							index: 'desc',
 						},
 					});
-					const newIndexPosition =
-						highestIndex && newIndex > highestIndex.index
-							? highestIndex.index
-							: newIndex;
 
 					await prisma.category.updateMany({
 						where: {
-							ownerId,
+							userId,
 							column: currentColumn,
-							id: {
-								not: id,
-							},
 							index: {
-								lte: newIndexPosition,
 								gt: currentIndex,
 							},
 						},
@@ -284,15 +231,66 @@ export const moveCategory = authActionClient
 							},
 						},
 					});
+					const newIndexPosition =
+						highestIndex !== null ? highestIndex?.index + 1 : 0;
+					// TODO Fix
+					return await prisma.category.update({
+						where: {
+							id,
+							userId,
+							column: newColumn,
+						},
+						data: {
+							index: newIndexPosition,
+						},
+					});
 				}
+
+				// If index is specified
+				await prisma.category.updateMany({
+					where: {
+						userId,
+						column: currentColumn,
+						id: {
+							not: id,
+						},
+						index: {
+							gt: currentIndex,
+						},
+					},
+					data: {
+						index: {
+							decrement: 1,
+						},
+					},
+				});
+
+				await prisma.category.updateMany({
+					where: {
+						userId,
+						column: newColumn,
+						id: {
+							not: id,
+						},
+						index: {
+							gte: newIndex,
+						},
+					},
+					data: {
+						index: {
+							increment: 1,
+						},
+					},
+				});
 
 				return await prisma.category.update({
 					where: {
 						id,
-						ownerId,
+						userId,
 					},
 					data: {
 						index: newIndex,
+						column: newColumn,
 					},
 				});
 			});
@@ -305,12 +303,12 @@ export const deleteCategory = authActionClient
 	.schema(z.number())
 	.action(async ({ parsedInput, ctx }) => {
 		const id = parsedInput;
-		const { userId: ownerId } = ctx;
+		const { userId } = ctx;
 
 		try {
 			await prisma.$transaction(async (prisma) => {
 				const category = await prisma.category.findUnique({
-					where: { id, ownerId },
+					where: { id, userId },
 				});
 
 				if (!category) throw new Error('Category does not exist');
@@ -320,7 +318,7 @@ export const deleteCategory = authActionClient
 						index: {
 							gt: category?.index,
 						},
-						ownerId,
+						userId,
 					},
 					data: {
 						index: {
@@ -330,13 +328,13 @@ export const deleteCategory = authActionClient
 				});
 
 				await prisma.link.deleteMany({
-					where: { categoryId: id, ownerId },
+					where: { categoryId: id, userId },
 				});
 
 				await prisma.category.delete({
 					where: {
 						id,
-						ownerId,
+						userId,
 					},
 				});
 			});

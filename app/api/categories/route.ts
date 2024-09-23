@@ -8,7 +8,7 @@ export async function GET() {
 
 	const categories = await prisma.category.findMany({
 		where: {
-			ownerId: session.user.id,
+			userId: session.user.id,
 		},
 		select: {
 			id: true,

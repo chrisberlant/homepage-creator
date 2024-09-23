@@ -15,6 +15,11 @@ function makeQueryClient() {
 				staleTime: 60 * 30 * 1000,
 			},
 		},
+		// queryCache: new QueryCache({
+		// 	onError: (error, query) => {
+
+		// 	},
+		// }),
 	});
 }
 

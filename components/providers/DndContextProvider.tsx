@@ -8,7 +8,7 @@ import {
 	useSensor,
 	useSensors,
 } from '@dnd-kit/core';
-import { act, createContext, ReactNode, useRef, useState } from 'react';
+import { createContext, ReactNode, useRef, useState } from 'react';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import LinkCardOverlay from '../LinkCardOverlay';
 import { CategoryType } from '@/lib/types';
@@ -157,7 +157,7 @@ export default function DndContextProvider({
 				over.data.current.type === 'column'
 					? undefined
 					: over.data.current?.sortable?.index;
-
+			console.log(newIndex);
 			moveCategory({
 				id: activeDragged.id,
 				newIndex,

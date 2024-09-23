@@ -30,7 +30,17 @@ export const updateLinkSchema = z.strictObject({
 });
 
 export const moveLinkSchema = z.strictObject({
-	id: z.number().int().min(0),
-	newIndex: z.number().int().min(0).optional(),
-	newCategoryId: z.number().int().min(0),
+	id: z.number().int().min(0, {
+		message: 'Id must be positive',
+	}),
+	newIndex: z
+		.number()
+		.int()
+		.min(0, {
+			message: 'Index must be positive',
+		})
+		.optional(),
+	newCategoryId: z.number().int().min(0, {
+		message: 'New category must be positive',
+	}),
 });
