@@ -147,9 +147,11 @@ export default function DndContextProvider({
 		) {
 			const newColumn =
 				over?.data.current?.columnId ?? Number(over.id.split('-')[1]);
+
 			if (
 				activeDragged.id === Number(over.id.split('-')[1]) &&
-				newColumn === activeDragged.parentId
+				newColumn === activeDragged.parentId &&
+				over.data.current.type === 'category'
 			)
 				return resetActiveDragged();
 
@@ -179,7 +181,8 @@ export default function DndContextProvider({
 
 		if (
 			activeDragged.id === over.id &&
-			newCategoryId === activeDragged.parentId
+			newCategoryId === activeDragged.parentId &&
+			over.data.current.type === 'link'
 		)
 			return;
 

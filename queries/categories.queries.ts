@@ -39,7 +39,7 @@ export const useCreateCategory = (
 ) =>
 	useMutation({
 		mutationFn: createCategory,
-		onMutate: async ({ title }) => {
+		onMutate: async ({ title, column }) => {
 			await browserQueryClient?.cancelQueries({
 				queryKey: ['categories'],
 			});
@@ -52,19 +52,18 @@ export const useCreateCategory = (
 				['categories'],
 				(categories: CategoryType[]) => [
 					...categories,
-					{ title, id: 9999, links: [] },
+					{ title, id: undefined, column, links: [] },
 				]
 			);
 
 			return previousCategories;
 		},
 		onSuccess: (apiResponse) => {
-			console.log(apiResponse);
 			browserQueryClient?.setQueryData(
 				['categories'],
 				(categories: CategoryType[]) =>
 					categories.map((category) =>
-						category.id === 9999
+						category.id === undefined
 							? {
 									...category,
 									id: apiResponse?.data?.id,
@@ -84,7 +83,7 @@ export const useCreateCategory = (
 		},
 	});
 
-// Update a category
+// Update title of a category
 export const useUpdateCategory = ({
 	setEditingTitle,
 	setDisabledDragging,
@@ -150,53 +149,64 @@ export const useMoveCategory = () =>
 				currentIndex: number;
 			}
 		) => {
+			const { currentIndex, newIndex, newColumn, id } = updatedCategory;
 			await browserQueryClient?.cancelQueries({
 				queryKey: ['categories'],
 			});
 			const previousCategories: CategoryWithLinksType[] | undefined =
 				browserQueryClient?.getQueryData(['categories']);
 			if (!previousCategories || !browserQueryClient) return;
+			const categoryToMove = previousCategories.find(
+				(category) => category.id === id
+			);
+			console.log(id, newIndex);
+			console.log('moving', categoryToMove?.title);
 
-			const { currentIndex, newIndex, id } = updatedCategory;
 			// TODO
 			// If no index specified, put the category at the end of the column
 			if (newIndex === undefined) {
 				browserQueryClient.setQueryData(
 					['categories'],
-					(categories: CategoryWithLinksType[]) =>
-						categories.map((category) =>
-							category.id === currentCategory.id
-								? {
-										...category,
-										links: [
-											...category.links.filter(
-												(link) => link.id !== id
-											),
-											linkInfos,
-										],
-								  }
-								: category
-						)
+					(categories: CategoryWithLinksType[]) => {
+						const categoriesWithSameColumn = categories.filter(
+							(category) =>
+								category.column === newColumn &&
+								category.id !== id
+						);
+						const updatedCategoriesWithSameColumn = [
+							...categoriesWithSameColumn,
+							categoryToMove,
+						];
+
+						const categoriesWithDifferentColumn = categories.filter(
+							(category) => category.column !== newColumn
+						);
+
+						return [
+							...categoriesWithDifferentColumn,
+							...updatedCategoriesWithSameColumn,
+						];
+					}
 				);
-				console.log(browserQueryClient.getQueryData(['categories']));
 				// If index is defined
 			} else {
-				browserQueryClient.setQueryData(
-					['categories'],
-					(categories: CategoryWithLinksType[]) =>
-						categories.map((category) =>
-							category.id === currentCategory.id
-								? {
-										...category,
-										links: arrayMove(
-											category.links,
-											currentIndex,
-											newIndex
-										),
-								  }
-								: category
-						)
-				);
+				console.log('index defined', newIndex);
+				// browserQueryClient.setQueryData(
+				// 	['categories'],
+				// 	(categories: CategoryWithLinksType[]) =>
+				// 		categories.map((category) =>
+				// 			category.id === id
+				// 				? {
+				// 						...category,
+				// 						links: arrayMove(
+				// 							category.links,
+				// 							currentIndex,
+				// 							newIndex
+				// 						),
+				// 				  }
+				// 				: category
+				// 		)
+				// );
 			}
 
 			return previousCategories;
@@ -232,14 +242,14 @@ export async function updateCategoriesPosition({
 	browserQueryClient.setQueryData(
 		['categories'],
 		(categories: CategoryWithLinksType[]) =>
-			categories.map((category) => {
-				if (category.id === id)
-					return {
-						...category,
-						column: newColumnId,
-					};
-				return category;
-			})
+			categories.map((category) =>
+				category.id === id
+					? {
+							...category,
+							column: newColumnId,
+					  }
+					: category
+			)
 	);
 }
 

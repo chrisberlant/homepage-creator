@@ -299,7 +299,7 @@ export const moveCategory = authActionClient
 				});
 			});
 		} catch (error) {
-			throw new Error('Cannot move link');
+			throw new Error('Cannot move category');
 		}
 	});
 
