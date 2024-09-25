@@ -29,7 +29,7 @@ export const registerSchema = z
 			.email('Invalid email address'),
 		password: passwordSchema,
 		confirmPassword: z
-			.string()
+			.string({ required_error: 'Password confirmation is required' })
 			.min(8, {
 				message: 'Password confirmation must be at least 8 characters.',
 			})

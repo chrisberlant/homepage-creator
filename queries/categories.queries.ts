@@ -144,12 +144,8 @@ export const useMoveCategory = () =>
 	useMutation({
 		mutationFn: ({ id, newColumn, newIndex }) =>
 			moveCategory({ id, newColumn, newIndex }),
-		onMutate: async (
-			updatedCategory: MoveCategoryType & {
-				currentIndex: number;
-			}
-		) => {
-			const { currentIndex, newIndex, newColumn, id } = updatedCategory;
+		onMutate: async (updatedCategory: MoveCategoryType) => {
+			const { newIndex, newColumn, id } = updatedCategory;
 			await browserQueryClient?.cancelQueries({
 				queryKey: ['categories'],
 			});
@@ -159,10 +155,8 @@ export const useMoveCategory = () =>
 			const categoryToMove = previousCategories.find(
 				(category) => category.id === id
 			);
-			console.log(id, newIndex);
-			console.log('moving', categoryToMove?.title);
+			if (!categoryToMove) return;
 
-			// TODO
 			// If no index specified, put the category at the end of the column
 			if (newIndex === undefined) {
 				browserQueryClient.setQueryData(
@@ -173,10 +167,8 @@ export const useMoveCategory = () =>
 								category.column === newColumn &&
 								category.id !== id
 						);
-						const updatedCategoriesWithSameColumn = [
-							...categoriesWithSameColumn,
-							categoryToMove,
-						];
+						// Add the moved category to the end of the array
+						categoriesWithSameColumn.push(categoryToMove);
 
 						const categoriesWithDifferentColumn = categories.filter(
 							(category) => category.column !== newColumn
@@ -184,29 +176,37 @@ export const useMoveCategory = () =>
 
 						return [
 							...categoriesWithDifferentColumn,
-							...updatedCategoriesWithSameColumn,
+							...categoriesWithSameColumn,
 						];
 					}
 				);
-				// If index is defined
 			} else {
-				console.log('index defined', newIndex);
-				// browserQueryClient.setQueryData(
-				// 	['categories'],
-				// 	(categories: CategoryWithLinksType[]) =>
-				// 		categories.map((category) =>
-				// 			category.id === id
-				// 				? {
-				// 						...category,
-				// 						links: arrayMove(
-				// 							category.links,
-				// 							currentIndex,
-				// 							newIndex
-				// 						),
-				// 				  }
-				// 				: category
-				// 		)
-				// );
+				// If index is defined
+				browserQueryClient.setQueryData(
+					['categories'],
+					(categories: CategoryWithLinksType[]) => {
+						const categoriesWithSameColumn = categories.filter(
+							(category) =>
+								category.column === newColumn &&
+								category.id !== id
+						);
+						// Add the moved category to specified index
+						categoriesWithSameColumn.splice(
+							newIndex,
+							0,
+							categoryToMove
+						);
+
+						const categoriesWithDifferentColumn = categories.filter(
+							(category) => category.column !== newColumn
+						);
+
+						return [
+							...categoriesWithDifferentColumn,
+							...categoriesWithSameColumn,
+						];
+					}
+				);
 			}
 
 			return previousCategories;

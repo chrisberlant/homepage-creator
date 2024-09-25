@@ -94,9 +94,9 @@ export const moveCategory = authActionClient
 
 				let newIndexPosition = newIndex;
 
-				// If moved in the same category
+				// If moved in the same column
 				if (newColumn === currentColumn) {
-					// If no index specified, put it at the end of the category
+					// If no index specified, put it at the end of the column
 					if (newIndex === undefined) {
 						const highestIndex = await prisma.category.findFirst({
 							where: {
@@ -217,7 +217,7 @@ export const moveCategory = authActionClient
 					});
 				}
 
-				// If moved in another category
+				// If moved in another column
 				await prisma.category.updateMany({
 					where: {
 						column: currentColumn,
@@ -251,10 +251,10 @@ export const moveCategory = authActionClient
 					return await prisma.category.update({
 						where: {
 							id,
-							column: newColumn,
 							userId,
 						},
 						data: {
+							column: newColumn,
 							index:
 								highestIndex !== null
 									? highestIndex.index + 1
