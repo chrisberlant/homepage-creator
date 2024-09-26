@@ -30,11 +30,11 @@ export default function Column({
 						key={category.id}
 						id={category.id}
 						title={category.title}
-						columnId={id}
+						column={id}
 						links={category.links}
 					/>
 				))}
-				<CreateCategoryButton columnId={id} />
+				<CreateCategoryButton column={id} />
 			</div>
 		</SortableContext>
 	);

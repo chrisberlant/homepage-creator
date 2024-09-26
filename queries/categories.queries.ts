@@ -145,13 +145,14 @@ export const useMoveCategory = () =>
 		mutationFn: ({ id, newColumn, newIndex }) =>
 			moveCategory({ id, newColumn, newIndex }),
 		onMutate: async (updatedCategory: MoveCategoryType) => {
+			if (!browserQueryClient) return;
 			const { newIndex, newColumn, id } = updatedCategory;
-			await browserQueryClient?.cancelQueries({
+			await browserQueryClient.cancelQueries({
 				queryKey: ['categories'],
 			});
 			const previousCategories: CategoryWithLinksType[] | undefined =
-				browserQueryClient?.getQueryData(['categories']);
-			if (!previousCategories || !browserQueryClient) return;
+				browserQueryClient.getQueryData(['categories']);
+			if (!previousCategories) return;
 			const categoryToMove = previousCategories.find(
 				(category) => category.id === id
 			);
@@ -225,10 +226,10 @@ export const useMoveCategory = () =>
 // Update the elements when moving a category from a column to another
 export async function updateCategoriesPosition({
 	id,
-	newColumnId,
+	newColumn,
 }: {
 	id: number;
-	newColumnId: number;
+	newColumn: number;
 }) {
 	if (!browserQueryClient) return;
 
@@ -246,7 +247,7 @@ export async function updateCategoriesPosition({
 				category.id === id
 					? {
 							...category,
-							column: newColumnId,
+							column: newColumn,
 					  }
 					: category
 			)

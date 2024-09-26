@@ -207,50 +207,44 @@ export const useUpdateLink = () =>
 // Change index of a link
 export const useMoveLink = () =>
 	useMutation({
-		mutationFn: ({ id, newCategoryId, newIndex }) =>
-			moveLink({ id, newCategoryId, newIndex }),
-		onMutate: async (
-			updatedLink: MoveLinkType & {
-				currentIndex: number;
-			}
-		) => {
-			await browserQueryClient?.cancelQueries({
+		mutationFn: moveLink,
+		onMutate: async (updatedLink: MoveLinkType) => {
+			if (!browserQueryClient) return;
+			const { newIndex, id } = updatedLink;
+			await browserQueryClient.cancelQueries({
 				queryKey: ['categories'],
 			});
 			const previousCategories: CategoryWithLinksType[] | undefined =
-				browserQueryClient?.getQueryData(['categories']);
-			if (!previousCategories || !browserQueryClient) return;
-
-			const { currentIndex, newIndex, id } = updatedLink;
+				browserQueryClient.getQueryData(['categories']);
+			if (!previousCategories) return;
 
 			const currentCategory = previousCategories.find((category) =>
 				category.links.some((link) => link.id === id)
 			);
-
-			const linkInfos = currentCategory?.links.find(
+			const linkToMove = currentCategory?.links.find(
 				(link) => link.id === id
 			);
-
-			if (!currentCategory || !linkInfos) return;
+			if (!currentCategory || !linkToMove) return;
 
 			// If no index specified, put the link at the end of the list
 			if (newIndex === undefined) {
 				browserQueryClient.setQueryData(
 					['categories'],
 					(categories: CategoryWithLinksType[]) =>
-						categories.map((category) =>
-							category.id === currentCategory.id
-								? {
-										...category,
-										links: [
-											...category.links.filter(
-												(link) => link.id !== id
-											),
-											linkInfos,
-										],
-								  }
-								: category
-						)
+						categories.map((category) => {
+							if (category.id === currentCategory.id) {
+								const filteredLinks = category.links.filter(
+									(link) => link.id !== id
+								);
+								filteredLinks.push(linkToMove);
+								return {
+									...category,
+									links: filteredLinks,
+								};
+							}
+
+							return category;
+						})
 				);
 
 				// If index is defined
@@ -258,18 +252,19 @@ export const useMoveLink = () =>
 				browserQueryClient.setQueryData(
 					['categories'],
 					(categories: CategoryWithLinksType[]) =>
-						categories.map((category) =>
-							category.id === currentCategory.id
-								? {
-										...category,
-										links: arrayMove(
-											category.links,
-											currentIndex,
-											newIndex
-										),
-								  }
-								: category
-						)
+						categories.map((category) => {
+							if (category.id === currentCategory.id) {
+								const filteredLinks = category.links.filter(
+									(link) => link.id !== id
+								);
+								filteredLinks.splice(newIndex, 0, linkToMove);
+								return {
+									...category,
+									links: filteredLinks,
+								};
+							}
+							return category;
+						})
 				);
 			}
 
@@ -301,15 +296,11 @@ export async function updateLinksPosition({
 	});
 	const previousCategories: CategoryWithLinksType[] | undefined =
 		browserQueryClient.getQueryData(['categories']);
-	if (!previousCategories || !browserQueryClient) return;
-
-	const currentCategory = previousCategories.find((category) =>
+	const currentCategory = previousCategories?.find((category) =>
 		category.links.find((link) => link.id === id)
 	);
-	const currentLinkInfos = currentCategory?.links.find(
-		(link) => link.id === id
-	);
-	if (!currentCategory || !currentLinkInfos) return;
+	const linkToMove = currentCategory?.links.find((link) => link.id === id);
+	if (!previousCategories || !currentCategory || !linkToMove) return;
 
 	browserQueryClient.setQueryData(
 		['categories'],
@@ -318,7 +309,7 @@ export async function updateLinksPosition({
 				if (category.id === newCategoryId)
 					return {
 						...category,
-						links: [...category.links, currentLinkInfos],
+						links: [...category.links, linkToMove],
 					};
 				if (category.id === currentCategory.id)
 					return {

@@ -26,14 +26,14 @@ import { Button } from './ui/button';
 interface CategoryCardProps {
 	id: number;
 	title: string;
-	columnId: number;
+	column: number;
 	links: LinkType[];
 }
 
 export default function CategoryCard({
 	id,
 	title,
-	columnId,
+	column,
 	links,
 }: CategoryCardProps) {
 	const { editingMode } = useContext(EditingModeContext);
@@ -54,7 +54,7 @@ export default function CategoryCard({
 	} = useSortable({
 		id: `category-${id}`,
 		data: {
-			columnId,
+			column,
 			type: 'category',
 		},
 		disabled: disabledDragging,

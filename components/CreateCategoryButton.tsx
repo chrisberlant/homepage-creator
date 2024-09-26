@@ -29,16 +29,12 @@ import {
 import { CreateCategoryType } from '@/lib/types';
 import { createCategorySchema } from '@/schemas/categories.schemas';
 
-export default function CreateCategoryButton({
-	columnId,
-}: {
-	columnId: number;
-}) {
+export default function CreateCategoryButton({ column }: { column: number }) {
 	const { editingMode } = useContext(EditingModeContext);
 	const form = useForm<CreateCategoryType>({
 		resolver: zodResolver(createCategorySchema),
 		defaultValues: {
-			column: columnId,
+			column,
 			title: '',
 		},
 	});

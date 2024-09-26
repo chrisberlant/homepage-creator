@@ -94,6 +94,14 @@ export const moveLink = authActionClient
 				const { index: currentIndex, categoryId: currentCategoryId } =
 					link;
 
+				if (
+					newIndex === currentIndex &&
+					newCategoryId === currentCategoryId
+				)
+					throw new Error(
+						'The link is already at the specified location'
+					);
+
 				const newCategory = await prisma.category.findUnique({
 					where: {
 						id: currentCategoryId,
@@ -104,15 +112,8 @@ export const moveLink = authActionClient
 					},
 				});
 
-				if (!newCategory) throw new Error('The category does exist');
-
-				if (
-					newIndex === currentIndex &&
-					newCategoryId === currentCategoryId
-				)
-					throw new Error(
-						'The link is already at the specified location'
-					);
+				if (!newCategory)
+					throw new Error('The category does not exist');
 
 				let newIndexPosition = newIndex;
 
@@ -273,10 +274,10 @@ export const moveLink = authActionClient
 					return await prisma.link.update({
 						where: {
 							id,
-							categoryId: newCategoryId,
 							userId,
 						},
 						data: {
+							categoryId: newCategoryId,
 							index:
 								highestIndex !== null
 									? highestIndex.index + 1

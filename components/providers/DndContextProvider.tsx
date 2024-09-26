@@ -44,12 +44,10 @@ export default function DndContextProvider({
 	const [activeDragged, setActiveDragged] = useState<{
 		id: undefined | number;
 		type: undefined | 'link' | 'category';
-		index: undefined | number;
 		parentId: undefined | number;
 	}>({
 		id: undefined,
 		type: undefined,
-		index: undefined,
 		parentId: undefined,
 	});
 
@@ -57,7 +55,6 @@ export default function DndContextProvider({
 		setActiveDragged({
 			id: undefined,
 			type: undefined,
-			index: undefined,
 			parentId: undefined,
 		});
 
@@ -78,8 +75,7 @@ export default function DndContextProvider({
 			return setActiveDragged({
 				id: Number(draggedElementId.split('-')[1]),
 				type: active.data.current.type,
-				index: active.data.current.sortable.index,
-				parentId: active.data.current.columnId,
+				parentId: active.data.current.column,
 			});
 		}
 		// If dragging a link
@@ -87,13 +83,12 @@ export default function DndContextProvider({
 			return setActiveDragged({
 				id: draggedElementId,
 				type: active.data.current.type,
-				index: active.data.current.sortable.index,
 				parentId: active.data.current.categoryId,
 			});
 		}
 	}
 
-	// Used to reorder links when changing categories or columns
+	// Used to reorder links/categories when changing categories/columns
 	function handleDragOver(event: any) {
 		const { over, active } = event;
 		if (!over) return;
@@ -103,14 +98,15 @@ export default function DndContextProvider({
 			activeDragged.id !== undefined &&
 			activeDragged.type === 'category'
 		) {
-			const newColumnId: number =
-				over.data.current?.columnId ?? Number(over.id.split('-')[1]);
-			const currentColumnId = active.data?.current?.columnId;
-			if (newColumnId === currentColumnId) return;
+			const newColumn: number =
+				over.data.current?.column ?? Number(over.id.split('-')[1]);
+			const currentColumn = active.data?.current?.column;
+
+			if (newColumn === currentColumn) return;
 
 			return updateCategoriesPosition({
 				id: activeDragged.id,
-				newColumnId,
+				newColumn,
 			});
 		}
 
@@ -118,14 +114,13 @@ export default function DndContextProvider({
 		if (activeDragged.id !== undefined && activeDragged.type === 'link') {
 			const newCategoryId: number =
 				over.data.current?.categoryId ?? Number(over.id.split('-')[1]);
-			const currentCategoryId = activeDragged.parentId;
-
+			const currentCategoryId = active.data.current?.categoryId;
 			if (
 				newCategoryId === currentCategoryId ||
 				over.data.current.type === 'column'
 			)
 				return;
-
+			console.log('update position');
 			// Update the cache only if link was moved to another category
 			return updateLinksPosition({
 				id: activeDragged.id,
@@ -146,7 +141,7 @@ export default function DndContextProvider({
 				over.data.current.type === 'column')
 		) {
 			const newColumn =
-				over?.data.current?.columnId ?? Number(over.id.split('-')[1]);
+				over?.data.current?.column ?? Number(over.id.split('-')[1]);
 
 			if (
 				activeDragged.id === Number(over.id.split('-')[1]) &&
@@ -160,18 +155,13 @@ export default function DndContextProvider({
 					? undefined
 					: over.data.current?.sortable?.index;
 
-			if (
-				activeDragged.id !== undefined &&
-				activeDragged.index !== undefined
-			) {
-				moveCategory({
-					id: activeDragged.id,
-					newIndex,
-					newColumn,
-				});
+			moveCategory({
+				id: activeDragged.id,
+				newIndex,
+				newColumn,
+			});
 
-				return resetActiveDragged();
-			}
+			return resetActiveDragged();
 		}
 
 		// If a link is moving
@@ -185,10 +175,7 @@ export default function DndContextProvider({
 		)
 			return;
 
-		if (
-			activeDragged.id !== undefined &&
-			activeDragged.index !== undefined
-		) {
+		if (activeDragged.id !== undefined) {
 			const newIndex =
 				over.data.current.type === 'category'
 					? undefined
@@ -196,7 +183,6 @@ export default function DndContextProvider({
 
 			moveLink({
 				id: activeDragged.id,
-				currentIndex: activeDragged.index,
 				newIndex,
 				newCategoryId,
 			});
