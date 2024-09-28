@@ -144,8 +144,25 @@ export const useDeleteLink = () =>
 		},
 	});
 
+interface UseUpdateLinkProps {
+	form: UseFormReturn<
+		{
+			id: number;
+			title?: string | undefined;
+			url?: string | undefined;
+		},
+		any,
+		undefined
+	>;
+	setOpen: Dispatch<SetStateAction<boolean>>;
+	setDisabledDragging: Dispatch<SetStateAction<boolean>>;
+}
 // Update a link
-export const useUpdateLink = () =>
+export const useUpdateLink = ({
+	form,
+	setOpen,
+	setDisabledDragging,
+}: UseUpdateLinkProps) =>
 	useMutation({
 		mutationFn: updateLink,
 		onMutate: async (updatedLink) => {
@@ -192,7 +209,12 @@ export const useUpdateLink = () =>
 
 			return previousCategories;
 		},
-		onSuccess: () => toast.success('Link successfully updated'),
+		onSuccess: (apiResponse) => {
+			form.reset(apiResponse?.data);
+			setOpen(false);
+			setDisabledDragging(false);
+			toast.success('Link successfully updated');
+		},
 		onError: (error, __, previousCategories) => {
 			if (error.message === 'No data modified')
 				return toast.info(error.message);

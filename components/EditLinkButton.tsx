@@ -22,7 +22,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from '@/components/ui/dialog';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useUpdateLink } from '@/queries/links.queries';
 import Image from 'next/image';
 import { UpdateLinkType } from '@/lib/types';
@@ -30,6 +30,7 @@ import FaviconNotFound from './FaviconNotFound';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
 import { Button } from './ui/button';
 import { updateLinkSchema, urlSchema } from '@/schemas/links.schemas';
+import { updateLink } from '../server-actions/links.actions';
 
 interface EditLinkButtonProps {
 	defaultTitle: string;
@@ -50,18 +51,34 @@ export default function EditLinkButton({
 			url: defaultUrl,
 		},
 	});
-
-	const { mutate: updateLink } = useUpdateLink();
 	const url = form.getValues('url');
-	const { setDisabledDragging } = useContext(DisabledDraggingContext);
+
+	const { disabledDragging, setDisabledDragging } = useContext(
+		DisabledDraggingContext
+	);
 	const [faviconFound, setFaviconFound] = useState(true);
+	const [open, setOpen] = useState(false);
+	const { mutate: updateLink } = useUpdateLink({
+		form,
+		setOpen,
+		setDisabledDragging,
+	});
+
+	// Reset the form and allow dragging again when the dialog is closed
+	useEffect(() => {
+		if (!open) {
+			if (disabledDragging) setDisabledDragging(false);
+			form.reset();
+		}
+	}, [open, setDisabledDragging, form, disabledDragging]);
 
 	return (
-		<Dialog>
+		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
 				<Button
 					variant='ghost'
 					className='px-2 absolute bottom-0 left-3'
+					// TODO fix
 					onClick={() => setDisabledDragging(true)}
 				>
 					<PenIcon size={18} />
