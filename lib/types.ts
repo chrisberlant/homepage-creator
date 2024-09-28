@@ -7,6 +7,7 @@ import {
 import {
 	createCategorySchema,
 	moveCategorySchema,
+	updateCategorySchema,
 } from '@/schemas/categories.schemas';
 import {
 	createLinkSchema,
@@ -35,6 +36,10 @@ export type LinkWithCategoryType = LinkType & {
 
 export type CreateLinkType = z.infer<typeof createLinkSchema>;
 
+export type UpdateLinkType = z.infer<typeof updateLinkSchema>;
+
+export type MoveLinkType = z.infer<typeof moveLinkSchema>;
+
 export type CategoryType = {
 	id: number;
 	title: string;
@@ -45,9 +50,7 @@ export type CategoryWithLinksType = CategoryType & {
 	links: LinkType[];
 };
 
-export type updateLinkType = z.infer<typeof updateLinkSchema>;
-
-export type MoveLinkType = z.infer<typeof moveLinkSchema>;
+export type UpdateCategoryType = z.infer<typeof updateCategorySchema>;
 
 export type UserType = {
 	username: string;

@@ -25,7 +25,7 @@ import {
 import { useContext, useState } from 'react';
 import { useUpdateLink } from '@/queries/links.queries';
 import Image from 'next/image';
-import { updateLinkType } from '@/lib/types';
+import { UpdateLinkType } from '@/lib/types';
 import FaviconNotFound from './FaviconNotFound';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
 import { Button } from './ui/button';
@@ -42,7 +42,7 @@ export default function EditLinkButton({
 	defaultUrl,
 	id,
 }: EditLinkButtonProps) {
-	const form = useForm<updateLinkType>({
+	const form = useForm<UpdateLinkType>({
 		resolver: zodResolver(updateLinkSchema),
 		defaultValues: {
 			id,

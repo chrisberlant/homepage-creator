@@ -97,7 +97,6 @@ export const useUpdateCategory = ({
 			await browserQueryClient?.cancelQueries({
 				queryKey: ['categories'],
 			});
-
 			const previousCategories: CategoryType[] | undefined =
 				browserQueryClient?.getQueryData(['categories']);
 			if (!previousCategories || !browserQueryClient) return;

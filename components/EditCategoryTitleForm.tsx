@@ -5,12 +5,12 @@ import { Button } from './ui/button';
 import { Form, FormField, FormItem, FormControl, FormMessage } from './ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { CreateCategoryType } from '@/lib/types';
-import { createCategorySchema } from '@/schemas/categories.schemas';
-import { useUpdateCategory } from '../queries/categories.queries';
+import { updateCategorySchema } from '@/schemas/categories.schemas';
+import { useUpdateCategory } from '@/queries/categories.queries';
 import { Input } from './ui/input';
 import { useContext, useEffect, useRef } from 'react';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
+import { UpdateCategoryType } from '@/lib/types';
 
 export default function EditCategoryTitleForm({
 	id,
@@ -21,9 +21,10 @@ export default function EditCategoryTitleForm({
 	defaultTitle: string;
 	setEditingTitle: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-	const form = useForm<CreateCategoryType>({
-		resolver: zodResolver(createCategorySchema),
+	const form = useForm<UpdateCategoryType>({
+		resolver: zodResolver(updateCategorySchema),
 		defaultValues: {
+			id,
 			title: defaultTitle,
 		},
 	});
@@ -43,12 +44,13 @@ export default function EditCategoryTitleForm({
 		<Form {...form}>
 			<form
 				className='flex w-36 h-6 gap-2'
-				onSubmit={form.handleSubmit((data) =>
+				onSubmit={form.handleSubmit(({ title }) => {
+					console.log(title);
 					updateCategory({
 						id,
-						title: data.title,
-					})
-				)}
+						title,
+					});
+				})}
 			>
 				<FormField
 					control={form.control}
@@ -67,14 +69,6 @@ export default function EditCategoryTitleForm({
 					)}
 				/>
 				<Button
-					type='submit'
-					variant='ghost'
-					size='icon'
-					className='h-8 px-1'
-				>
-					<CheckIcon className='h-4 w-4' />
-				</Button>
-				<Button
 					type='reset'
 					variant='ghost'
 					size='icon'
@@ -84,7 +78,15 @@ export default function EditCategoryTitleForm({
 						setDisabledDragging(false);
 					}}
 				>
-					<CircleXIcon className='h-4 w-4' />
+					<CircleXIcon color='red' className='h-4 w-4' />
+				</Button>
+				<Button
+					type='submit'
+					variant='ghost'
+					size='icon'
+					className='h-8 px-1'
+				>
+					<CheckIcon className='h-4 w-4' />
 				</Button>
 			</form>
 		</Form>
