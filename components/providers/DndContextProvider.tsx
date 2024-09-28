@@ -115,16 +115,21 @@ export default function DndContextProvider({
 			const newCategoryId: number =
 				over.data.current?.categoryId ?? Number(over.id.split('-')[1]);
 			const currentCategoryId = active.data.current?.categoryId;
+			const newIndex =
+				over.data.current.type === 'link'
+					? over.data.current.sortable.index
+					: undefined;
+
 			if (
 				newCategoryId === currentCategoryId ||
 				over.data.current.type === 'column'
 			)
 				return;
-			console.log('update position');
 			// Update the cache only if link was moved to another category
 			return updateLinksPosition({
 				id: activeDragged.id,
 				newCategoryId,
+				newIndex,
 			});
 		}
 	}

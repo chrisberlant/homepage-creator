@@ -5,7 +5,7 @@ import { Trash2Icon } from 'lucide-react';
 import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import LinkCardEditButton from './LinkCardEditButton';
+import EditLinkButton from './EditLinkButton';
 import { useDeleteLink } from '@/queries/links.queries';
 import { LinkWithCategoryType } from '@/lib/types';
 import Image from 'next/image';
@@ -56,7 +56,7 @@ export default function LinkCard({
 		>
 			{editingMode ? (
 				<>
-					<LinkCardEditButton
+					<EditLinkButton
 						defaultTitle={title}
 						defaultUrl={url}
 						id={id}

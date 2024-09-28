@@ -158,8 +158,8 @@ export const useMoveCategory = () =>
 			);
 			if (!categoryToMove) return;
 
-			// If no index specified, put the category at the end of the column
 			if (newIndex === undefined) {
+				// If no index specified, put the category at the end of the column
 				browserQueryClient.setQueryData(
 					['categories'],
 					(categories: CategoryWithLinksType[]) => {

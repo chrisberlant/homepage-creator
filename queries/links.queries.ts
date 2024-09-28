@@ -22,13 +22,13 @@ interface UseCreateLinkProps {
 		any,
 		undefined
 	>;
-	setOpenedMenu: Dispatch<SetStateAction<boolean>>;
+	setOpen: Dispatch<SetStateAction<boolean>>;
 	setDisabledDragging: Dispatch<SetStateAction<boolean>>;
 }
 // Create a link
 export const useCreateLink = ({
 	form,
-	setOpenedMenu,
+	setOpen,
 	setDisabledDragging,
 }: UseCreateLinkProps) =>
 	useMutation({
@@ -85,7 +85,7 @@ export const useCreateLink = ({
 					)
 			);
 			form.reset();
-			setOpenedMenu(false);
+			setOpen(false);
 			setDisabledDragging(false);
 			toast.success('Link successfully created');
 		},
@@ -226,43 +226,39 @@ export const useMoveLink = () =>
 			);
 			if (!currentCategory || !linkToMove) return;
 
-			// If no index specified, put the link at the end of the list
 			if (newIndex === undefined) {
+				// If no index specified, put the link at the end of the list
 				browserQueryClient.setQueryData(
 					['categories'],
 					(categories: CategoryWithLinksType[]) =>
 						categories.map((category) => {
-							if (category.id === currentCategory.id) {
-								const filteredLinks = category.links.filter(
-									(link) => link.id !== id
-								);
-								filteredLinks.push(linkToMove);
+							if (category.id === currentCategory.id)
 								return {
 									...category,
-									links: filteredLinks,
+									links: arrayMove(
+										category.links,
+										category.links.indexOf(linkToMove),
+										category.links.length - 1
+									),
 								};
-							}
-
 							return category;
 						})
 				);
-
-				// If index is defined
 			} else {
+				// If index is defined
 				browserQueryClient.setQueryData(
 					['categories'],
 					(categories: CategoryWithLinksType[]) =>
 						categories.map((category) => {
-							if (category.id === currentCategory.id) {
-								const filteredLinks = category.links.filter(
-									(link) => link.id !== id
-								);
-								filteredLinks.splice(newIndex, 0, linkToMove);
+							if (category.id === currentCategory.id)
 								return {
 									...category,
-									links: filteredLinks,
+									links: arrayMove(
+										category.links,
+										category.links.indexOf(linkToMove),
+										newIndex
+									),
 								};
-							}
 							return category;
 						})
 				);
@@ -285,9 +281,11 @@ export const useMoveLink = () =>
 export async function updateLinksPosition({
 	id,
 	newCategoryId,
+	newIndex,
 }: {
 	id: number;
 	newCategoryId: number;
+	newIndex: number | undefined;
 }) {
 	if (!browserQueryClient) return;
 
@@ -302,15 +300,44 @@ export async function updateLinksPosition({
 	const linkToMove = currentCategory?.links.find((link) => link.id === id);
 	if (!previousCategories || !currentCategory || !linkToMove) return;
 
-	browserQueryClient.setQueryData(
+	// TODO arrayMove ?
+	if (newIndex === undefined) {
+		return browserQueryClient.setQueryData(
+			['categories'],
+			(categories: CategoryWithLinksType[]) =>
+				categories.map((category) => {
+					if (category.id === newCategoryId)
+						return {
+							...category,
+							links: [...category.links, linkToMove],
+						};
+					if (category.id === currentCategory.id)
+						return {
+							...category,
+							links: category.links.filter(
+								(link) => link.id !== id
+							),
+						};
+					return category;
+				})
+		);
+	}
+
+	// If index is defined
+	return browserQueryClient.setQueryData(
 		['categories'],
 		(categories: CategoryWithLinksType[]) =>
 			categories.map((category) => {
-				if (category.id === newCategoryId)
+				if (category.id === newCategoryId) {
+					const filteredLinks = category.links.filter(
+						(link) => link.id !== id
+					);
+					filteredLinks.push(linkToMove);
 					return {
 						...category,
-						links: [...category.links, linkToMove],
+						links: filteredLinks,
 					};
+				}
 				if (category.id === currentCategory.id)
 					return {
 						...category,

@@ -1,5 +1,4 @@
 import EditingModeContextProvider from '@/components/providers/EditingModeContextProvider';
-import { redirect } from 'next/navigation';
 import EditingModeButton from '@/components/EditingModeButton';
 import {
 	dehydrate,
@@ -7,7 +6,6 @@ import {
 	QueryClient,
 } from '@tanstack/react-query';
 import fetchApiFromServer from '@/utils/fetchApiFromServer';
-import { getSession } from '../../lib/jwt';
 
 export default async function Layout({
 	children,

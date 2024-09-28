@@ -1,6 +1,6 @@
 'use client';
 
-import { XIcon, BookmarkPlusIcon } from 'lucide-react';
+import { BookmarkPlusIcon } from 'lucide-react';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Input } from './ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +13,16 @@ import {
 	FormLabel,
 	FormMessage,
 } from './ui/form';
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
 import { Button } from './ui/button';
 import { useCreateLink } from '@/queries/links.queries';
 import { createLinkSchema, urlSchema } from '@/schemas/links.schemas';
@@ -36,35 +46,39 @@ export default function CreateLinkButton({
 	});
 	const { setDisabledDragging } = useContext(DisabledDraggingContext);
 	const url = form.getValues('url');
-	const [openedMenu, setOpenedMenu] = useState(false);
+	const [open, setOpen] = useState(false);
 	const [faviconFound, setFaviconFound] = useState(true);
 	const inputRef = useRef<HTMLInputElement>(null);
-
 	const { mutate: createLink } = useCreateLink({
 		form,
-		setOpenedMenu,
+		setOpen,
 		setDisabledDragging,
 	});
 
 	useEffect(() => {
-		if (inputRef.current && openedMenu) inputRef.current.focus();
-	}, [openedMenu]);
+		if (inputRef.current) inputRef.current.focus();
+	}, [open]);
 
 	return (
-		<>
-			<Button
-				variant='ghost'
-				className='mb-2 py-1 px-2'
-				onClick={() => {
-					setOpenedMenu(true);
-					setDisabledDragging(true);
-					form.reset();
-				}}
-			>
-				<BookmarkPlusIcon />
-			</Button>
-
-			{openedMenu && (
+		<Dialog>
+			<DialogTrigger asChild>
+				<Button
+					variant='ghost'
+					className='mb-2 py-1 px-2'
+					onClick={() => {
+						setOpen(true);
+						setDisabledDragging(true);
+						form.reset();
+					}}
+				>
+					<BookmarkPlusIcon />
+				</Button>
+			</DialogTrigger>
+			<DialogContent className='sm:max-w-[425px]'>
+				<DialogHeader>
+					<DialogDescription></DialogDescription>
+					<DialogTitle>Create a link</DialogTitle>
+				</DialogHeader>
 				<Form {...form}>
 					<form
 						onSubmit={form.handleSubmit((e) => {
@@ -75,24 +89,13 @@ export default function CreateLinkButton({
 								categoryId,
 							});
 						})}
-						className='flex cursor-default flex-col mb-4 border p-4 bg-card rounded-xl absolute z-30 w-96'
 					>
-						<Button
-							variant='ghost'
-							className='absolute right-0 top-0 p-1'
-							onClick={() => {
-								setOpenedMenu(false);
-								setDisabledDragging(false);
-							}}
-						>
-							<XIcon />
-						</Button>
 						<FormField
 							control={form.control}
 							name='title'
 							render={({ field }) => (
 								<FormItem className='mb-2'>
-									<FormLabel>Insert title</FormLabel>
+									<FormLabel>Title</FormLabel>
 									<FormControl>
 										<Input {...field} ref={inputRef} />
 									</FormControl>
@@ -105,7 +108,7 @@ export default function CreateLinkButton({
 							name='url'
 							render={({ field }) => (
 								<FormItem className='mb-2'>
-									<FormLabel>Insert URL</FormLabel>
+									<FormLabel>URL</FormLabel>
 									<FormControl>
 										<div className='flex relative'>
 											<div className='flex items-center justify-center absolute bottom-2.5 left-3'>
@@ -136,12 +139,17 @@ export default function CreateLinkButton({
 								</FormItem>
 							)}
 						/>
-						<Button type='submit' className='mt-4'>
-							Create link
-						</Button>
+						<DialogFooter className='mt-4'>
+							<DialogClose asChild>
+								<Button type='reset' variant='outline'>
+									Close
+								</Button>
+							</DialogClose>
+							<Button type='submit'>Create link</Button>
+						</DialogFooter>
 					</form>
 				</Form>
-			)}
-		</>
+			</DialogContent>
+		</Dialog>
 	);
 }

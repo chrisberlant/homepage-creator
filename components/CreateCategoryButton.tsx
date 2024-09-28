@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Input } from './ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -15,19 +15,18 @@ import {
 import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { Button } from './ui/button';
 import { useCreateCategory } from '@/queries/categories.queries';
-import {
-	AlertDialog,
-	AlertDialogTrigger,
-	AlertDialogContent,
-	AlertDialogTitle,
-	AlertDialogDescription,
-	AlertDialogCancel,
-	AlertDialogAction,
-	AlertDialogHeader,
-	AlertDialogFooter,
-} from '@/components/ui/alert-dialog';
 import { CreateCategoryType } from '@/lib/types';
 import { createCategorySchema } from '@/schemas/categories.schemas';
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
 
 export default function CreateCategoryButton({ column }: { column: number }) {
 	const { editingMode } = useContext(EditingModeContext);
@@ -38,35 +37,35 @@ export default function CreateCategoryButton({ column }: { column: number }) {
 			title: '',
 		},
 	});
+	const inputRef = useRef<HTMLInputElement>(null);
 	const { mutate: createCategory } = useCreateCategory(form);
-	const [open, setOpen] = useState(false);
+
+	useEffect(() => {
+		if (inputRef.current) inputRef.current.focus();
+	}, []);
 
 	return (
 		editingMode && (
-			<AlertDialog open={open} onOpenChange={setOpen}>
-				<AlertDialogTrigger asChild>
+			<Dialog>
+				<DialogTrigger asChild>
 					<Button className='mt-2 self-center'>
 						Create a new category
 					</Button>
-				</AlertDialogTrigger>
-				<AlertDialogContent>
+				</DialogTrigger>
+				<DialogContent className='sm:max-w-[425px]'>
+					<DialogHeader>
+						<DialogDescription></DialogDescription>
+						<DialogTitle>Create a new category</DialogTitle>
+					</DialogHeader>
 					<Form {...form}>
 						<form
-							onSubmit={form.handleSubmit(
-								(data) =>
-									createCategory({
-										title: data.title,
-										column: data.column,
-									}),
-								() => setOpen(true)
+							onSubmit={form.handleSubmit(({ title, column }) =>
+								createCategory({
+									title,
+									column,
+								})
 							)}
 						>
-							<AlertDialogHeader>
-								<AlertDialogTitle>
-									Create a new category
-								</AlertDialogTitle>
-								<AlertDialogDescription></AlertDialogDescription>
-							</AlertDialogHeader>
 							<FormField
 								control={form.control}
 								name='title'
@@ -74,27 +73,24 @@ export default function CreateCategoryButton({ column }: { column: number }) {
 									<FormItem>
 										<FormLabel>Title</FormLabel>
 										<FormControl>
-											<Input {...field} />
+											<Input {...field} ref={inputRef} />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
 								)}
 							/>
-							<AlertDialogFooter className='mt-4'>
-								<AlertDialogCancel
-									type='reset'
-									onClick={() => form.reset()}
-								>
-									Cancel
-								</AlertDialogCancel>
-								<AlertDialogAction type='submit'>
-									Continue
-								</AlertDialogAction>
-							</AlertDialogFooter>
+							<DialogFooter className='mt-4'>
+								<DialogClose asChild>
+									<Button type='reset' variant='outline'>
+										Close
+									</Button>
+								</DialogClose>
+								<Button type='submit'>Save changes</Button>
+							</DialogFooter>
 						</form>
 					</Form>
-				</AlertDialogContent>
-			</AlertDialog>
+				</DialogContent>
+			</Dialog>
 		)
 	);
 }

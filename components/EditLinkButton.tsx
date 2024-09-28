@@ -1,16 +1,5 @@
 'use client';
 
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { PenIcon } from 'lucide-react';
 import { Input } from './ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,6 +12,16 @@ import {
 	FormControl,
 	FormMessage,
 } from './ui/form';
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
 import { useContext, useState } from 'react';
 import { useUpdateLink } from '@/queries/links.queries';
 import Image from 'next/image';
@@ -32,17 +31,17 @@ import { DisabledDraggingContext } from './providers/DisabledDraggingContextProv
 import { Button } from './ui/button';
 import { updateLinkSchema, urlSchema } from '@/schemas/links.schemas';
 
-interface LinkCardEditButtonProps {
+interface EditLinkButtonProps {
 	defaultTitle: string;
 	defaultUrl: string;
 	id: number;
 }
 
-export default function LinkCardEditButton({
+export default function EditLinkButton({
 	defaultTitle,
 	defaultUrl,
 	id,
-}: LinkCardEditButtonProps) {
+}: EditLinkButtonProps) {
 	const form = useForm<updateLinkType>({
 		resolver: zodResolver(updateLinkSchema),
 		defaultValues: {
@@ -53,14 +52,13 @@ export default function LinkCardEditButton({
 	});
 
 	const { mutate: updateLink } = useUpdateLink();
-	const [open, setOpen] = useState(false);
 	const url = form.getValues('url');
 	const { setDisabledDragging } = useContext(DisabledDraggingContext);
 	const [faviconFound, setFaviconFound] = useState(true);
 
 	return (
-		<AlertDialog open={open} onOpenChange={setOpen}>
-			<AlertDialogTrigger asChild>
+		<Dialog>
+			<DialogTrigger asChild>
 				<Button
 					variant='ghost'
 					className='px-2 absolute bottom-0 left-3'
@@ -68,20 +66,16 @@ export default function LinkCardEditButton({
 				>
 					<PenIcon size={18} />
 				</Button>
-			</AlertDialogTrigger>
-			<AlertDialogContent>
+			</DialogTrigger>
+			<DialogContent className='sm:max-w-[425px]'>
+				<DialogHeader>
+					<DialogDescription></DialogDescription>
+					<DialogTitle>Edit a link</DialogTitle>
+				</DialogHeader>
 				<Form {...form}>
 					<form
-						onSubmit={form.handleSubmit(
-							(data) => updateLink(data),
-							// If any error in the data
-							() => setOpen(true)
-						)}
+						onSubmit={form.handleSubmit((data) => updateLink(data))}
 					>
-						<AlertDialogHeader>
-							<AlertDialogTitle>Editing a link</AlertDialogTitle>
-							<AlertDialogDescription></AlertDialogDescription>
-						</AlertDialogHeader>
 						<FormField
 							control={form.control}
 							name='title'
@@ -131,24 +125,17 @@ export default function LinkCardEditButton({
 								</FormItem>
 							)}
 						/>
-
-						<AlertDialogFooter className='mt-4'>
-							<AlertDialogCancel
-								type='reset'
-								onClick={() => {
-									form.reset();
-									setDisabledDragging(false);
-								}}
-							>
-								Cancel
-							</AlertDialogCancel>
-							<AlertDialogAction type='submit'>
-								Continue
-							</AlertDialogAction>
-						</AlertDialogFooter>
+						<DialogFooter className='mt-4'>
+							<DialogClose asChild>
+								<Button type='reset' variant='outline'>
+									Close
+								</Button>
+							</DialogClose>
+							<Button type='submit'>Save changes</Button>
+						</DialogFooter>
 					</form>
 				</Form>
-			</AlertDialogContent>
-		</AlertDialog>
+			</DialogContent>
+		</Dialog>
 	);
 }
