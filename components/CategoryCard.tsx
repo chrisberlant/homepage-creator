@@ -1,12 +1,7 @@
 'use client';
 
 import React, { useContext, useState } from 'react';
-import {
-	ArrowBigDown,
-	ArrowBigUp,
-	FolderPenIcon,
-	Trash2Icon,
-} from 'lucide-react';
+import { ArrowBigDown, ArrowBigUp, Trash2Icon } from 'lucide-react';
 import CreateLinkButton from './CreateLinkButton';
 import { EditingModeContext } from './providers/EditingModeContextProvider';
 import LinkCard from './LinkCard';
@@ -20,7 +15,7 @@ import { LinkType } from '@/lib/types';
 import { CSS } from '@dnd-kit/utilities';
 import { DraggingCategoryContext } from './providers/DndContextProvider';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
-import EditCategoryTitleForm from './EditCategoryTitleForm';
+import CategoryTitle from './CategoryTitle';
 import { Button } from './ui/button';
 
 interface CategoryCardProps {
@@ -39,8 +34,6 @@ export default function CategoryCard({
 	const { editingMode } = useContext(EditingModeContext);
 	const draggingCategory = useContext(DraggingCategoryContext);
 	const { disabledDragging } = useContext(DisabledDraggingContext);
-
-	const [editingTitle, setEditingTitle] = useState(false);
 	const { mutate: deleteCategory } = useDeleteCategory();
 
 	const {
@@ -67,8 +60,6 @@ export default function CategoryCard({
 	};
 
 	const [opened, setOpened] = useState(true);
-
-	const { setDisabledDragging } = useContext(DisabledDraggingContext);
 
 	// const contentRef = useRef<HTMLDivElement>(null);
 	const toggleView = () => setOpened(!opened);
@@ -105,27 +96,7 @@ export default function CategoryCard({
 					>
 						{opened ? <ArrowBigUp /> : <ArrowBigDown />}
 					</Button>
-					{editingMode && !editingTitle && (
-						<Button
-							variant='ghost'
-							className='mr-2 py-1 px-2'
-							onClick={() => {
-								setEditingTitle(!editingTitle);
-								setDisabledDragging(true);
-							}}
-						>
-							<FolderPenIcon className='size-4' />
-						</Button>
-					)}
-					{editingTitle ? (
-						<EditCategoryTitleForm
-							id={id}
-							defaultTitle={title}
-							setEditingTitle={setEditingTitle}
-						/>
-					) : (
-						<h2 className='font-bold'>{title}</h2>
-					)}
+					<CategoryTitle id={id} defaultTitle={title} />
 				</div>
 
 				{editingMode && (

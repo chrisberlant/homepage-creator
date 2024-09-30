@@ -59,17 +59,17 @@ export default function CreateLinkButton({
 		if (inputRef.current) inputRef.current.focus();
 	}, [open]);
 
+	useEffect(() => {
+		if (!open) form.reset();
+	}, [open, form]);
+
 	return (
-		<Dialog>
+		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
 				<Button
 					variant='ghost'
 					className='mb-2 py-1 px-2'
-					onClick={() => {
-						setOpen(true);
-						setDisabledDragging(true);
-						form.reset();
-					}}
+					onClick={() => setDisabledDragging(true)}
 				>
 					<BookmarkPlusIcon />
 				</Button>

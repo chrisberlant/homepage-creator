@@ -65,29 +65,39 @@ export const useCreateLink = ({
 			return previousCategories;
 		},
 		onSuccess: (apiResponse) => {
-			browserQueryClient?.setQueryData(
-				['categories'],
-				(categories: CategoryWithLinksType[]) =>
-					categories.map((category) =>
-						category.id === apiResponse?.data?.categoryId
-							? {
-									...category,
-									links: category.links.map((link) =>
-										link.id === 9999
-											? {
-													...link,
-													id: apiResponse?.data?.id,
-											  }
-											: link
-									),
-							  }
-							: category
-					)
-			);
-			form.reset();
-			setOpen(false);
-			setDisabledDragging(false);
-			toast.success('Link successfully created');
+			if (apiResponse && apiResponse.data) {
+				browserQueryClient?.setQueryData(
+					['categories'],
+					(categories: CategoryWithLinksType[]) =>
+						categories.map((category) =>
+							category.id === apiResponse.data?.categoryId
+								? {
+										...category,
+										links: category.links.map((link) =>
+											link.id === 9999
+												? {
+														...link,
+														id: apiResponse.data
+															?.id,
+												  }
+												: link
+										),
+								  }
+								: category
+						)
+				);
+				localStorage.setItem(
+					'favicons',
+					JSON.stringify({
+						id: apiResponse.data.id,
+						url: `https://s2.googleusercontent.com/s2/favicons?domain_url=${apiResponse.data.url}`,
+					})
+				);
+				form.reset();
+				setOpen(false);
+				setDisabledDragging(false);
+				toast.success('Link successfully created');
+			}
 		},
 		onError: (error, __, previousCategories) => {
 			toast.error(error.message);
@@ -158,11 +168,7 @@ interface UseUpdateLinkProps {
 	setDisabledDragging: Dispatch<SetStateAction<boolean>>;
 }
 // Update a link
-export const useUpdateLink = ({
-	form,
-	setOpen,
-	setDisabledDragging,
-}: UseUpdateLinkProps) =>
+export const useUpdateLink = ({ form, setOpen }: UseUpdateLinkProps) =>
 	useMutation({
 		mutationFn: updateLink,
 		onMutate: async (updatedLink) => {
@@ -187,7 +193,10 @@ export const useUpdateLink = ({
 			)
 				return;
 
-			if (JSON.stringify(currentLink) === JSON.stringify(updatedLink))
+			if (
+				currentLink.title === updatedLink.title &&
+				currentLink.url === updatedLink.url
+			)
 				throw new Error('No data modified');
 
 			browserQueryClient.setQueryData(
@@ -212,7 +221,6 @@ export const useUpdateLink = ({
 		onSuccess: (apiResponse) => {
 			form.reset(apiResponse?.data);
 			setOpen(false);
-			setDisabledDragging(false);
 			toast.success('Link successfully updated');
 		},
 		onError: (error, __, previousCategories) => {

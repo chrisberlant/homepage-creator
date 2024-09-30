@@ -39,14 +39,19 @@ export default function CreateCategoryButton({ column }: { column: number }) {
 	});
 	const inputRef = useRef<HTMLInputElement>(null);
 	const { mutate: createCategory } = useCreateCategory(form);
+	const [open, setOpen] = useState(false);
 
 	useEffect(() => {
 		if (inputRef.current) inputRef.current.focus();
 	}, []);
 
+	useEffect(() => {
+		if (!open) form.reset();
+	}, [open, form]);
+
 	return (
 		editingMode && (
-			<Dialog>
+			<Dialog open={open} onOpenChange={setOpen}>
 				<DialogTrigger asChild>
 					<Button className='mt-2 self-center'>
 						Create a new category

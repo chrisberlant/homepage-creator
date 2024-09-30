@@ -123,18 +123,15 @@ export const useUpdateCategory = ({
 			setDisabledDragging(false);
 		},
 		onError: (error, __, previousCategories) => {
-			if (error.message === 'No data modified') {
-				toast.info(error.message);
-				setEditingTitle(false);
-				return setDisabledDragging(false);
-			}
+			setEditingTitle(false);
+			setDisabledDragging(false);
+			if (error.message === 'No data modified')
+				return toast.info(error.message);
 			toast.error(error.message);
 			browserQueryClient?.setQueryData(
 				['categories'],
 				previousCategories
 			);
-			setEditingTitle(false);
-			setDisabledDragging(false);
 		},
 	});
 

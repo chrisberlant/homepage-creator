@@ -66,11 +66,8 @@ export default function EditLinkButton({
 
 	// Reset the form and allow dragging again when the dialog is closed
 	useEffect(() => {
-		if (!open) {
-			if (disabledDragging) setDisabledDragging(false);
-			form.reset();
-		}
-	}, [open, setDisabledDragging, form, disabledDragging]);
+		if (!open) form.reset();
+	}, [open, form]);
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
@@ -78,7 +75,6 @@ export default function EditLinkButton({
 				<Button
 					variant='ghost'
 					className='px-2 absolute bottom-0 left-3'
-					// TODO fix
 					onClick={() => setDisabledDragging(true)}
 				>
 					<PenIcon size={18} />

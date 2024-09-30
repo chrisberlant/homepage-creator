@@ -13,10 +13,13 @@ export const useUpdateUser = () =>
 			await browserQueryClient?.cancelQueries({
 				queryKey: ['user'],
 			});
-			const previousUser: UserType | undefined =
+			const currentUser: UserType | undefined =
 				browserQueryClient?.getQueryData(['user']);
-			if (!previousUser || !browserQueryClient) return;
-			if (JSON.stringify(previousUser) === JSON.stringify(updatedUser))
+			if (!currentUser || !browserQueryClient) return;
+			if (
+				currentUser.email === updatedUser.email &&
+				currentUser.username === updatedUser.username
+			)
 				throw new Error('No data modified');
 
 			browserQueryClient.setQueryData(['user'], (user: UserType) => ({
@@ -24,14 +27,14 @@ export const useUpdateUser = () =>
 				...updatedUser,
 			}));
 
-			return previousUser;
+			return currentUser;
 		},
 		onSuccess: () => toast.success('User successfully updated'),
-		onError: (error, _, previousUser) => {
+		onError: (error, _, currentUser) => {
 			if (error.message === 'No data modified')
 				return toast.info(error.message);
 			toast.error(error.message);
-			browserQueryClient?.setQueryData(['user'], previousUser);
+			browserQueryClient?.setQueryData(['user'], currentUser);
 		},
 	});
 
