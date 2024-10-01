@@ -219,18 +219,22 @@ export const useUpdateLink = ({ form, setOpen }: UseUpdateLinkProps) =>
 			return previousCategories;
 		},
 		onSuccess: (apiResponse) => {
-			form.reset(apiResponse?.data);
-			setOpen(false);
-			toast.success('Link successfully updated');
+			if (apiResponse?.data) {
+				const { id, title, url } = apiResponse.data;
+				form.reset({ id, title, url });
+				setOpen(false);
+				toast.success('Link successfully updated');
+			}
 		},
 		onError: (error, __, previousCategories) => {
-			if (error.message === 'No data modified')
-				return toast.info(error.message);
-			toast.error(error.message);
 			browserQueryClient?.setQueryData(
 				['categories'],
 				previousCategories
 			);
+			setOpen(false);
+			if (error.message === 'No data modified')
+				return toast.info(error.message);
+			toast.error(error.message);
 		},
 	});
 

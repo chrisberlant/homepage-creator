@@ -30,7 +30,6 @@ import FaviconNotFound from './FaviconNotFound';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
 import { Button } from './ui/button';
 import { updateLinkSchema, urlSchema } from '@/schemas/links.schemas';
-import { updateLink } from '../server-actions/links.actions';
 
 interface EditLinkButtonProps {
 	defaultTitle: string;
@@ -53,9 +52,7 @@ export default function EditLinkButton({
 	});
 	const url = form.getValues('url');
 
-	const { disabledDragging, setDisabledDragging } = useContext(
-		DisabledDraggingContext
-	);
+	const { setDisabledDragging } = useContext(DisabledDraggingContext);
 	const [faviconFound, setFaviconFound] = useState(true);
 	const [open, setOpen] = useState(false);
 	const { mutate: updateLink } = useUpdateLink({
