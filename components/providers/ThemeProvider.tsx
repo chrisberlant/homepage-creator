@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useEffect, useState, useContext } from 'react';
+import { createContext, useEffect, useState } from 'react';
 
 type Theme = 'dark' | 'light';
 
@@ -24,18 +24,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 		if (storedTheme) setTheme(storedTheme);
 	}, []);
 
+	useEffect(() => {
+		const root = window.document.documentElement;
+		root.classList.remove('light', 'dark');
+		root.classList.add(theme);
+	}, [theme]);
+
 	const toggleTheme = () => {
 		const newTheme = theme === 'dark' ? 'light' : 'dark';
 
 		localStorage.setItem('homepage-theme', newTheme);
 		setTheme(newTheme);
 	};
-
-	useEffect(() => {
-		const root = window.document.documentElement;
-		root.classList.remove('light', 'dark');
-		root.classList.add(theme);
-	}, [theme]);
 
 	const value = {
 		theme,

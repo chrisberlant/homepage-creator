@@ -6,6 +6,7 @@ import {
 	QueryClient,
 } from '@tanstack/react-query';
 import fetchApiFromServer from '@/utils/fetchApiFromServer';
+import FaviconsContextProvider from '@/components/providers/FaviconsContextProvider';
 
 export default async function Layout({
 	children,
@@ -22,7 +23,7 @@ export default async function Layout({
 		<HydrationBoundary state={dehydrate(queryClient)}>
 			<EditingModeContextProvider>
 				<EditingModeButton />
-				{children}
+				<FaviconsContextProvider>{children}</FaviconsContextProvider>
 			</EditingModeContextProvider>
 		</HydrationBoundary>
 	);

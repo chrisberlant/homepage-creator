@@ -3,9 +3,7 @@
 import { ReactNode, useState } from 'react';
 import { createContext } from 'react';
 import DndContextProvider from './DndContextProvider';
-import DisabledDraggingContextProvider, {
-	DisabledDraggingContext,
-} from './DisabledDraggingContextProvider';
+import DisabledDraggingContextProvider from './DisabledDraggingContextProvider';
 
 type EditingModeContextType = {
 	editingMode: boolean;

@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { UseFormReturn } from 'react-hook-form';
 import { Dispatch, SetStateAction } from 'react';
 import { arrayMove } from '@dnd-kit/sortable';
+import setFavicon from '../utils/setFavicon';
 
 interface UseCreateLinkProps {
 	form: UseFormReturn<
@@ -54,7 +55,7 @@ export const useCreateLink = ({
 										{
 											title: data.title,
 											url: data.url,
-											id: 9999,
+											id: undefined,
 										},
 									],
 							  }
@@ -74,7 +75,7 @@ export const useCreateLink = ({
 								? {
 										...category,
 										links: category.links.map((link) =>
-											link.id === 9999
+											link.id === undefined
 												? {
 														...link,
 														id: apiResponse.data
@@ -86,14 +87,11 @@ export const useCreateLink = ({
 								: category
 						)
 				);
-				localStorage.setItem(
-					'favicons',
-					JSON.stringify({
-						id: apiResponse.data.id,
-						url: `https://s2.googleusercontent.com/s2/favicons?domain_url=${apiResponse.data.url}`,
-					})
-				);
 				form.reset();
+				setFavicon({
+					id: apiResponse.data.id,
+					url: apiResponse.data.url,
+				});
 				setOpen(false);
 				setDisabledDragging(false);
 				toast.success('Link successfully created');
