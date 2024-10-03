@@ -11,7 +11,6 @@ import { LinkWithCategoryType } from '@/lib/types';
 import Image from 'next/image';
 import FaviconNotFound from './FaviconNotFound';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
-import { FaviconsContext } from './providers/FaviconsContextProvider';
 
 export default function LinkCard({
 	id,
@@ -44,13 +43,14 @@ export default function LinkCard({
 		transition,
 	};
 
-	const favicons = useContext(FaviconsContext);
 	const [faviconUrl, setFaviconUrl] = useState('');
 
 	useEffect(() => {
-		const favicon = favicons.find((f) => f.id === id);
-		setFaviconUrl(favicon ? favicon.url : '');
-	}, [favicons, id]);
+		setFaviconUrl(
+			`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}` ??
+				''
+		);
+	}, [url]);
 
 	return (
 		<div
