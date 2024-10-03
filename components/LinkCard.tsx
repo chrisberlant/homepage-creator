@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Trash2Icon } from 'lucide-react';
 import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { useSortable } from '@dnd-kit/sortable';
@@ -11,6 +11,7 @@ import { LinkWithCategoryType } from '@/lib/types';
 import Image from 'next/image';
 import FaviconNotFound from './FaviconNotFound';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
+import { FaviconsContext } from './providers/FaviconsContextProvider';
 
 export default function LinkCard({
 	id,
@@ -21,7 +22,6 @@ export default function LinkCard({
 	const { editingMode } = useContext(EditingModeContext);
 	const { disabledDragging } = useContext(DisabledDraggingContext);
 	const { mutate: deleteLink } = useDeleteLink();
-	const [faviconFound, setFaviconFound] = useState(true);
 	const {
 		attributes,
 		listeners,
@@ -44,6 +44,14 @@ export default function LinkCard({
 		transition,
 	};
 
+	const favicons = useContext(FaviconsContext);
+	const [faviconUrl, setFaviconUrl] = useState('');
+
+	useEffect(() => {
+		const favicon = favicons.find((f) => f.id === id);
+		setFaviconUrl(favicon ? favicon.url : '');
+	}, [favicons, id]);
+
 	return (
 		<div
 			ref={setNodeRef}
@@ -63,13 +71,12 @@ export default function LinkCard({
 					/>
 					<div className='flex flex-1 items-center justify-center'>
 						<div className='flex  mr-2'>
-							{faviconFound ? (
+							{faviconUrl ? (
 								<Image
 									height={15}
 									width={15}
-									src={`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`}
+									src={faviconUrl}
 									alt='favicon'
-									onError={() => setFaviconFound(false)}
 								/>
 							) : (
 								<FaviconNotFound />
@@ -92,13 +99,12 @@ export default function LinkCard({
 					className='flex justify-center flex-1 cursor-pointer'
 				>
 					<div className='flex items-center justify-center mr-2'>
-						{faviconFound ? (
+						{faviconUrl ? (
 							<Image
 								height={15}
 								width={15}
 								src={`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`}
 								alt='favicon'
-								onError={() => setFaviconFound(false)}
 							/>
 						) : (
 							<FaviconNotFound />

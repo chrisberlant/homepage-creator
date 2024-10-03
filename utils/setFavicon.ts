@@ -1,9 +1,8 @@
-export default function setFavicon(data: { id: number; url: string }) {
+export default async function setFavicon(data: { id: number; url: string }) {
 	const existingFavicons: { id: number; url: string }[] = JSON.parse(
 		localStorage.getItem('favicons') || '[]'
 	);
 	const faviconUrl = `https://s2.googleusercontent.com/s2/favicons?domain_url=${data.url}`;
-	const fallbackFavicon = '/favicon-not-found';
 
 	const img = new Image();
 	img.src = faviconUrl;
@@ -22,7 +21,7 @@ export default function setFavicon(data: { id: number; url: string }) {
 	img.onerror = () => {
 		existingFavicons.push({
 			id: data.id,
-			url: fallbackFavicon,
+			url: '',
 		});
 		localStorage.setItem('favicons', JSON.stringify(existingFavicons));
 		console.log('error');

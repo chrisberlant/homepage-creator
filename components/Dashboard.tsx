@@ -2,8 +2,6 @@
 
 import { useGetCategories } from '@/queries/categories.queries';
 import Column from './Column';
-import { useContext } from 'react';
-import { FaviconsContext } from './providers/FaviconsContextProvider';
 
 export default function Dashboard() {
 	const { data: categories, isLoading, error } = useGetCategories();
@@ -19,8 +17,6 @@ export default function Dashboard() {
 	const fourthColumnCategories = categories?.filter(
 		(category) => category.column === 3
 	);
-	const favicons = useContext(FaviconsContext);
-	console.log('dashboard favicons', favicons);
 
 	const allData =
 		categories &&
