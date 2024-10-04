@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { Trash2Icon } from 'lucide-react';
 import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { useSortable } from '@dnd-kit/sortable';
@@ -9,8 +9,8 @@ import EditLinkButton from './EditLinkButton';
 import { useDeleteLink } from '@/queries/links.queries';
 import { LinkWithCategoryType } from '@/lib/types';
 import Image from 'next/image';
-import FaviconNotFound from './FaviconNotFound';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
+import Favicon from './Favicon';
 
 export default function LinkCard({
 	id,
@@ -43,22 +43,13 @@ export default function LinkCard({
 		transition,
 	};
 
-	const [faviconUrl, setFaviconUrl] = useState('');
-
-	useEffect(() => {
-		setFaviconUrl(
-			`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}` ??
-				''
-		);
-	}, [url]);
-
 	return (
 		<div
 			ref={setNodeRef}
 			style={style}
 			{...listeners}
 			{...attributes}
-			className={`relative justify-between text-center flex border rounded-xl p-2 bg-muted shadow-sm dark:shadow-none z-20 ${
+			className={`relative z-20 flex justify-between rounded-xl border bg-muted p-2 text-center shadow-sm dark:shadow-none ${
 				editingMode ? 'cursor-move' : 'cursor-pointer'
 			}`}
 		>
@@ -70,18 +61,7 @@ export default function LinkCard({
 						id={id}
 					/>
 					<div className='flex flex-1 items-center justify-center'>
-						<div className='flex  mr-2'>
-							{faviconUrl ? (
-								<Image
-									height={15}
-									width={15}
-									src={faviconUrl}
-									alt='favicon'
-								/>
-							) : (
-								<FaviconNotFound />
-							)}
-						</div>
+						<Favicon url={url} />
 						{title}
 					</div>
 					<button
@@ -96,20 +76,9 @@ export default function LinkCard({
 					href={url}
 					target='_blank'
 					title={url}
-					className='flex justify-center flex-1 cursor-pointer'
+					className='flex flex-1 cursor-pointer items-center justify-center'
 				>
-					<div className='flex items-center justify-center mr-2'>
-						{faviconUrl ? (
-							<Image
-								height={15}
-								width={15}
-								src={`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`}
-								alt='favicon'
-							/>
-						) : (
-							<FaviconNotFound />
-						)}
-					</div>
+					<Favicon url={url} />
 					{title}
 				</a>
 			)}
