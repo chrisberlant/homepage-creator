@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export default function Favicon({ url }: { url: string }) {
 	const [imageError, setimageError] = useState(false);
-	// TODO fix first render when imageError
+
 	return imageError ? (
 		<FaviconNotFound className='mr-2' />
 	) : (
@@ -12,7 +12,7 @@ export default function Favicon({ url }: { url: string }) {
 			className='mr-2'
 			height={15}
 			width={15}
-			src={`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}`}
+			src={`https://s2.googleusercontent.com/s2/favicons?domain_url=${url}&sz=15`}
 			alt='favicon'
 			onError={() => setimageError(true)}
 		/>

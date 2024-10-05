@@ -84,50 +84,63 @@ export default function CategoryCard({
 				style={style}
 				{...listeners}
 				{...attributes}
-				className={`border-2 shadow-md dark:shadow-none bg-card pt-3 pb-3 px-5 rounded-2xl relative ${
-					editingMode ? 'cursor-move pt-1' : 'cursor-default'
+				className={`relative rounded-2xl border-2 bg-card px-5 py-3 shadow-md dark:shadow-none ${
+					editingMode ? 'cursor-move' : 'cursor-default'
 				}`}
 			>
-				<div className='flex mb-5 relative justify-center items-center'>
-					<Button
-						variant='ghost'
-						className='py-0 px-1 absolute -left-4'
-						onClick={toggleView}
-					>
-						{opened ? <ArrowBigUp /> : <ArrowBigDown />}
-					</Button>
-					<CategoryTitle id={id} defaultTitle={title} />
-				</div>
-
-				{editingMode && (
-					<div className='flex justify-between'>
-						<CreateLinkButton categoryId={id} />
-						<Button
-							variant='ghost'
-							className='mb-2 py-1 px-2'
-							onClick={() => deleteCategory(id)}
+				{draggingCategory ? (
+					<h2 className='flex-1 text-center font-bold'>{title}</h2>
+				) : (
+					<>
+						<div
+							className={`relative ${
+								editingMode ? '' : 'mb-5'
+							} flex items-center justify-center`}
 						>
-							<Trash2Icon stroke='red' />
-						</Button>
-					</div>
-				)}
-				{opened && !draggingCategory && (
-					<div
-						// ref={setNodeRef}
-						className={`flex flex-col gap-2 transition-all duration-500 ease ${
-							opened ? 'opacity-100' : 'opacity-0 overflow-hidden'
-						}`}
-					>
-						{links.map((link) => (
-							<LinkCard
-								key={link.id}
-								id={link.id}
-								title={link.title}
-								url={link.url}
-								categoryId={id}
-							/>
-						))}
-					</div>
+							<Button
+								variant='ghost'
+								className='absolute -left-4 px-1 py-0'
+								onClick={toggleView}
+							>
+								{opened ? <ArrowBigUp /> : <ArrowBigDown />}
+							</Button>
+							<CategoryTitle id={id} defaultTitle={title} />
+						</div>
+
+						{editingMode && (
+							<div className='flex justify-between'>
+								<CreateLinkButton categoryId={id} />
+								<Button
+									variant='ghost'
+									className='mb-2 px-2 py-1'
+									onClick={() => deleteCategory(id)}
+								>
+									<Trash2Icon stroke='red' />
+								</Button>
+							</div>
+						)}
+
+						{opened && (
+							<div
+								// ref={setNodeRef}
+								className={`ease flex flex-col gap-2 transition-all duration-500 ${
+									opened
+										? 'opacity-100'
+										: 'overflow-hidden opacity-0'
+								}`}
+							>
+								{links.map((link) => (
+									<LinkCard
+										key={link.id}
+										id={link.id}
+										title={link.title}
+										url={link.url}
+										categoryId={id}
+									/>
+								))}
+							</div>
+						)}
+					</>
 				)}
 			</div>
 		</SortableContext>

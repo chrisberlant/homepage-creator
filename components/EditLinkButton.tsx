@@ -71,7 +71,7 @@ export default function EditLinkButton({
 			<DialogTrigger asChild>
 				<Button
 					variant='ghost'
-					className='px-2 absolute bottom-0 left-3'
+					className='absolute bottom-0 left-3 px-2'
 					onClick={() => setDisabledDragging(true)}
 				>
 					<PenIcon size={18} />
@@ -106,8 +106,8 @@ export default function EditLinkButton({
 								<FormItem className='mt-2'>
 									<FormLabel>URL</FormLabel>
 									<FormControl>
-										<div className='flex relative'>
-											<div className='flex items-center justify-center absolute bottom-2.5 left-3'>
+										<div className='relative flex'>
+											<div className='absolute bottom-2.5 left-3 flex items-center justify-center'>
 												{urlSchema.safeParse(url)
 													.success && faviconFound ? (
 													<Image
@@ -122,7 +122,7 @@ export default function EditLinkButton({
 														}
 													/>
 												) : (
-													<FaviconNotFound className='h-6 w-6' />
+													<FaviconNotFound className='size-6' />
 												)}
 											</div>
 											<Input
