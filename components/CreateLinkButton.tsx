@@ -68,7 +68,7 @@ export default function CreateLinkButton({
 			<DialogTrigger asChild>
 				<Button
 					variant='ghost'
-					className='mb-2 py-1 px-2'
+					className='mb-2 px-2 py-1'
 					onClick={() => setDisabledDragging(true)}
 				>
 					<BookmarkPlusIcon />
@@ -110,8 +110,8 @@ export default function CreateLinkButton({
 								<FormItem className='mb-2'>
 									<FormLabel>URL</FormLabel>
 									<FormControl>
-										<div className='flex relative'>
-											<div className='flex items-center justify-center absolute bottom-2.5 left-3'>
+										<div className='relative flex'>
+											<div className='absolute bottom-2.5 left-3 flex items-center justify-center'>
 												{urlSchema.safeParse(url)
 													.success && faviconFound ? (
 													<Image
@@ -126,7 +126,7 @@ export default function CreateLinkButton({
 														}
 													/>
 												) : (
-													<FaviconNotFound className='h-6 w-6' />
+													<FaviconNotFound className='size-6' />
 												)}
 											</div>
 											<Input

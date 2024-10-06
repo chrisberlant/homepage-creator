@@ -18,3 +18,5 @@ export default function Favicon({ url }: { url: string }) {
 		/>
 	);
 }
+{
+}

@@ -11,7 +11,7 @@ import {
 import { createContext, ReactNode, useRef, useState } from 'react';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import LinkCardOverlay from '../LinkCardOverlay';
-import { CategoryType } from '@/lib/types';
+import { CategoryWithLinksType } from '@/lib/types';
 import { browserQueryClient } from './QueryClientProvider';
 import { updateLinksPosition, useMoveLink } from '@/queries/links.queries';
 import {
@@ -58,7 +58,7 @@ export default function DndContextProvider({
 			parentId: undefined,
 		});
 
-	const currentCategories = useRef<CategoryType[]>();
+	const currentCategories = useRef<CategoryWithLinksType[]>();
 
 	function handleDragStart(event: any) {
 		const { active } = event;
@@ -214,11 +214,31 @@ export default function DndContextProvider({
 			sensors={sensors}
 		>
 			<DragOverlay>
-				{activeDragged.id && activeDragged.type === 'link' ? (
-					<LinkCardOverlay id={activeDragged.id} />
+				{activeDragged.id &&
+				activeDragged.type === 'link' &&
+				currentCategories.current ? (
+					<LinkCardOverlay
+						link={currentCategories.current
+							.find((category) =>
+								category.links.some(
+									(link) => link.id === activeDragged.id
+								)
+							)
+							?.links.find(
+								(link) => link.id === activeDragged.id
+							)}
+					/>
 				) : null}
-				{activeDragged.id && activeDragged.type === 'category' ? (
-					<CategoryCardOverlay id={activeDragged.id} />
+				{activeDragged.id &&
+				activeDragged.type === 'category' &&
+				currentCategories.current ? (
+					<CategoryCardOverlay
+						title={
+							currentCategories.current.find(
+								(category) => category.id === activeDragged.id
+							)?.title
+						}
+					/>
 				) : null}
 			</DragOverlay>
 			<DraggingCategoryContext.Provider
