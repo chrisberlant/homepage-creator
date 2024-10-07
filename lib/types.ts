@@ -13,6 +13,8 @@ import {
 	createLinkSchema,
 	moveLinkSchema,
 	updateLinkSchema,
+	urlObjectSchema,
+	urlSchema,
 } from '../schemas/links.schemas';
 
 export type SessionType = {
@@ -39,6 +41,8 @@ export type CreateLinkType = z.infer<typeof createLinkSchema>;
 export type UpdateLinkType = z.infer<typeof updateLinkSchema>;
 
 export type MoveLinkType = z.infer<typeof moveLinkSchema>;
+
+export type UrlObjectType = z.infer<typeof urlObjectSchema>;
 
 export type CategoryType = {
 	id: number;

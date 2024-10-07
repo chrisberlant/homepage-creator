@@ -1,5 +1,6 @@
 import EditingModeContextProvider from '@/components/providers/EditingModeContextProvider';
 import EditingModeButton from '@/components/EditingModeButton';
+import WallpaperButton from '@/components/WallpaperButton';
 import {
 	dehydrate,
 	HydrationBoundary,
@@ -21,7 +22,10 @@ export default async function Layout({
 	return (
 		<HydrationBoundary state={dehydrate(queryClient)}>
 			<EditingModeContextProvider>
-				<EditingModeButton />
+				<div className='flex gap-8'>
+					<EditingModeButton />
+					<WallpaperButton />
+				</div>
 				{children}
 			</EditingModeContextProvider>
 		</HydrationBoundary>

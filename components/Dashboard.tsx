@@ -2,6 +2,7 @@
 
 import { useGetCategories } from '@/queries/categories.queries';
 import Column from './Column';
+import { useEffect } from 'react';
 
 export default function Dashboard() {
 	const { data: categories, isLoading, error } = useGetCategories();

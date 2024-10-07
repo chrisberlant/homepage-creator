@@ -7,7 +7,9 @@ export const urlSchema = z
 	})
 	.url({ message: 'Please enter a valid URL' });
 
-export const createLinkSchema = z.object({
+export const urlObjectSchema = z.strictObject({ url: urlSchema });
+
+export const createLinkSchema = z.strictObject({
 	title: z.string({ required_error: 'Title is required' }).min(1, {
 		message: 'Link title must be at least 1 character.',
 	}),
