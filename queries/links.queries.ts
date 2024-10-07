@@ -11,7 +11,6 @@ import { toast } from 'sonner';
 import { UseFormReturn } from 'react-hook-form';
 import { Dispatch, SetStateAction } from 'react';
 import { arrayMove } from '@dnd-kit/sortable';
-import setFavicon from '../utils/setFavicon';
 
 interface UseCreateLinkProps {
 	form: UseFormReturn<
@@ -88,10 +87,6 @@ export const useCreateLink = ({
 						)
 				);
 				form.reset();
-				setFavicon({
-					id: apiResponse.data.id,
-					url: apiResponse.data.url,
-				});
 				setOpen(false);
 				setDisabledDragging(false);
 				toast.success('Link successfully created');
@@ -106,8 +101,11 @@ export const useCreateLink = ({
 		},
 	});
 
+interface UseDeleteLinkProps {
+	setDisabledDragging: Dispatch<SetStateAction<boolean>>;
+}
 // Delete a link
-export const useDeleteLink = () =>
+export const useDeleteLink = ({ setDisabledDragging }: UseDeleteLinkProps) =>
 	useMutation({
 		mutationFn: deleteLink,
 		onMutate: async (id) => {
@@ -142,7 +140,10 @@ export const useDeleteLink = () =>
 
 			return previousCategories;
 		},
-		onSuccess: () => toast.success('Link successfully deleted'),
+		onSuccess: () => {
+			setDisabledDragging(false);
+			toast.success('Link successfully deleted');
+		},
 		onError: (error, __, previousCategories) => {
 			toast.error(error.message);
 			browserQueryClient?.setQueryData(

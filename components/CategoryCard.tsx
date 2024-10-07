@@ -10,13 +10,13 @@ import {
 	useSortable,
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useDeleteCategory } from '@/queries/categories.queries';
 import { LinkType } from '@/lib/types';
 import { CSS } from '@dnd-kit/utilities';
 import { DraggingCategoryContext } from './providers/DndContextProvider';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
 import CategoryTitle from './CategoryTitle';
 import { Button } from './ui/button';
+import DeleteCategoryButton from './DeleteCategoryButton';
 
 interface CategoryCardProps {
 	id: number;
@@ -34,7 +34,6 @@ export default function CategoryCard({
 	const { editingMode } = useContext(EditingModeContext);
 	const draggingCategory = useContext(DraggingCategoryContext);
 	const { disabledDragging } = useContext(DisabledDraggingContext);
-	const { mutate: deleteCategory } = useDeleteCategory();
 
 	const {
 		isOver,
@@ -110,13 +109,7 @@ export default function CategoryCard({
 						{editingMode && (
 							<div className='flex justify-between'>
 								<CreateLinkButton categoryId={id} />
-								<Button
-									variant='ghost'
-									className='mb-2 px-2 py-1'
-									onClick={() => deleteCategory(id)}
-								>
-									<Trash2Icon stroke='red' />
-								</Button>
+								<DeleteCategoryButton id={id} title={title} />
 							</div>
 						)}
 

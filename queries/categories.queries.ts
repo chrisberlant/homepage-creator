@@ -250,8 +250,13 @@ export async function updateCategoriesPosition({
 	);
 }
 
+interface UseDeleteCategoryProps {
+	setDisabledDragging: Dispatch<SetStateAction<boolean>>;
+}
 // Delete a category
-export const useDeleteCategory = () =>
+export const useDeleteCategory = ({
+	setDisabledDragging,
+}: UseDeleteCategoryProps) =>
 	useMutation({
 		mutationFn: deleteCategory,
 		onMutate: async (categoryId) => {
@@ -271,7 +276,10 @@ export const useDeleteCategory = () =>
 
 			return previousCategories;
 		},
-		onSuccess: () => toast.success('Category successfully deleted'),
+		onSuccess: () => {
+			setDisabledDragging(false);
+			toast.success('Category successfully deleted');
+		},
 		onError: (error, __, previousCategories) => {
 			toast.error(error.message);
 			browserQueryClient?.setQueryData(

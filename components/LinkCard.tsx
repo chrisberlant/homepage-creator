@@ -1,16 +1,14 @@
 'use client';
 
 import React, { useContext } from 'react';
-import { Trash2Icon } from 'lucide-react';
 import { EditingModeContext } from './providers/EditingModeContextProvider';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import EditLinkButton from './EditLinkButton';
-import { useDeleteLink } from '@/queries/links.queries';
 import { LinkWithCategoryType } from '@/lib/types';
-import Image from 'next/image';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
 import Favicon from './Favicon';
+import DeleteLinkButton from './DeleteLinkButton';
 
 export default function LinkCard({
 	id,
@@ -20,7 +18,6 @@ export default function LinkCard({
 }: LinkWithCategoryType) {
 	const { editingMode } = useContext(EditingModeContext);
 	const { disabledDragging } = useContext(DisabledDraggingContext);
-	const { mutate: deleteLink } = useDeleteLink();
 	const {
 		attributes,
 		listeners,
@@ -64,12 +61,7 @@ export default function LinkCard({
 						<Favicon url={url} />
 						{title}
 					</div>
-					<button
-						className='absolute right-1.5 top-1.5 p-0'
-						onClick={() => deleteLink(id)}
-					>
-						<Trash2Icon stroke='red' size={18} />
-					</button>
+					<DeleteLinkButton id={id} title={title} />
 				</>
 			) : (
 				<a
