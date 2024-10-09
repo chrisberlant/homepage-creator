@@ -32,7 +32,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 	const toggleTheme = () => {
 		const newTheme = theme === 'dark' ? 'light' : 'dark';
-
 		localStorage.setItem('homepage-theme', newTheme);
 		setTheme(newTheme);
 	};

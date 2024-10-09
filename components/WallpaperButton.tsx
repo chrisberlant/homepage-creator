@@ -1,6 +1,6 @@
 'use client';
 
-import { FileIcon, WallpaperIcon } from 'lucide-react';
+import { WallpaperIcon } from 'lucide-react';
 import { useContext, useEffect, useState } from 'react';
 import { DisabledDraggingContext } from './providers/DisabledDraggingContextProvider';
 import { Button } from './ui/button';
@@ -27,6 +27,11 @@ import {
 import { UrlObjectType } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from './ui/input';
+import {
+	removeWallpaper,
+	setWallpaper,
+	setWallpaperToLocalStorage,
+} from '@/utils/wallpaper';
 
 export default function WallpaperButton() {
 	const { setDisabledDragging } = useContext(DisabledDraggingContext);
@@ -43,6 +48,11 @@ export default function WallpaperButton() {
 		if (!open) form.reset();
 	}, [open, form]);
 
+	useEffect(() => {
+		const storedWallpaper = localStorage.getItem('wallpaper');
+		if (storedWallpaper) setWallpaper(storedWallpaper);
+	}, []);
+
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
@@ -51,45 +61,24 @@ export default function WallpaperButton() {
 					Set Wallpaper
 				</Button>
 			</DialogTrigger>
-			<DialogContent className='sm:max-w-[425px]'>
+			<DialogContent>
 				<DialogHeader>
 					<DialogDescription></DialogDescription>
-					<DialogTitle>Edit a link</DialogTitle>
+					<DialogTitle>Set a wallpaper</DialogTitle>
 				</DialogHeader>
 				<Form {...form}>
 					<form
-						onSubmit={form.handleSubmit((data) => {
-							console.log(data.url);
-							localStorage.setItem('wallpaper', data.url);
+						onSubmit={form.handleSubmit(({ url }) => {
+							setWallpaperToLocalStorage(url);
 							setOpen(false);
 						})}
 					>
-						{/* <div className='flex items-center gap-2'>
-							<FileIcon className='mr-2' />
-							<Input
-								type='file'
-								className='text-primary'
-								accept='image/png, image/jpeg'
-								// onChange={(e) => {
-								// 	const file = e.target.files?.[0];
-								// 	if (file) {
-								// 		const fileUrl =
-								// 			URL.createObjectURL(file);
-								// 		form.setValue('url', fileUrl);
-								// 		localStorage.setItem(
-								// 			'wallpaperUrl',
-								// 			fileUrl
-								// 		);
-								// 	}
-								// }}
-							/>
-						</div> */}
 						<FormField
 							control={form.control}
 							name='url'
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>URL</FormLabel>
+									<FormLabel>Enter an URL</FormLabel>
 									<FormControl>
 										<Input {...field} />
 									</FormControl>
@@ -106,9 +95,10 @@ export default function WallpaperButton() {
 							<Button
 								variant='destructive'
 								type='button'
-								onClick={() =>
-									localStorage.removeItem('wallpaper')
-								}
+								onClick={() => {
+									removeWallpaper();
+									setOpen(false);
+								}}
 							>
 								Remove wallpaper
 							</Button>
