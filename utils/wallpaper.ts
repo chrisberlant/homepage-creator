@@ -4,7 +4,7 @@ export const setWallpaper = (url: string) => {
 	document.body.style.backgroundPosition = 'center';
 };
 
-export const setWallpaperToLocalStorage = (url: string) => {
+export const saveWallpaperToLocalStorage = (url: string) => {
 	localStorage.setItem('wallpaper', url);
 	setWallpaper(url);
 };

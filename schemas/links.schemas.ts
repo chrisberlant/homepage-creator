@@ -5,7 +5,13 @@ export const urlSchema = z
 	.min(1, {
 		message: 'URL cannot be empty',
 	})
-	.url({ message: 'Please enter a valid URL' });
+	.url({ message: 'Please enter a valid URL' })
+	.refine(
+		(value) => value.startsWith('http://') || value.startsWith('https://'),
+		{
+			message: 'URL must start with http:// or https://',
+		}
+	);
 
 export const urlObjectSchema = z.strictObject({ url: urlSchema });
 

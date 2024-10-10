@@ -15,7 +15,7 @@ import {
 	DialogTrigger,
 } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
-import { urlObjectSchema } from '@/schemas/links.schemas';
+import { urlObjectSchema, urlSchema } from '@/schemas/links.schemas';
 import {
 	Form,
 	FormField,
@@ -30,7 +30,7 @@ import { Input } from './ui/input';
 import {
 	removeWallpaper,
 	setWallpaper,
-	setWallpaperToLocalStorage,
+	saveWallpaperToLocalStorage,
 } from '@/utils/wallpaper';
 
 export default function WallpaperButton() {
@@ -50,7 +50,8 @@ export default function WallpaperButton() {
 
 	useEffect(() => {
 		const storedWallpaper = localStorage.getItem('wallpaper');
-		if (storedWallpaper) setWallpaper(storedWallpaper);
+		if (storedWallpaper && urlSchema.safeParse(storedWallpaper).success)
+			setWallpaper(storedWallpaper);
 	}, []);
 
 	return (
@@ -69,7 +70,7 @@ export default function WallpaperButton() {
 				<Form {...form}>
 					<form
 						onSubmit={form.handleSubmit(({ url }) => {
-							setWallpaperToLocalStorage(url);
+							saveWallpaperToLocalStorage(url);
 							setOpen(false);
 						})}
 					>
