@@ -43,10 +43,14 @@ export default function WallpaperButton() {
 	});
 	const [open, setOpen] = useState(false);
 
-	// Reset the form and allow dragging again when the dialog is closed
+	// Reset the form and disallow dragging when form is opened
 	useEffect(() => {
-		if (!open) form.reset();
-	}, [open, form]);
+		if (open) {
+			form.reset();
+			return setDisabledDragging(true);
+		}
+		setDisabledDragging(false);
+	}, [open, form, setDisabledDragging]);
 
 	useEffect(() => {
 		const storedWallpaper = localStorage.getItem('wallpaper');
@@ -57,7 +61,7 @@ export default function WallpaperButton() {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button onClick={() => setDisabledDragging(true)}>
+				<Button>
 					<WallpaperIcon className='mr-2' />
 					Set Wallpaper
 				</Button>
