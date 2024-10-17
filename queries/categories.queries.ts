@@ -14,7 +14,6 @@ import {
 import { toast } from 'sonner';
 import { browserQueryClient } from '@/components/providers/QueryClientProvider';
 import { UseFormReturn } from 'react-hook-form';
-import { arrayMove } from '@dnd-kit/sortable';
 import { Dispatch, SetStateAction } from 'react';
 
 export const useGetCategories = () =>

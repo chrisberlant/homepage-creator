@@ -83,7 +83,9 @@ export default function WallpaperButton() {
 							name='url'
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Enter an URL</FormLabel>
+									<FormLabel>
+										Enter the wallpaper URL
+									</FormLabel>
 									<FormControl>
 										<Input {...field} />
 									</FormControl>
@@ -105,7 +107,7 @@ export default function WallpaperButton() {
 									setOpen(false);
 								}}
 							>
-								Remove wallpaper
+								Remove current wallpaper
 							</Button>
 							<Button type='submit'>
 								Set selected wallpaper

@@ -17,6 +17,7 @@ import { DisabledDraggingContext } from './providers/DisabledDraggingContextProv
 import CategoryTitle from './CategoryTitle';
 import { Button } from './ui/button';
 import DeleteCategoryButton from './DeleteCategoryButton';
+import { useGetCategories } from '../queries/categories.queries';
 
 interface CategoryCardProps {
 	id: number;
@@ -34,6 +35,8 @@ export default function CategoryCard({
 	const { editingMode } = useContext(EditingModeContext);
 	const draggingCategory = useContext(DraggingCategoryContext);
 	const { disabledDragging } = useContext(DisabledDraggingContext);
+	const { data: categories } = useGetCategories();
+	const currentCategory = categories?.find((category) => category.id === id);
 
 	const {
 		isOver,
@@ -96,13 +99,20 @@ export default function CategoryCard({
 								editingMode ? '' : 'mb-5'
 							} flex items-center justify-center`}
 						>
-							<Button
-								variant='ghost'
-								className='absolute -left-4 px-1 py-0'
-								onClick={toggleView}
-							>
-								{opened ? <ArrowBigUp /> : <ArrowBigDown />}
-							</Button>
+							{currentCategory &&
+								currentCategory?.links.length > 0 && (
+									<Button
+										variant='ghost'
+										className='absolute -left-4 px-1 py-0'
+										onClick={toggleView}
+									>
+										{opened ? (
+											<ArrowBigUp />
+										) : (
+											<ArrowBigDown />
+										)}
+									</Button>
+								)}
 							<CategoryTitle id={id} defaultTitle={title} />
 						</div>
 

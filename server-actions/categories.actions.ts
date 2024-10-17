@@ -73,7 +73,7 @@ export const moveCategory = authActionClient
 
 		try {
 			return await prisma.$transaction(async (prisma) => {
-				const link = await prisma.category.findUnique({
+				const category = await prisma.category.findUnique({
 					where: {
 						id,
 						userId,
@@ -83,15 +83,14 @@ export const moveCategory = authActionClient
 						column: true,
 					},
 				});
-				if (!link) throw new Error('Cannot find link');
+				if (!category) throw new Error('Cannot find link');
 
-				const { index: currentIndex, column: currentColumn } = link;
+				const { index: currentIndex, column: currentColumn } = category;
 
 				if (newIndex === currentIndex && newColumn === currentColumn)
 					throw new Error(
 						'The category is already at the specified location'
 					);
-
 				let newIndexPosition = newIndex;
 
 				// If moved in the same column

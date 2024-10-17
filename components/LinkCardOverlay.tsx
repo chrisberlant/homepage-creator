@@ -13,7 +13,7 @@ export default function LinkCardOverlay({
 	const [faviconFound, setFaviconFound] = useState(true);
 
 	return (
-		<div className='flex cursor-move justify-center rounded-xl border bg-muted p-2 text-center shadow-sm dark:shadow-none'>
+		<div className='flex cursor-move justify-center rounded-xl border bg-secondary p-2 text-center shadow-sm dark:shadow-none'>
 			<div className='mr-2 flex items-center justify-center'>
 				{faviconFound ? (
 					<Image

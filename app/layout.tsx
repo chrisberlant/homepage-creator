@@ -16,18 +16,16 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<ThemeProvider>
-			<html lang='en'>
-				<body className='bg-background text-foreground'>
-					<QueryProvider>
-						<Header />
-						<main className='p-5'>
-							<Toaster richColors closeButton />
-							{children}
-						</main>
-					</QueryProvider>
-				</body>
-			</html>
-		</ThemeProvider>
+		<html lang='en'>
+			<body className='bg-background text-foreground'>
+				<QueryProvider>
+					<Header />
+					<main className='p-5'>
+						<Toaster richColors closeButton />
+						<ThemeProvider>{children}</ThemeProvider>
+					</main>
+				</QueryProvider>
+			</body>
+		</html>
 	);
 }

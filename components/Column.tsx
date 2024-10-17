@@ -26,7 +26,7 @@ export default function Column({
 			items={categories.map((category) => `category-${category.id}`)}
 			strategy={verticalListSortingStrategy}
 		>
-			<div ref={setNodeRef} className='flex-1 flex flex-col gap-4 p-2'>
+			<div ref={setNodeRef} className='flex flex-1 flex-col gap-4 p-2'>
 				{categories.map((category) => (
 					<CategoryCard
 						key={category.id}

@@ -46,7 +46,7 @@ export default function LinkCard({
 			style={style}
 			{...listeners}
 			{...attributes}
-			className={`relative z-20 flex justify-between rounded-xl border bg-muted p-2 text-center shadow-sm dark:shadow-none ${
+			className={`relative flex justify-between rounded-xl border bg-secondary p-2 text-center shadow-sm dark:shadow-none ${
 				editingMode ? 'cursor-move' : 'cursor-pointer'
 			}`}
 		>
