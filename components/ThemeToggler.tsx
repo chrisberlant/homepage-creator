@@ -1,19 +1,22 @@
 'use client';
 
 import { Sun, Moon } from 'lucide-react';
-import { useContext } from 'react';
-import { ThemeProviderContext } from './providers/ThemeProvider';
+import { useTheme } from 'next-themes';
+import { Button } from './ui/button';
 
 export default function ThemeToggler() {
-	const { theme, toggleTheme } = useContext(ThemeProviderContext);
+	const { setTheme, resolvedTheme } = useTheme();
 
 	return (
-		<button
-			onClick={toggleTheme}
-			className='hover:scale-110'
-			aria-label='Toggle color theme'
+		<Button
+			variant='outline'
+			size='icon'
+			onClick={() =>
+				setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
+			}
 		>
-			{theme === 'light' ? <Sun /> : <Moon />}
-		</button>
+			<Sun className='size-[1.2rem] scale-100 transition-all dark:scale-0' />
+			<Moon className='absolute size-[1.2rem] scale-0 transition-all dark:scale-100' />
+		</Button>
 	);
 }
