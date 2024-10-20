@@ -29,7 +29,8 @@ export default function LoginForm() {
 	return (
 		<Form {...form}>
 			<form
-				onSubmit={form.handleSubmit((e) => login(e))}
+				method='POST'
+				onSubmit={form.handleSubmit((values) => login(values))}
 				className='mt-8 min-w-[300px]'
 			>
 				<FormField

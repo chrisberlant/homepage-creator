@@ -33,10 +33,11 @@ export default function DeleteLinkButton({ id, title }: DeleteLinkButtonProps) {
 			<AlertDialogTrigger asChild>
 				<Button
 					variant='ghost'
-					className='absolute -top-1.5 right-1.5 p-0'
+					size='icon'
+					className='absolute bottom-3 right-1.5 size-6'
 					onClick={() => setDisabledDragging(true)}
 				>
-					<Trash2Icon stroke='red' size={18} />
+					<Trash2Icon stroke='red' size={14} />
 				</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>

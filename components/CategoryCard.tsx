@@ -117,7 +117,7 @@ export default function CategoryCard({
 						</div>
 
 						{editingMode && (
-							<div className='flex justify-between'>
+							<div className='mb-2 flex justify-between'>
 								<CreateLinkButton categoryId={id} />
 								<DeleteCategoryButton id={id} title={title} />
 							</div>

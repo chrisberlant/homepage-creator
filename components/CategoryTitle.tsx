@@ -47,7 +47,8 @@ export default function CategoryTitle({
 					{editingMode && (
 						<Button
 							variant='ghost'
-							className='mr-2 py-1 px-2'
+							size='icon'
+							className='mr-1 size-8'
 							onClick={() => {
 								setEditingTitle(!editingTitle);
 								setDisabledDragging(true);
@@ -61,7 +62,7 @@ export default function CategoryTitle({
 			) : (
 				<Form {...form}>
 					<form
-						className='flex w-36 h-6 gap-2'
+						className='flex h-6 w-36 gap-2'
 						onSubmit={form.handleSubmit(({ title }) =>
 							updateCategory({
 								id,
@@ -95,7 +96,7 @@ export default function CategoryTitle({
 								setDisabledDragging(false);
 							}}
 						>
-							<CircleXIcon color='red' className='h-4 w-4' />
+							<CircleXIcon color='red' className='size-4' />
 						</Button>
 						<Button
 							type='submit'
@@ -103,7 +104,7 @@ export default function CategoryTitle({
 							size='icon'
 							className='h-8 px-1'
 						>
-							<CheckIcon className='h-4 w-4' />
+							<CheckIcon className='size-4' />
 						</Button>
 					</form>
 				</Form>

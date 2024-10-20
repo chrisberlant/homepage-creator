@@ -37,7 +37,7 @@ export default function DeleteCategoryButton({
 			<AlertDialogTrigger asChild>
 				<Button
 					variant='ghost'
-					className='mb-2 px-2 py-1'
+					size='icon'
 					onClick={() => setDisabledDragging(true)}
 				>
 					<Trash2Icon stroke='red' />

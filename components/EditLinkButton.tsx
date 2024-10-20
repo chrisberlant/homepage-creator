@@ -71,7 +71,8 @@ export default function EditLinkButton({
 			<DialogTrigger asChild>
 				<Button
 					variant='ghost'
-					className='absolute bottom-0 left-3 px-2'
+					size='icon'
+					className='absolute bottom-1 left-3 size-8'
 					onClick={() => setDisabledDragging(true)}
 				>
 					<PenIcon size={18} />

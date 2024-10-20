@@ -68,7 +68,7 @@ export default function CreateLinkButton({
 			<DialogTrigger asChild>
 				<Button
 					variant='ghost'
-					className='mb-2 px-2 py-1'
+					size='icon'
 					onClick={() => setDisabledDragging(true)}
 				>
 					<BookmarkPlusIcon />

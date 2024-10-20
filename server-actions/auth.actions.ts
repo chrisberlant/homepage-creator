@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcrypt';
 import { encrypt } from '@/lib/jwt';
-import { loginSchema, registerSchema } from '../schemas/auth.schemas.ts';
+import { loginSchema, registerSchema } from '@/schemas/auth.schemas.ts';
 import { actionClient, authActionClient } from './safe-actions';
 
 export const login = actionClient
