@@ -14,15 +14,7 @@ import {
 	moveLinkSchema,
 	updateLinkSchema,
 	urlObjectSchema,
-	urlSchema,
-} from '../schemas/links.schemas';
-
-export type SessionType = {
-	user: { id: number; name: string };
-	expires: string;
-	iat: number;
-	exp: number;
-};
+} from '@/schemas/links.schemas';
 
 export type loginType = z.infer<typeof loginSchema>;
 

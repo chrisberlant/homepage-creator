@@ -12,7 +12,8 @@ export const actionClient = createSafeActionClient({
 
 export const authActionClient = actionClient.use(async ({ next }) => {
 	const session = await getSession();
-	if (!session?.user.id) throw new ActionError('User not logged in');
+	if (!session?.userId) throw new ActionError('User not logged in');
 
-	return next({ ctx: { userId: session.user.id } });
+	const { userId } = session;
+	return next({ ctx: { userId } });
 });

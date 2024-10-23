@@ -6,9 +6,10 @@ export async function GET() {
 	const session = await getSession();
 	if (!session) return NextResponse.json(null);
 
+	const { userId } = session;
 	const categories = await prisma.category.findMany({
 		where: {
-			userId: session.user.id,
+			userId,
 		},
 		select: {
 			id: true,

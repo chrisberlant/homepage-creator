@@ -1,14 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { updateSession } from './lib/jwt';
+import { getSession } from './lib/jwt';
 
-export async function middleware(request: NextRequest) {
-	const { pathname } = request.nextUrl;
-	const unprotectedRoutes = ['/', '/login', '/register'];
+const publicRoutes = ['/', '/register'];
+const protectedRoutes = ['/home'];
+
+export async function middleware(req: NextRequest) {
+	const { pathname } = req.nextUrl;
+	const isProtectedRoute = protectedRoutes.includes(pathname);
+	const isPublicRoute = publicRoutes.includes(pathname);
 	console.log('Route Middleware', pathname);
 
-	if (!unprotectedRoutes.includes(pathname)) {
-		console.log('protected route');
-		// await updateSession(request);
+	const session = await getSession();
+
+	if (isProtectedRoute && !session?.userId) {
+		return NextResponse.redirect(new URL('/', req.nextUrl));
+	}
+
+	if (isPublicRoute && session?.userId) {
+		return NextResponse.redirect(new URL('/dashboard', req.nextUrl));
 	}
 
 	return NextResponse.next();

@@ -1,36 +1,31 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcrypt';
-import { encrypt } from '@/lib/jwt';
+import { createSession, deleteSession } from '@/lib/jwt';
 import { loginSchema, registerSchema } from '@/schemas/auth.schemas.ts';
 import { actionClient, authActionClient } from './safe-actions';
 
 export const login = actionClient
 	.schema(loginSchema)
 	.action(async ({ parsedInput }) => {
+		const { username, password } = parsedInput;
 		try {
 			const user = await prisma.user.findFirst({
 				where: {
-					username: parsedInput.username,
+					username,
 				},
 			});
 			if (!user) throw new Error('Incorrect credentials');
 
 			const passwordsMatch = await bcrypt.compare(
-				parsedInput.password,
+				password,
 				user.password
 			);
 			if (!passwordsMatch) throw new Error('Incorrect credentials');
 
-			// Create the session
-			const expires = new Date(Date.now() + 60 * 60 * 10000);
-			const { id, username, email } = user;
-			const session = await encrypt({ user: { id }, expires });
-			// Save the session in a cookie
-			cookies().set('session', session, { expires, httpOnly: true });
-			return { username, email };
+			createSession(user.id);
+			return { username, email: user.email };
 		} catch (error) {
 			throw new Error('Incorrect credentials');
 		}
@@ -82,5 +77,5 @@ export const register = actionClient
 	});
 
 export async function logout() {
-	cookies().delete('session');
+	deleteSession();
 }
