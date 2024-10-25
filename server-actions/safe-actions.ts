@@ -1,5 +1,6 @@
 import { createSafeActionClient } from 'next-safe-action';
-import { getSession } from '@/lib/jwt';
+import { deleteSession, getSession } from '@/lib/jwt';
+import prisma from '../lib/prisma';
 
 class ActionError extends Error {}
 
@@ -12,8 +13,14 @@ export const actionClient = createSafeActionClient({
 
 export const authActionClient = actionClient.use(async ({ next }) => {
 	const session = await getSession();
-	if (!session?.userId) throw new ActionError('User not logged in');
-
+	if (!session) throw new ActionError('User not logged in');
 	const { userId } = session;
+
+	const user = await prisma.user.findUnique({ where: { id: userId } });
+	if (!user) {
+		deleteSession();
+		throw new ActionError('User not found');
+	}
+
 	return next({ ctx: { userId } });
 });

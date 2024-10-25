@@ -11,7 +11,7 @@ export const login = actionClient
 	.action(async ({ parsedInput }) => {
 		const { username, password } = parsedInput;
 		try {
-			const user = await prisma.user.findFirst({
+			const user = await prisma.user.findUnique({
 				where: {
 					username,
 				},

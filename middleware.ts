@@ -12,12 +12,12 @@ export async function middleware(req: NextRequest) {
 
 	const session = await getSession();
 
-	if (isProtectedRoute && !session?.userId) {
+	if (isProtectedRoute && !session) {
 		return NextResponse.redirect(new URL('/', req.nextUrl));
 	}
 
-	if (isPublicRoute && session?.userId) {
-		return NextResponse.redirect(new URL('/dashboard', req.nextUrl));
+	if (isPublicRoute && session) {
+		return NextResponse.redirect(new URL('/home', req.nextUrl));
 	}
 
 	return NextResponse.next();
