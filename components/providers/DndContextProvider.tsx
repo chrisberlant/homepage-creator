@@ -216,30 +216,36 @@ export default function DndContextProvider({
 			<DragOverlay>
 				{activeDragged.id &&
 				activeDragged.type === 'link' &&
-				currentCategories.current ? (
-					<LinkCardOverlay
-						link={currentCategories.current
-							.find((category) =>
-								category.links.some(
-									(link) => link.id === activeDragged.id
+				currentCategories.current
+					? (() => {
+							const link = currentCategories.current
+								.find((category) =>
+									category.links.some(
+										(link) => link.id === activeDragged.id
+									)
 								)
-							)
-							?.links.find(
-								(link) => link.id === activeDragged.id
-							)}
-					/>
-				) : null}
+								?.links.find(
+									(link) => link.id === activeDragged.id
+								);
+
+							return link ? (
+								<LinkCardOverlay link={link} />
+							) : null;
+					  })()
+					: null}
 				{activeDragged.id &&
 				activeDragged.type === 'category' &&
-				currentCategories.current ? (
-					<CategoryCardOverlay
-						title={
-							currentCategories.current.find(
+				currentCategories.current
+					? (() => {
+							const title = currentCategories.current.find(
 								(category) => category.id === activeDragged.id
-							)?.title
-						}
-					/>
-				) : null}
+							)?.title;
+
+							return title ? (
+								<CategoryCardOverlay title={title} />
+							) : null;
+					  })()
+					: null}
 			</DragOverlay>
 			<DraggingCategoryContext.Provider
 				value={activeDragged.type === 'category'}
