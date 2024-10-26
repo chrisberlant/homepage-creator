@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Input } from './ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -37,13 +37,8 @@ export default function CreateCategoryButton({ column }: { column: number }) {
 			title: '',
 		},
 	});
-	const inputRef = useRef<HTMLInputElement>(null);
 	const { mutate: createCategory } = useCreateCategory(form);
 	const [open, setOpen] = useState(false);
-
-	useEffect(() => {
-		if (inputRef.current) inputRef.current.focus();
-	}, []);
 
 	useEffect(() => {
 		if (!open) form.reset();
@@ -78,7 +73,7 @@ export default function CreateCategoryButton({ column }: { column: number }) {
 									<FormItem>
 										<FormLabel>Title</FormLabel>
 										<FormControl>
-											<Input {...field} ref={inputRef} />
+											<Input {...field} />
 										</FormControl>
 										<FormMessage />
 									</FormItem>

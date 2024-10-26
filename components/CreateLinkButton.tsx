@@ -1,7 +1,7 @@
 'use client';
 
 import { BookmarkPlusIcon } from 'lucide-react';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Input } from './ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -48,16 +48,11 @@ export default function CreateLinkButton({
 	const url = form.getValues('url');
 	const [open, setOpen] = useState(false);
 	const [faviconFound, setFaviconFound] = useState(true);
-	const inputRef = useRef<HTMLInputElement>(null);
 	const { mutate: createLink } = useCreateLink({
 		form,
 		setOpen,
 		setDisabledDragging,
 	});
-
-	useEffect(() => {
-		if (inputRef.current) inputRef.current.focus();
-	}, [open]);
 
 	useEffect(() => {
 		if (!open) form.reset();
@@ -97,7 +92,7 @@ export default function CreateLinkButton({
 								<FormItem className='mb-2'>
 									<FormLabel>Title</FormLabel>
 									<FormControl>
-										<Input {...field} ref={inputRef} />
+										<Input {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>

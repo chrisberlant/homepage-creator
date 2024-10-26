@@ -1,6 +1,6 @@
 import { createSafeActionClient } from 'next-safe-action';
 import { deleteSession, getSession } from '@/lib/jwt';
-import prisma from '../lib/prisma';
+import prisma from '@/lib/prisma';
 
 class ActionError extends Error {}
 

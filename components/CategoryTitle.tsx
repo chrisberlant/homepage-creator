@@ -37,8 +37,10 @@ export default function CategoryTitle({
 	});
 
 	useEffect(() => {
-		if (inputRef.current) inputRef.current.focus();
-	}, []);
+		if (editingTitle && inputRef.current) {
+			inputRef.current.focus();
+		}
+	}, [editingTitle]);
 
 	return (
 		<>
@@ -94,6 +96,7 @@ export default function CategoryTitle({
 							onClick={() => {
 								setEditingTitle(false);
 								setDisabledDragging(false);
+								form.reset();
 							}}
 						>
 							<CircleXIcon color='red' className='size-4' />
